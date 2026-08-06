@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# My Movie Collection
 
-## Getting Started
+A free, self-hosted movie collection tracker/picker. Scan a disc's barcode or
+search by title, and it looks up the movie via [TMDb](https://www.themoviedb.org).
+Installs to your iPhone home screen as a PWA — no App Store, no Apple
+Developer account.
 
-First, run the development server:
+## One-time setup
+
+1. **TMDb API key** (free): sign up at themoviedb.org, then generate a key at
+   Settings > API. Copy it into `TMDB_API_KEY` in `.env.local`.
+2. **Firebase project** (free): create a project at
+   [console.firebase.google.com](https://console.firebase.google.com).
+   - Enable **Authentication > Sign-in method > Email/Password**.
+   - Enable **Firestore Database** (production mode).
+   - In Project settings > General > Your apps, add a Web app and copy the
+     config values into the `NEXT_PUBLIC_FIREBASE_*` vars in `.env.local`.
+   - Deploy `firestore.rules` from this repo to your project (via the
+     Firebase console's Rules tab, or the Firebase CLI: `firebase deploy
+     --only firestore:rules`).
+3. Copy `.env.example` to `.env.local` and fill in the values from steps 1-2.
+
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit http://localhost:3000. Camera access for barcode scanning works on
+localhost without HTTPS.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploying (free, on Vercel)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Push this repo to GitHub.
+2. Import it at [vercel.com/new](https://vercel.com/new).
+3. Add the same environment variables from `.env.local` in the Vercel
+   project's Settings > Environment Variables.
+4. Deploy. Vercel gives you HTTPS automatically, which the camera scanner
+   requires in production.
 
-## Learn More
+## Installing on your iPhone
 
-To learn more about Next.js, take a look at the following resources:
+Open the deployed URL in **Safari** (not Chrome — iOS PWA install only works
+in Safari), tap the Share icon, then **Add to Home Screen**. The app icon
+will appear on your home screen and launches full-screen, like a native app.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- UPC barcode lookups use a free trial tier (100/day) — results are cached
+  so re-scanning the same disc never costs another lookup. If a scan fails or
+  the limit is hit, use "Search by title" instead.
+- iOS Safari can evict offline storage after long periods of inactivity —
+  open the app with a connection occasionally to keep your library synced
+  for offline browsing.
