@@ -1,13 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useMovies } from "@/lib/hooks/useMovies";
 import { useWatchlist } from "@/lib/hooks/useWatchlist";
 import { MovieGrid } from "@/components/movie/MovieGrid";
 import { MovieRail } from "@/components/movie/MovieRail";
 import { FilterBar } from "@/components/movie/FilterBar";
-import { AddIcon } from "@/lib/icons";
 import { DEFAULT_FILTERS, applyFilters, collectGenres } from "@/lib/filters";
 import { posterUrl } from "@/lib/tmdb/image";
 
@@ -51,7 +49,7 @@ export default function LibraryPage() {
   );
 
   return (
-    <div className="relative flex flex-col gap-6 pb-16">
+    <div className="flex flex-col gap-6">
       {!loading && (
         <>
           <MovieRail
@@ -87,14 +85,6 @@ export default function LibraryPage() {
           <MovieGrid movies={filtered} />
         )}
       </div>
-
-      <Link
-        href="/add"
-        aria-label="Add a movie"
-        className="fixed bottom-20 right-4 z-10 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg transition active:scale-90 md:bottom-6 md:right-6"
-      >
-        <AddIcon className="h-7 w-7" />
-      </Link>
     </div>
   );
 }

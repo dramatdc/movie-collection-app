@@ -6,6 +6,7 @@
 
   /* Design system tokens — dark grey + blue, single source of truth */
   --color-canvas: #1e1e1e;
+  --color-bar: #171717;
   --color-surface: #262626;
   --color-surface-hover: #2e2e2e;
   --color-border: #3a3a3a;

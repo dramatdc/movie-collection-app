@@ -32,7 +32,9 @@ export default function AppShellLayout({
   return (
     <div className="flex flex-1 flex-col">
       <AppHeader />
-      <main className="flex-1 px-4 py-4 md:px-6 md:py-6">{children}</main>
+      <main className="flex-1 px-4 py-4 pb-24 md:px-6 md:py-6 md:pb-6">
+        {children}
+      </main>
       <BottomNav />
       <InstallPrompt />
     </div>

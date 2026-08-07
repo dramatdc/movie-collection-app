@@ -6,9 +6,9 @@ import Link from "next/link";
 import { useMovies } from "@/lib/hooks/useMovies";
 import { FilterBar } from "@/components/movie/FilterBar";
 import { FormatBadge } from "@/components/movie/FormatBadge";
+import { Randomizer } from "@/components/movie/Randomizer";
 import { DEFAULT_FILTERS, applyFilters, collectGenres, type MovieFilters } from "@/lib/filters";
 import { posterUrl } from "@/lib/tmdb/image";
-import { ShuffleIcon } from "@/lib/icons";
 import type { OwnedMovie } from "@/lib/firebase/types";
 
 export default function PickerPage() {
@@ -21,15 +21,6 @@ export default function PickerPage() {
 
   const genres = useMemo(() => collectGenres(movies), [movies]);
   const eligible = useMemo(() => applyFilters(movies, filters), [movies, filters]);
-
-  function pickRandom() {
-    if (eligible.length === 0) {
-      setPick(null);
-      return;
-    }
-    const choice = eligible[Math.floor(Math.random() * eligible.length)];
-    setPick(choice);
-  }
 
   const poster = pick ? posterUrl(pick.posterPath, "w500") : null;
 
@@ -51,15 +42,7 @@ export default function PickerPage() {
         </p>
       )}
 
-      <button
-        type="button"
-        onClick={pickRandom}
-        disabled={loading || eligible.length === 0}
-        className="flex items-center justify-center gap-2 rounded bg-accent px-4 py-2.5 text-sm font-medium text-accent-foreground disabled:opacity-50"
-      >
-        <ShuffleIcon className="h-4 w-4" />
-        Pick something
-      </button>
+      <Randomizer eligible={eligible} onLanded={setPick} disabled={loading} />
 
       {pick && (
         <Link
