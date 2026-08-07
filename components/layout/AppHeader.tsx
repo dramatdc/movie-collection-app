@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const NAV = [
   { href: "/library", label: "Library" },
@@ -10,8 +11,15 @@ const NAV = [
 export function AppHeader() {
   return (
     <header className="hidden md:flex items-center justify-between border-b border-border px-6 py-3">
-      <Link href="/library" className="text-lg font-semibold tracking-tight">
-        Hardcopy
+      <Link href="/library" className="flex items-center">
+        <Image
+          src="/brand/wordmark.png"
+          alt="Hardcopy"
+          width={2540}
+          height={416}
+          priority
+          className="h-6 w-auto"
+        />
       </Link>
       <nav className="flex gap-5 text-sm text-neutral-300">
         {NAV.map((item) => (
