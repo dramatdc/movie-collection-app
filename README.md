@@ -1,4 +1,4 @@
-# My Movie Collection
+# Hardcopy
 
 A free, self-hosted movie collection tracker/picker. Scan a disc's barcode or
 search by title, and it looks up the movie via [TMDb](https://www.themoviedb.org).

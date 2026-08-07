@@ -13,12 +13,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My Movie Collection",
+  title: "Hardcopy",
   description: "Personal movie collection tracker and picker",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Movies",
+    title: "Hardcopy",
   },
   icons: {
     apple: "/icons/apple-touch-icon.png",

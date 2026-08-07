@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "My Movie Collection",
-    short_name: "Movies",
+    name: "Hardcopy",
+    short_name: "Hardcopy",
     description: "Personal movie collection tracker and picker",
     start_url: "/library",
     display: "standalone",
