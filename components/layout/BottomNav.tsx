@@ -40,7 +40,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-10 pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-10 bg-bar pb-[env(safe-area-inset-bottom)] md:hidden">
       <div className="relative h-16">
         {/* Bar with a notch cut into the top edge, centered, for the FAB to nest into */}
         <svg
