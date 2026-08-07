@@ -33,7 +33,7 @@ export default function ConfirmAddPage() {
   }, [candidate, router]);
 
   if (!candidate || !detail) {
-    return <p className="py-16 text-center text-sm text-neutral-500">Loading...</p>;
+    return <p className="py-16 text-center text-sm text-muted">Loading...</p>;
   }
 
   const poster = posterUrl(detail.poster_path, "w342");
@@ -68,12 +68,12 @@ export default function ConfirmAddPage() {
       <h1 className="text-xl font-semibold">Confirm details</h1>
 
       <div className="flex gap-3">
-        <div className="relative aspect-2/3 w-24 shrink-0 overflow-hidden rounded bg-neutral-800">
+        <div className="relative aspect-2/3 w-24 shrink-0 overflow-hidden rounded bg-surface-hover">
           {poster && <Image src={poster} alt={detail.title} fill className="object-cover" />}
         </div>
         <div>
           <p className="font-medium">{detail.title}</p>
-          <p className="text-sm text-neutral-400">
+          <p className="text-sm text-muted">
             {detail.release_date?.slice(0, 4)} · {detail.runtime ? `${detail.runtime} min` : "—"}
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function ConfirmAddPage() {
         <select
           value={format}
           onChange={(e) => setFormat(e.target.value as MovieFormat)}
-          className="rounded border border-neutral-700 bg-neutral-950 px-2 py-1.5"
+          className="rounded border border-border bg-canvas px-2 py-1.5"
         >
           {FORMATS.map((f) => (
             <option key={f} value={f}>
@@ -100,7 +100,7 @@ export default function ConfirmAddPage() {
           type="text"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          className="rounded border border-neutral-700 bg-neutral-950 px-2 py-1.5"
+          className="rounded border border-border bg-canvas px-2 py-1.5"
         />
       </label>
 
@@ -113,7 +113,7 @@ export default function ConfirmAddPage() {
         type="button"
         onClick={handleSave}
         disabled={saving}
-        className="mt-2 rounded bg-emerald-400 px-3 py-2 text-sm font-medium text-black disabled:opacity-60"
+        className="mt-2 rounded bg-accent px-3 py-2 text-sm font-medium text-accent-foreground disabled:opacity-60"
       >
         {saving ? "Saving..." : "Add to collection"}
       </button>

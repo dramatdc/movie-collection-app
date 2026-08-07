@@ -23,14 +23,14 @@ export default function LibraryPage() {
         <h1 className="text-xl font-semibold">
           Your collection
           {!loading && (
-            <span className="ml-2 text-sm font-normal text-neutral-500">
+            <span className="ml-2 text-sm font-normal text-muted">
               {movies.length} {movies.length === 1 ? "title" : "titles"}
             </span>
           )}
         </h1>
         <Link
           href="/add"
-          className="rounded bg-emerald-400 px-3 py-1.5 text-sm font-medium text-black"
+          className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-accent-foreground"
         >
           + Add movie
         </Link>
@@ -39,7 +39,7 @@ export default function LibraryPage() {
       <FilterBar filters={filters} onChange={setFilters} genres={genres} />
 
       {loading ? (
-        <p className="py-16 text-center text-sm text-neutral-500">Loading...</p>
+        <p className="py-16 text-center text-sm text-muted">Loading...</p>
       ) : (
         <MovieGrid movies={filtered} />
       )}

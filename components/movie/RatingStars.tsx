@@ -1,5 +1,7 @@
 "use client";
 
+import { StarIcon } from "@/lib/icons";
+
 export function RatingStars({
   value,
   onChange,
@@ -10,20 +12,24 @@ export function RatingStars({
   const stars = [1, 2, 3, 4, 5];
   return (
     <div className="flex gap-1">
-      {stars.map((star) => (
-        <button
-          key={star}
-          type="button"
-          disabled={!onChange}
-          onClick={() => onChange?.(value === star ? null : star)}
-          className={`text-lg leading-none ${
-            value !== null && star <= value ? "text-amber-400" : "text-neutral-600"
-          } ${onChange ? "cursor-pointer" : "cursor-default"}`}
-          aria-label={`${star} star`}
-        >
-          ★
-        </button>
-      ))}
+      {stars.map((star) => {
+        const filled = value !== null && star <= value;
+        return (
+          <button
+            key={star}
+            type="button"
+            disabled={!onChange}
+            onClick={() => onChange?.(value === star ? null : star)}
+            className={onChange ? "cursor-pointer" : "cursor-default"}
+            aria-label={`${star} star`}
+          >
+            <StarIcon
+              className={`h-4.5 w-4.5 ${filled ? "text-accent" : "text-border"}`}
+              fill={filled ? "currentColor" : "none"}
+            />
+          </button>
+        );
+      })}
     </div>
   );
 }

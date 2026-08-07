@@ -22,7 +22,7 @@ export default function MovieDetailPage() {
 
   if (!movie) {
     return (
-      <p className="py-16 text-center text-sm text-neutral-500">
+      <p className="py-16 text-center text-sm text-muted">
         Movie not found (or still loading).
       </p>
     );
@@ -39,7 +39,7 @@ export default function MovieDetailPage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 sm:flex-row">
-      <div className="relative aspect-2/3 w-full max-w-[220px] shrink-0 overflow-hidden rounded-lg bg-neutral-800">
+      <div className="relative aspect-2/3 w-full max-w-[220px] shrink-0 overflow-hidden rounded-lg bg-surface-hover">
         {poster ? (
           <Image src={poster} alt={movie.title} fill className="object-cover" />
         ) : null}
@@ -48,7 +48,7 @@ export default function MovieDetailPage() {
       <div className="flex flex-1 flex-col gap-3">
         <div>
           <h1 className="text-2xl font-semibold">{movie.title}</h1>
-          <p className="text-sm text-neutral-400">
+          <p className="text-sm text-muted">
             {movie.year} · {movie.runtimeMinutes ? `${movie.runtimeMinutes} min` : "—"}
           </p>
         </div>
@@ -58,7 +58,7 @@ export default function MovieDetailPage() {
           {movie.genres.map((g) => (
             <span
               key={g}
-              className="rounded bg-neutral-800 px-2 py-0.5 text-xs text-neutral-300"
+              className="rounded bg-surface-hover px-2 py-0.5 text-xs text-muted"
             >
               {g}
             </span>
@@ -101,7 +101,7 @@ export default function MovieDetailPage() {
                   format: e.target.value as MovieFormat,
                 })
               }
-              className="rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-sm"
+              className="rounded border border-border bg-surface px-2 py-1 text-sm"
             >
               {FORMATS.map((f) => (
                 <option key={f} value={f}>
@@ -123,7 +123,7 @@ export default function MovieDetailPage() {
                   location: e.target.value || null,
                 })
               }
-              className="w-32 rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-sm"
+              className="w-32 rounded border border-border bg-surface px-2 py-1 text-sm"
             />
           </label>
         </div>

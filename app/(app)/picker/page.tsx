@@ -8,6 +8,7 @@ import { FilterBar } from "@/components/movie/FilterBar";
 import { FormatBadge } from "@/components/movie/FormatBadge";
 import { DEFAULT_FILTERS, applyFilters, collectGenres, type MovieFilters } from "@/lib/filters";
 import { posterUrl } from "@/lib/tmdb/image";
+import { ShuffleIcon } from "@/lib/icons";
 import type { OwnedMovie } from "@/lib/firebase/types";
 
 export default function PickerPage() {
@@ -44,7 +45,7 @@ export default function PickerPage() {
       />
 
       {!loading && (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-muted">
           {eligible.length} {eligible.length === 1 ? "movie matches" : "movies match"} these
           filters.
         </p>
@@ -54,22 +55,23 @@ export default function PickerPage() {
         type="button"
         onClick={pickRandom}
         disabled={loading || eligible.length === 0}
-        className="rounded bg-emerald-400 px-4 py-2.5 text-sm font-medium text-black disabled:opacity-50"
+        className="flex items-center justify-center gap-2 rounded bg-accent px-4 py-2.5 text-sm font-medium text-accent-foreground disabled:opacity-50"
       >
-        🎲 Pick something
+        <ShuffleIcon className="h-4 w-4" />
+        Pick something
       </button>
 
       {pick && (
         <Link
           href={`/library/${pick.id}`}
-          className="flex gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-4"
+          className="flex gap-4 rounded-lg border border-border bg-surface p-4"
         >
-          <div className="relative aspect-2/3 w-24 shrink-0 overflow-hidden rounded bg-neutral-800">
+          <div className="relative aspect-2/3 w-24 shrink-0 overflow-hidden rounded bg-surface-hover">
             {poster && <Image src={poster} alt={pick.title} fill className="object-cover" />}
           </div>
           <div className="flex flex-col gap-1">
             <p className="font-medium">{pick.title}</p>
-            <p className="text-sm text-neutral-400">
+            <p className="text-sm text-muted">
               {pick.year} · {pick.runtimeMinutes ? `${pick.runtimeMinutes} min` : "—"}
             </p>
             <FormatBadge format={pick.format} />
@@ -78,7 +80,7 @@ export default function PickerPage() {
       )}
 
       {eligible.length === 0 && !loading && (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-muted">
           No movies match these filters — try widening them.
         </p>
       )}

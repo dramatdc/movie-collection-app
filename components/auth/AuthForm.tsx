@@ -35,7 +35,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex w-full max-w-sm flex-col gap-3 rounded-lg border border-neutral-800 bg-neutral-900 p-6"
+      className="flex w-full max-w-sm flex-col gap-3 rounded-lg border border-border bg-surface p-6"
     >
       <h1 className="text-lg font-semibold">
         {mode === "login" ? "Sign in" : "Create your account"}
@@ -46,7 +46,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm"
+        className="rounded border border-border bg-canvas px-3 py-2 text-sm focus:border-accent focus:outline-none"
       />
       <input
         type="password"
@@ -55,13 +55,13 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm"
+        className="rounded border border-border bg-canvas px-3 py-2 text-sm focus:border-accent focus:outline-none"
       />
       {error && <p className="text-sm text-red-400">{error}</p>}
       <button
         type="submit"
         disabled={submitting}
-        className="mt-1 rounded bg-emerald-400 px-3 py-2 text-sm font-medium text-black disabled:opacity-60"
+        className="mt-1 rounded bg-accent px-3 py-2 text-sm font-medium text-accent-foreground disabled:opacity-60"
       >
         {submitting ? "Please wait..." : mode === "login" ? "Sign in" : "Sign up"}
       </button>

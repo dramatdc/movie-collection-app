@@ -14,7 +14,7 @@ export default function RootPage() {
   }, [loading, user, router]);
 
   return (
-    <div className="flex flex-1 items-center justify-center text-neutral-500 text-sm">
+    <div className="flex flex-1 items-center justify-center text-muted text-sm">
       Loading...
     </div>
   );

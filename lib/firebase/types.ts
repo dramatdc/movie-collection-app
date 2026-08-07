@@ -19,3 +19,11 @@ export interface OwnedMovie {
 }
 
 export type NewOwnedMovie = Omit<OwnedMovie, "id" | "dateAdded">;
+
+export interface WatchlistItem {
+  tmdbId: number;
+  title: string;
+  posterPath: string | null;
+  year: number | null;
+  addedAt: number;
+}

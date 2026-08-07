@@ -33,8 +33,8 @@ function PillTabs<T extends string>({
             className={clsx(
               "shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition",
               active
-                ? "bg-emerald-400 text-black"
-                : "bg-neutral-900 text-neutral-300 hover:bg-neutral-800"
+                ? "bg-accent text-accent-foreground"
+                : "bg-surface text-muted hover:bg-surface-hover"
             )}
           >
             {opt.label}
@@ -71,7 +71,7 @@ export function FilterBar({
             placeholder="Search your collection..."
             value={filters.query}
             onChange={(e) => onChange({ ...filters, query: e.target.value })}
-            className="w-48 rounded-full border border-neutral-700 bg-neutral-900 px-3.5 py-1.5 text-sm focus:border-emerald-400 focus:outline-none"
+            className="w-48 rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm focus:border-accent focus:outline-none"
           />
         )}
 
@@ -87,7 +87,7 @@ export function FilterBar({
         <select
           value={filters.genre ?? ""}
           onChange={(e) => onChange({ ...filters, genre: e.target.value || null })}
-          className="rounded-full border border-neutral-700 bg-neutral-900 px-3.5 py-1.5 text-sm focus:border-emerald-400 focus:outline-none"
+          className="rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm focus:border-accent focus:outline-none"
         >
           <option value="">All genres</option>
           {genres.map((g) => (

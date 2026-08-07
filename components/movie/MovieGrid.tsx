@@ -4,7 +4,7 @@ import { MovieCard } from "./MovieCard";
 export function MovieGrid({ movies }: { movies: OwnedMovie[] }) {
   if (movies.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center text-neutral-500 text-sm py-16">
+      <div className="flex flex-1 items-center justify-center text-muted text-sm py-16">
         No movies here yet.
       </div>
     );

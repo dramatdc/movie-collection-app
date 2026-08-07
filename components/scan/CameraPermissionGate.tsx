@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const GRANTED_KEY = "camera-permission-granted";
 
 export function CameraPermissionGate({
   children,
@@ -8,6 +10,10 @@ export function CameraPermissionGate({
   children: React.ReactNode;
 }) {
   const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem(GRANTED_KEY)) setReady(true);
+  }, []);
 
   if (ready) return <>{children}</>;
 
@@ -20,8 +26,11 @@ export function CameraPermissionGate({
       </p>
       <button
         type="button"
-        onClick={() => setReady(true)}
-        className="bg-emerald-400 text-black font-medium px-4 py-2 rounded-lg text-sm"
+        onClick={() => {
+          localStorage.setItem(GRANTED_KEY, "1");
+          setReady(true);
+        }}
+        className="bg-accent text-accent-foreground font-medium px-4 py-2 rounded-lg text-sm"
       >
         Enable camera
       </button>

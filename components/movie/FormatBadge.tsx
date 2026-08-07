@@ -1,16 +1,16 @@
 import type { MovieFormat } from "@/lib/firebase/types";
 
-const COLORS: Record<MovieFormat, string> = {
-  DVD: "bg-slate-600",
-  "Blu-ray": "bg-blue-600",
-  "4K UHD": "bg-purple-600",
-  Digital: "bg-emerald-600",
+const STYLES: Record<MovieFormat, string> = {
+  DVD: "bg-surface-hover text-muted border border-border",
+  "Blu-ray": "bg-accent text-accent-foreground",
+  "4K UHD": "bg-[#005f8a] text-accent-foreground",
+  Digital: "bg-transparent text-accent border border-accent",
 };
 
 export function FormatBadge({ format }: { format: MovieFormat }) {
   return (
     <span
-      className={`${COLORS[format]} text-white text-xs font-medium px-2 py-0.5 rounded`}
+      className={`${STYLES[format]} text-xs font-medium px-2 py-0.5 rounded`}
     >
       {format}
     </span>
