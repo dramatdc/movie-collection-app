@@ -32,7 +32,10 @@ export default function AppShellLayout({
   return (
     <div className="flex flex-1 flex-col">
       <AppHeader />
-      <main className="flex-1 px-4 py-4 pb-24 md:px-6 md:py-6 md:pb-6">
+      <main
+        className="flex-1 px-4 py-4 pb-24 md:px-6 md:py-6 md:pb-6"
+        style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
+      >
         {children}
       </main>
       <BottomNav />

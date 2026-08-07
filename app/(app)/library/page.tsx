@@ -6,7 +6,7 @@ import { useWatchlist } from "@/lib/hooks/useWatchlist";
 import { MovieGrid } from "@/components/movie/MovieGrid";
 import { MovieRail } from "@/components/movie/MovieRail";
 import { FilterBar } from "@/components/movie/FilterBar";
-import { DEFAULT_FILTERS, applyFilters, collectGenres } from "@/lib/filters";
+import { DEFAULT_FILTERS, applyFilters, collectGenres, sortAlphabetically } from "@/lib/filters";
 import { posterUrl } from "@/lib/tmdb/image";
 
 const RECENTLY_ADDED_COUNT = 15;
@@ -18,7 +18,7 @@ export default function LibraryPage() {
 
   const genres = useMemo(() => collectGenres(movies), [movies]);
   const filtered = useMemo(
-    () => applyFilters(movies, filters),
+    () => sortAlphabetically(applyFilters(movies, filters)),
     [movies, filters]
   );
 

@@ -39,6 +39,10 @@ export function applyFilters(movies: OwnedMovie[], filters: MovieFilters): Owned
   });
 }
 
+export function sortAlphabetically(movies: OwnedMovie[]): OwnedMovie[] {
+  return [...movies].sort((a, b) => a.title.localeCompare(b.title));
+}
+
 export function collectGenres(movies: OwnedMovie[]): string[] {
   const set = new Set<string>();
   for (const m of movies) {
