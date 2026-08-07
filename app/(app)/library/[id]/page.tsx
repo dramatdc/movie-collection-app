@@ -3,11 +3,14 @@
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useMovies } from "@/lib/hooks/useMovies";
+import { useWatchlist } from "@/lib/hooks/useWatchlist";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { posterUrl } from "@/lib/tmdb/image";
 import { FormatBadge } from "@/components/movie/FormatBadge";
 import { RatingStars } from "@/components/movie/RatingStars";
 import { removeOwnedMovie, updateOwnedMovie } from "@/lib/firebase/firestore";
+import { addToWatchlist, removeFromWatchlist } from "@/lib/firebase/watchlist";
+import { BookmarkIcon } from "@/lib/icons";
 import type { MovieFormat } from "@/lib/firebase/types";
 
 const FORMATS: MovieFormat[] = ["DVD", "Blu-ray", "4K UHD", "Digital"];
@@ -15,6 +18,7 @@ const FORMATS: MovieFormat[] = ["DVD", "Blu-ray", "4K UHD", "Digital"];
 export default function MovieDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { movies } = useMovies();
+  const { items: watchlist } = useWatchlist();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -29,6 +33,21 @@ export default function MovieDetailPage() {
   }
 
   const poster = posterUrl(movie.posterPath, "w500");
+  const onWatchlist = watchlist.some((w) => w.tmdbId === movie.tmdbId);
+
+  function toggleWatchlist() {
+    if (!user || !movie) return;
+    if (onWatchlist) {
+      removeFromWatchlist(user.uid, movie.tmdbId);
+    } else {
+      addToWatchlist(user.uid, {
+        tmdbId: movie.tmdbId,
+        title: movie.title,
+        posterPath: movie.posterPath,
+        year: movie.year,
+      });
+    }
+  }
 
   async function handleDelete() {
     if (!user || !movie) return;
@@ -55,6 +74,21 @@ export default function MovieDetailPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <FormatBadge format={movie.format} />
+          <button
+            type="button"
+            onClick={toggleWatchlist}
+            className={
+              onWatchlist
+                ? "flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-accent-foreground"
+                : "flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-xs text-muted hover:border-accent hover:text-accent"
+            }
+          >
+            <BookmarkIcon
+              className="h-3.5 w-3.5"
+              fill={onWatchlist ? "currentColor" : "none"}
+            />
+            {onWatchlist ? "On watchlist" : "Add to watchlist"}
+          </button>
           {movie.genres.map((g) => (
             <span
               key={g}

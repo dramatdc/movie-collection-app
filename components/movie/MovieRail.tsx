@@ -24,7 +24,7 @@ export function MovieRail({
       {items.length === 0 ? (
         <p className="text-sm text-muted">{emptyLabel}</p>
       ) : (
-        <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory scroll-px-4 -mx-4 px-4">
+        <div className="flex gap-3 overflow-x-auto py-3 snap-x snap-mandatory scroll-px-4 -mx-4 px-4">
           {items.map((item) => {
             const card = (
               <div className="relative aspect-2/3 w-28 shrink-0 overflow-hidden rounded-2xl bg-surface-hover shadow-xl shadow-black/50 transition active:scale-95">

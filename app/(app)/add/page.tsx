@@ -90,6 +90,8 @@ export default function AddPage() {
             <TMDbSearchResults
               query={scanStage.query}
               onSelect={(r) => selectForCollection(r, scanStage.upc)}
+              onAddToWatchlist={handleAddToWatchlist}
+              watchlistTmdbIds={watchlistTmdbIds}
             />
             <button
               type="button"
