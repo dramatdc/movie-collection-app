@@ -62,7 +62,7 @@ export default function AddPage() {
 
   return (
     <div className="flex h-full min-h-[calc(100vh-8rem)] flex-col gap-4 md:flex-row">
-      <section className="flex flex-1 flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+      <section className="flex flex-1 flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-lg shadow-black/40">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wide">
           Scan barcode
         </h2>
@@ -120,7 +120,7 @@ export default function AddPage() {
         )}
       </section>
 
-      <section className="flex flex-1 flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+      <section className="flex flex-1 flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-lg shadow-black/40">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wide">
           Search by title
         </h2>

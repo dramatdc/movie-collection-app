@@ -35,7 +35,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex w-full max-w-sm flex-col gap-3 rounded-lg border border-border bg-surface p-6"
+      className="flex w-full max-w-sm flex-col gap-3 rounded-lg border border-border bg-surface p-6 shadow-xl shadow-black/40"
     >
       <h1 className="text-lg font-semibold">
         {mode === "login" ? "Sign in" : "Create your account"}

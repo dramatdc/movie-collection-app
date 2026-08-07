@@ -17,7 +17,7 @@ export default function ProfilePage() {
         <p className="text-sm text-muted">{user?.email}</p>
       </div>
 
-      <div className="rounded-lg border border-border bg-surface p-4 text-sm">
+      <div className="rounded-lg border border-border bg-surface p-4 text-sm shadow-lg shadow-black/40">
         <p className="text-neutral-300">{movies.length} movies in your collection</p>
       </div>
 

@@ -39,7 +39,7 @@ export default function MovieDetailPage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 sm:flex-row">
-      <div className="relative aspect-2/3 w-full max-w-[220px] shrink-0 overflow-hidden rounded-lg bg-surface-hover">
+      <div className="relative aspect-2/3 w-full max-w-[220px] shrink-0 overflow-hidden rounded-lg bg-surface-hover shadow-xl shadow-black/50">
         {poster ? (
           <Image src={poster} alt={movie.title} fill className="object-cover" />
         ) : null}

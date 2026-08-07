@@ -6,8 +6,8 @@ import { posterUrl } from "@/lib/tmdb/image";
 import { ShuffleIcon } from "@/lib/icons";
 import type { OwnedMovie } from "@/lib/firebase/types";
 
-const CARD_WIDTH = 128;
-const GAP = 12;
+const CARD_WIDTH = 260;
+const GAP = 16;
 const STRIDE = CARD_WIDTH + GAP;
 const LOOPS = 5;
 const SPIN_MS = 3200;
@@ -80,11 +80,11 @@ export function Randomizer({
   }
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative w-32 overflow-hidden rounded-2xl border-2 border-accent">
+    <div className="flex flex-col items-center gap-5">
+      <div className="relative w-[260px] overflow-hidden rounded-3xl border-2 border-accent shadow-2xl shadow-black/60">
         <div
           onTransitionEnd={handleTransitionEnd}
-          className="flex gap-3"
+          className="flex gap-4"
           style={{
             transform: `translateX(-${offset}px)`,
             transition: animate
@@ -93,14 +93,14 @@ export function Randomizer({
           }}
         >
           {reel.length === 0 ? (
-            <div className="aspect-2/3 w-32 shrink-0 bg-surface-hover" />
+            <div className="aspect-2/3 w-[260px] shrink-0 bg-surface-hover" />
           ) : (
             reel.map((movie, i) => {
-              const poster = posterUrl(movie.posterPath, "w185");
+              const poster = posterUrl(movie.posterPath, "w342");
               return (
                 <div
                   key={`${movie.id}-${i}`}
-                  className="relative aspect-2/3 w-32 shrink-0 overflow-hidden bg-surface-hover"
+                  className="relative aspect-2/3 w-[260px] shrink-0 overflow-hidden bg-surface-hover"
                 >
                   {poster && (
                     <Image src={poster} alt={movie.title} fill className="object-cover" />

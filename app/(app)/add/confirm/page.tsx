@@ -68,7 +68,7 @@ export default function ConfirmAddPage() {
       <h1 className="text-xl font-semibold">Confirm details</h1>
 
       <div className="flex gap-3">
-        <div className="relative aspect-2/3 w-24 shrink-0 overflow-hidden rounded bg-surface-hover">
+        <div className="relative aspect-2/3 w-24 shrink-0 overflow-hidden rounded bg-surface-hover shadow-md">
           {poster && <Image src={poster} alt={detail.title} fill className="object-cover" />}
         </div>
         <div>

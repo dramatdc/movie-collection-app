@@ -10,7 +10,7 @@ export function MovieCard({ movie }: { movie: OwnedMovie }) {
   return (
     <Link
       href={`/library/${movie.id}`}
-      className="group flex flex-col gap-2 rounded-xl overflow-hidden bg-surface hover:ring-2 hover:ring-accent/60 transition"
+      className="group flex flex-col gap-2 rounded-xl overflow-hidden bg-surface shadow-lg shadow-black/40 hover:ring-2 hover:ring-accent/60 transition"
     >
       <div className="relative aspect-2/3 bg-surface-hover rounded-xl overflow-hidden">
         {poster ? (
