@@ -50,11 +50,13 @@ export function FilterBar({
   onChange,
   genres,
   showSearch = true,
+  showGenre = true,
 }: {
   filters: MovieFilters;
   onChange: (filters: MovieFilters) => void;
   genres: string[];
   showSearch?: boolean;
+  showGenre?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-3">
@@ -84,18 +86,20 @@ export function FilterBar({
           onChange={(format) => onChange({ ...filters, format })}
         />
 
-        <select
-          value={filters.genre ?? ""}
-          onChange={(e) => onChange({ ...filters, genre: e.target.value || null })}
-          className="rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm focus:border-accent focus:outline-none"
-        >
-          <option value="">All genres</option>
-          {genres.map((g) => (
-            <option key={g} value={g}>
-              {g}
-            </option>
-          ))}
-        </select>
+        {showGenre && (
+          <select
+            value={filters.genre ?? ""}
+            onChange={(e) => onChange({ ...filters, genre: e.target.value || null })}
+            className="rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm focus:border-accent focus:outline-none"
+          >
+            <option value="">All genres</option>
+            {genres.map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
     </div>
   );

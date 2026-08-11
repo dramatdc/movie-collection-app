@@ -93,7 +93,30 @@ export function Randomizer({
           }}
         >
           {reel.length === 0 ? (
-            <div className="aspect-2/3 w-[260px] shrink-0 bg-surface-hover" />
+            eligible.length > 0 ? (
+              <div
+                className="flex gap-4"
+                style={{
+                  animation: `marquee-scroll ${Math.max(eligible.length * 2.5, 8)}s linear infinite`,
+                }}
+              >
+                {[...eligible, ...eligible].map((movie, i) => {
+                  const poster = posterUrl(movie.posterPath, "w342");
+                  return (
+                    <div
+                      key={`idle-${movie.id}-${i}`}
+                      className="relative aspect-2/3 w-[260px] shrink-0 overflow-hidden bg-surface-hover"
+                    >
+                      {poster && (
+                        <Image src={poster} alt={movie.title} fill className="object-cover" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="aspect-2/3 w-[260px] shrink-0 bg-surface-hover" />
+            )
           ) : (
             reel.map((movie, i) => {
               const poster = posterUrl(movie.posterPath, "w342");

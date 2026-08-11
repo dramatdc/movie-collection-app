@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMovies } from "@/lib/hooks/useMovies";
 import { FilterBar } from "@/components/movie/FilterBar";
+import { MoodChips } from "@/components/movie/MoodChips";
 import { FormatBadge } from "@/components/movie/FormatBadge";
 import { Randomizer } from "@/components/movie/Randomizer";
 import { DEFAULT_FILTERS, applyFilters, collectGenres, type MovieFilters } from "@/lib/filters";
@@ -17,10 +18,15 @@ export default function PickerPage() {
     ...DEFAULT_FILTERS,
     watched: "unwatched",
   });
+  const [moods, setMoods] = useState<string[]>([]);
   const [pick, setPick] = useState<OwnedMovie | null>(null);
 
   const genres = useMemo(() => collectGenres(movies), [movies]);
-  const eligible = useMemo(() => applyFilters(movies, filters), [movies, filters]);
+  const eligible = useMemo(() => {
+    const base = applyFilters(movies, filters);
+    if (moods.length === 0) return base;
+    return base.filter((m) => m.genres.some((g) => moods.includes(g)));
+  }, [movies, filters, moods]);
 
   const poster = pick ? posterUrl(pick.posterPath, "w500") : null;
 
@@ -33,7 +39,10 @@ export default function PickerPage() {
         onChange={setFilters}
         genres={genres}
         showSearch={false}
+        showGenre={false}
       />
+
+      <MoodChips genres={genres} selected={moods} onChange={setMoods} />
 
       {!loading && (
         <p className="text-sm text-muted">
