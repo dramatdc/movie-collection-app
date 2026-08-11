@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useMovies } from "@/lib/hooks/useMovies";
 import { useWishlist } from "@/lib/hooks/useWishlist";
-import { MovieGrid } from "@/components/movie/MovieGrid";
+import { AlphabeticalGrid } from "@/components/movie/AlphabeticalGrid";
 import { MovieRail } from "@/components/movie/MovieRail";
 import { FilterBar } from "@/components/movie/FilterBar";
 import { DEFAULT_FILTERS, applyFilters, collectGenres, sortAlphabetically } from "@/lib/filters";
@@ -83,7 +83,7 @@ export default function LibraryPage() {
         {loading ? (
           <p className="py-16 text-center text-sm text-muted">Loading...</p>
         ) : (
-          <MovieGrid movies={filtered} />
+          <AlphabeticalGrid movies={filtered} />
         )}
       </div>
     </div>

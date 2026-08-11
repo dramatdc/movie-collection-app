@@ -43,6 +43,29 @@ export function sortAlphabetically(movies: OwnedMovie[]): OwnedMovie[] {
   return [...movies].sort((a, b) => a.title.localeCompare(b.title));
 }
 
+export interface LetterGroup {
+  letter: string;
+  movies: OwnedMovie[];
+}
+
+const ALPHABET_INDEX = ["#", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
+
+/** Groups already-alphabetized movies by their leading letter (or "#" for
+ * anything not starting with A-Z), preserving that alphabetical order. */
+export function groupByLetter(sortedMovies: OwnedMovie[]): LetterGroup[] {
+  const groups = new Map<string, OwnedMovie[]>();
+  for (const movie of sortedMovies) {
+    const first = movie.title.trim().charAt(0).toUpperCase();
+    const letter = first >= "A" && first <= "Z" ? first : "#";
+    if (!groups.has(letter)) groups.set(letter, []);
+    groups.get(letter)!.push(movie);
+  }
+  return ALPHABET_INDEX.filter((letter) => groups.has(letter)).map((letter) => ({
+    letter,
+    movies: groups.get(letter)!,
+  }));
+}
+
 export function collectGenres(movies: OwnedMovie[]): string[] {
   const set = new Set<string>();
   for (const m of movies) {
