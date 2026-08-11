@@ -10,7 +10,10 @@ const NAV = [
 
 export function AppHeader() {
   return (
-    <header className="hidden md:flex items-center justify-between border-b border-border px-6 py-3">
+    <header
+      className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-canvas px-4 py-3 md:px-6"
+      style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
+    >
       <Link href="/library" className="flex items-center">
         <Image
           src="/brand/wordmark.png"
@@ -18,10 +21,10 @@ export function AppHeader() {
           width={2695}
           height={431}
           priority
-          className="h-7 w-auto"
+          className="h-6 w-auto md:h-7"
         />
       </Link>
-      <nav className="flex gap-5 text-sm text-neutral-300">
+      <nav className="hidden gap-5 text-sm text-neutral-300 md:flex">
         {NAV.map((item) => (
           <Link key={item.href} href={item.href} className="hover:text-white">
             {item.label}
