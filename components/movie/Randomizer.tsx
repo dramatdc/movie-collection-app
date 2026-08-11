@@ -80,7 +80,7 @@ export function Randomizer({
   }
 
   return (
-    <div className="flex flex-col items-center gap-5">
+    <div className="flex flex-col items-center gap-3">
       <div className="relative w-[260px] overflow-hidden rounded-3xl border-2 border-accent shadow-2xl shadow-black/60">
         <div
           onTransitionEnd={handleTransitionEnd}

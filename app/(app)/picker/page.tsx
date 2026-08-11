@@ -31,7 +31,7 @@ export default function PickerPage() {
   const poster = pick ? posterUrl(pick.posterPath, "w500") : null;
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-4">
+    <div className="mx-auto flex max-w-md flex-col gap-3">
       <h1 className="text-xl font-semibold">Pick a movie for me</h1>
 
       <FilterBar
