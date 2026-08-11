@@ -82,12 +82,20 @@ export function BottomNav() {
           </div>
         </div>
 
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
+          <Link
+            href="/add"
+            aria-label="Add a movie"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg ring-4 ring-canvas transition active:scale-90"
+          >
+            <AddIcon className="h-6 w-6" />
+          </Link>
+        </div>
         <Link
           href="/add"
-          aria-label="Add a movie"
-          className="absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg ring-4 ring-canvas transition active:scale-90"
+          className="absolute left-1/2 top-8 -translate-x-1/2 text-[10px] font-medium text-accent"
         >
-          <AddIcon className="h-6 w-6" />
+          Add
         </Link>
       </div>
     </nav>

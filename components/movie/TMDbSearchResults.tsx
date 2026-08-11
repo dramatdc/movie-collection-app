@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { searchMoviesClient } from "@/lib/tmdb/client";
 import { posterUrl } from "@/lib/tmdb/image";
-import { BookmarkIcon } from "@/lib/icons";
+import { BookmarkIcon, LibraryIcon } from "@/lib/icons";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
 export function TMDbSearchResults({
@@ -12,11 +12,17 @@ export function TMDbSearchResults({
   onSelect,
   onAddToWishlist,
   wishlistTmdbIds,
+  onAddToCollection,
+  collectionTmdbIds,
+  addingToCollectionIds,
 }: {
   query: string;
   onSelect: (result: TMDbSearchResult) => void;
   onAddToWishlist?: (result: TMDbSearchResult) => void;
   wishlistTmdbIds?: Set<number>;
+  onAddToCollection?: (result: TMDbSearchResult) => void;
+  collectionTmdbIds?: Set<number>;
+  addingToCollectionIds?: Set<number>;
 }) {
   const [results, setResults] = useState<TMDbSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -57,12 +63,14 @@ export function TMDbSearchResults({
         const poster = posterUrl(r.poster_path, "w92");
         const year = r.release_date ? r.release_date.slice(0, 4) : "—";
         const onWishlist = wishlistTmdbIds?.has(r.id) ?? false;
+        const inCollection = collectionTmdbIds?.has(r.id) ?? false;
+        const addingToCollection = addingToCollectionIds?.has(r.id) ?? false;
         return (
-          <li key={r.id} className="flex items-center gap-2 p-2">
+          <li key={r.id} className="flex flex-col gap-2 p-2">
             <button
               type="button"
               onClick={() => onSelect(r)}
-              className="flex flex-1 min-w-0 items-center gap-3 text-left"
+              className="flex min-w-0 items-center gap-3 text-left"
             >
               <div className="relative h-16 w-11 shrink-0 overflow-hidden rounded bg-surface-hover">
                 {poster && (
@@ -74,23 +82,46 @@ export function TMDbSearchResults({
                 <p className="text-xs text-muted">{year}</p>
               </div>
             </button>
-            {onAddToWishlist && (
-              <button
-                type="button"
-                onClick={() => onAddToWishlist(r)}
-                disabled={onWishlist}
-                className={
-                  onWishlist
-                    ? "flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground"
-                    : "flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted hover:border-accent hover:text-accent"
-                }
-              >
-                <BookmarkIcon
-                  className="h-3.5 w-3.5"
-                  fill={onWishlist ? "currentColor" : "none"}
-                />
-                {onWishlist ? "On wishlist" : "Add to wishlist"}
-              </button>
+            {(onAddToWishlist || onAddToCollection) && (
+              <div className="flex flex-wrap gap-2 pl-14">
+                {onAddToWishlist && (
+                  <button
+                    type="button"
+                    onClick={() => onAddToWishlist(r)}
+                    disabled={onWishlist}
+                    className={
+                      onWishlist
+                        ? "flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground"
+                        : "flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted hover:border-accent hover:text-accent"
+                    }
+                  >
+                    <BookmarkIcon
+                      className="h-3.5 w-3.5"
+                      fill={onWishlist ? "currentColor" : "none"}
+                    />
+                    {onWishlist ? "On wishlist" : "Add to wishlist"}
+                  </button>
+                )}
+                {onAddToCollection && (
+                  <button
+                    type="button"
+                    onClick={() => onAddToCollection(r)}
+                    disabled={inCollection || addingToCollection}
+                    className={
+                      inCollection
+                        ? "flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground"
+                        : "flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted hover:border-accent hover:text-accent disabled:opacity-60"
+                    }
+                  >
+                    <LibraryIcon className="h-3.5 w-3.5" />
+                    {inCollection
+                      ? "In collection"
+                      : addingToCollection
+                        ? "Adding..."
+                        : "Add to collection"}
+                  </button>
+                )}
+              </div>
             )}
           </li>
         );

@@ -2,10 +2,13 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useWishlist } from "@/lib/hooks/useWishlist";
+import { useRecentSearches } from "@/lib/hooks/useRecentSearches";
 import { addToWishlist, removeFromWishlist } from "@/lib/firebase/wishlist";
 import { TMDbSearchResults } from "@/components/movie/TMDbSearchResults";
+import { RecentSearchChips } from "@/components/movie/RecentSearchChips";
 import { CloseIcon } from "@/lib/icons";
 import { posterUrl } from "@/lib/tmdb/image";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
@@ -14,11 +17,13 @@ export default function WishlistPage() {
   const { user } = useAuth();
   const { items, loading } = useWishlist();
   const [searchQuery, setSearchQuery] = useState("");
+  const { recent, record } = useRecentSearches("recent-searches-wishlist");
 
   const wishlistTmdbIds = useMemo(() => new Set(items.map((i) => i.tmdbId)), [items]);
 
   function handleAdd(result: TMDbSearchResult) {
     if (!user) return;
+    record(searchQuery);
     addToWishlist(user.uid, {
       tmdbId: result.id,
       title: result.title,
@@ -52,6 +57,9 @@ export default function WishlistPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="rounded border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none"
         />
+        {!searchQuery.trim() && (
+          <RecentSearchChips recent={recent} onSelect={setSearchQuery} />
+        )}
         <TMDbSearchResults
           query={searchQuery}
           onSelect={handleAdd}
@@ -77,13 +85,15 @@ export default function WishlistPage() {
             return (
               <div key={item.tmdbId} className="flex flex-col gap-1.5">
                 <div className="relative aspect-2/3 overflow-hidden rounded-xl bg-surface-hover shadow-lg shadow-black/40">
-                  {poster ? (
-                    <Image src={poster} alt={item.title} fill className="object-cover" />
-                  ) : (
-                    <div className="flex h-full items-center justify-center px-2 text-center text-xs text-muted">
-                      {item.title}
-                    </div>
-                  )}
+                  <Link href={`/wishlist/${item.tmdbId}`} className="absolute inset-0">
+                    {poster ? (
+                      <Image src={poster} alt={item.title} fill className="object-cover" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center px-2 text-center text-xs text-muted">
+                        {item.title}
+                      </div>
+                    )}
+                  </Link>
                   <button
                     type="button"
                     onClick={() => handleRemove(item.tmdbId)}
@@ -93,8 +103,10 @@ export default function WishlistPage() {
                     <CloseIcon className="h-3.5 w-3.5" />
                   </button>
                 </div>
-                <p className="truncate text-xs font-medium">{item.title}</p>
-                {item.year && <p className="text-xs text-muted">{item.year}</p>}
+                <Link href={`/wishlist/${item.tmdbId}`}>
+                  <p className="truncate text-xs font-medium hover:text-accent">{item.title}</p>
+                  {item.year && <p className="text-xs text-muted">{item.year}</p>}
+                </Link>
               </div>
             );
           })}

@@ -14,15 +14,11 @@ const WATCHED_TABS: { value: MovieFilters["watched"]; label: string }[] = [
 
 const FORMATS: MovieFormat[] = ["DVD", "Blu-ray", "4K UHD", "Digital"];
 
-function ScrollablePillTabs<T extends string>({
-  value,
-  options,
-  onChange,
-}: {
-  value: T | null;
-  options: { value: T | null; label: string }[];
-  onChange: (value: T | null) => void;
-}) {
+type Chip =
+  | { kind: "divider"; key: string }
+  | { kind: "option"; key: string; label: string; active: boolean; onClick: () => void };
+
+function ScrollableChipRow({ chips }: { chips: Chip[] }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canScrollMore, setCanScrollMore] = useState(false);
 
@@ -34,33 +30,34 @@ function ScrollablePillTabs<T extends string>({
 
   useEffect(() => {
     updateScrollHint();
-  }, [options]);
+  }, [chips.length]);
 
   return (
     <div className="relative">
       <div
         ref={scrollerRef}
         onScroll={updateScrollHint}
-        className="flex gap-1.5 overflow-x-auto"
+        className="flex items-center gap-1.5 overflow-x-auto"
       >
-        {options.map((opt) => {
-          const active = value === opt.value;
-          return (
+        {chips.map((chip) =>
+          chip.kind === "divider" ? (
+            <span key={chip.key} className="h-4 w-px shrink-0 bg-border" />
+          ) : (
             <button
-              key={opt.label}
+              key={chip.key}
               type="button"
-              onClick={() => onChange(opt.value)}
+              onClick={chip.onClick}
               className={clsx(
                 "shrink-0 rounded-full px-2.5 py-1 text-xs font-medium transition",
-                active
+                chip.active
                   ? "bg-accent text-accent-foreground"
                   : "bg-surface text-muted hover:bg-surface-hover"
               )}
             >
-              {opt.label}
+              {chip.label}
             </button>
-          );
-        })}
+          )
+        )}
       </div>
 
       {canScrollMore && (
@@ -90,51 +87,63 @@ export function FilterBar({
   showSearch?: boolean;
   showGenre?: boolean;
 }) {
+  const chips: Chip[] = [
+    ...WATCHED_TABS.map((tab) => ({
+      kind: "option" as const,
+      key: `watched-${tab.value}`,
+      label: tab.label,
+      active: filters.watched === tab.value,
+      onClick: () => onChange({ ...filters, watched: tab.value }),
+    })),
+    { kind: "divider" as const, key: "divider-format" },
+    {
+      kind: "option" as const,
+      key: "format-all",
+      label: "All formats",
+      active: filters.format === null,
+      onClick: () => onChange({ ...filters, format: null }),
+    },
+    ...FORMATS.map((f) => ({
+      kind: "option" as const,
+      key: `format-${f}`,
+      label: f,
+      active: filters.format === f,
+      onClick: () => onChange({ ...filters, format: f }),
+    })),
+  ];
+
+  if (showGenre && genres.length > 0) {
+    chips.push(
+      { kind: "divider" as const, key: "divider-genre" },
+      {
+        kind: "option" as const,
+        key: "genre-all",
+        label: "All genres",
+        active: filters.genre === null,
+        onClick: () => onChange({ ...filters, genre: null }),
+      },
+      ...genres.map((g) => ({
+        kind: "option" as const,
+        key: `genre-${g}`,
+        label: g,
+        active: filters.genre === g,
+        onClick: () => onChange({ ...filters, genre: g }),
+      }))
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2">
-      <ScrollablePillTabs
-        value={filters.watched === "all" ? "all" : filters.watched}
-        options={WATCHED_TABS}
-        onChange={(watched) => onChange({ ...filters, watched: watched ?? "all" })}
-      />
-
-      <ScrollablePillTabs
-        value={filters.format}
-        options={[
-          { value: null, label: "All formats" },
-          ...FORMATS.map((f) => ({ value: f, label: f })),
-        ]}
-        onChange={(format) => onChange({ ...filters, format })}
-      />
-
-      {(showSearch || showGenre) && (
-        <div className="flex flex-wrap items-center gap-2">
-          {showSearch && (
-            <input
-              type="text"
-              placeholder="Search your collection..."
-              value={filters.query}
-              onChange={(e) => onChange({ ...filters, query: e.target.value })}
-              className="w-48 rounded-full border border-border bg-surface px-3 py-1 text-xs focus:border-accent focus:outline-none"
-            />
-          )}
-
-          {showGenre && (
-            <select
-              value={filters.genre ?? ""}
-              onChange={(e) => onChange({ ...filters, genre: e.target.value || null })}
-              className="rounded-full border border-border bg-surface px-3 py-1 text-xs focus:border-accent focus:outline-none"
-            >
-              <option value="">All genres</option>
-              {genres.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
+      {showSearch && (
+        <input
+          type="text"
+          placeholder="Search your collection..."
+          value={filters.query}
+          onChange={(e) => onChange({ ...filters, query: e.target.value })}
+          className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs focus:border-accent focus:outline-none"
+        />
       )}
+      <ScrollableChipRow chips={chips} />
     </div>
   );
 }
