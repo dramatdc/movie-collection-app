@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { LibraryIcon, ShuffleIcon, ProfileIcon, AddIcon } from "@/lib/icons";
+import { LibraryIcon, ListIcon, ShuffleIcon, ProfileIcon, AddIcon } from "@/lib/icons";
 
-const LEFT_ITEMS = [{ href: "/library", label: "Library", Icon: LibraryIcon }];
+const LEFT_ITEMS = [
+  { href: "/library", label: "Library", Icon: LibraryIcon },
+  { href: "/lists", label: "Lists", Icon: ListIcon },
+];
 const RIGHT_ITEMS = [
   { href: "/picker", label: "Pick", Icon: ShuffleIcon },
   { href: "/profile", label: "Profile", Icon: ProfileIcon },

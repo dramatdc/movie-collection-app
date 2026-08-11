@@ -27,3 +27,11 @@ export interface WishlistItem {
   year: number | null;
   addedAt: number;
 }
+
+export interface CustomList {
+  id: string;
+  name: string;
+  createdAt: number;
+}
+
+export type CustomListItem = WishlistItem;
