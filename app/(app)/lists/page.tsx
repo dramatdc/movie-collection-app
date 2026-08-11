@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useLists } from "@/lib/hooks/useLists";
 import { createList } from "@/lib/firebase/lists";
-import { ListIcon, AddIcon } from "@/lib/icons";
+import { AddIcon } from "@/lib/icons";
+import { ListPreviewCard } from "@/components/movie/ListPreviewCard";
 
 export default function ListsPage() {
   const { user } = useAuth();
@@ -30,9 +30,7 @@ export default function ListsPage() {
     <div className="mx-auto flex max-w-md flex-col gap-6">
       <div>
         <h1 className="text-xl font-semibold">Lists</h1>
-        <p className="text-sm text-muted">
-          Group movies your own way — favorites, funny movies, whatever you like.
-        </p>
+        <p className="text-sm text-muted">Group movies your own way.</p>
       </div>
 
       <form onSubmit={handleCreate} className="flex gap-2">
@@ -64,14 +62,7 @@ export default function ListsPage() {
           {[...lists]
             .sort((a, b) => b.createdAt - a.createdAt)
             .map((list) => (
-              <Link
-                key={list.id}
-                href={`/lists/${list.id}`}
-                className="flex items-center gap-3 rounded-lg border border-border bg-surface p-4 shadow-lg shadow-black/40 hover:border-accent"
-              >
-                <ListIcon className="h-5 w-5 text-accent" />
-                <span className="font-medium">{list.name}</span>
-              </Link>
+              <ListPreviewCard key={list.id} list={list} />
             ))}
         </div>
       )}

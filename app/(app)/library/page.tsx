@@ -44,6 +44,7 @@ export default function LibraryPage() {
           key: String(w.tmdbId),
           title: w.title,
           posterUrl: posterUrl(w.posterPath, "w185"),
+          href: "/wishlist",
         })),
     [wishlist]
   );
@@ -62,6 +63,7 @@ export default function LibraryPage() {
             titleHref="/wishlist"
             items={wishlistRail}
             emptyLabel="Nothing on your wishlist yet."
+            size="sm"
           />
         </>
       )}

@@ -8,17 +8,26 @@ export interface RailItem {
   href?: string;
 }
 
+const SIZES = {
+  md: { wrapper: "w-28", sizes: "112px" },
+  sm: { wrapper: "w-20", sizes: "80px" },
+};
+
 export function MovieRail({
   title,
   titleHref,
   items,
   emptyLabel,
+  size = "md",
 }: {
   title: string;
   titleHref?: string;
   items: RailItem[];
   emptyLabel: string;
+  size?: "md" | "sm";
 }) {
+  const { wrapper, sizes } = SIZES[size];
+
   return (
     <section className="flex flex-col gap-2.5">
       {titleHref ? (
@@ -35,13 +44,15 @@ export function MovieRail({
         <div className="flex gap-3 overflow-x-auto pt-3 pb-12 -mb-9 snap-x snap-mandatory scroll-px-4 -mx-4 px-4">
           {items.map((item) => {
             const card = (
-              <div className="relative aspect-2/3 w-28 shrink-0 overflow-hidden rounded-2xl bg-surface-hover shadow-xl shadow-black/50 transition active:scale-95">
+              <div
+                className={`relative aspect-2/3 ${wrapper} shrink-0 overflow-hidden rounded-2xl bg-surface-hover shadow-xl shadow-black/50 transition active:scale-95`}
+              >
                 {item.posterUrl ? (
                   <Image
                     src={item.posterUrl}
                     alt={item.title}
                     fill
-                    sizes="112px"
+                    sizes={sizes}
                     className="object-cover"
                   />
                 ) : (
