@@ -6,7 +6,7 @@ import { posterUrl } from "@/lib/tmdb/image";
 import { ShuffleIcon } from "@/lib/icons";
 import type { OwnedMovie } from "@/lib/firebase/types";
 
-const CARD_WIDTH = 260;
+const CARD_WIDTH = 225;
 const GAP = 16;
 const STRIDE = CARD_WIDTH + GAP;
 const LOOPS = 5;
@@ -81,7 +81,7 @@ export function Randomizer({
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="relative w-[260px] overflow-hidden rounded-3xl border-2 border-accent shadow-2xl shadow-black/60">
+      <div className="relative w-[225px] overflow-hidden rounded-3xl border-2 border-accent shadow-2xl shadow-black/60">
         <div
           onTransitionEnd={handleTransitionEnd}
           className="flex gap-4"
@@ -105,7 +105,7 @@ export function Randomizer({
                   return (
                     <div
                       key={`idle-${movie.id}-${i}`}
-                      className="relative aspect-2/3 w-[260px] shrink-0 overflow-hidden bg-surface-hover"
+                      className="relative aspect-2/3 w-[225px] shrink-0 overflow-hidden bg-surface-hover"
                     >
                       {poster && (
                         <Image src={poster} alt={movie.title} fill className="object-cover" />
@@ -115,7 +115,7 @@ export function Randomizer({
                 })}
               </div>
             ) : (
-              <div className="aspect-2/3 w-[260px] shrink-0 bg-surface-hover" />
+              <div className="aspect-2/3 w-[225px] shrink-0 bg-surface-hover" />
             )
           ) : (
             reel.map((movie, i) => {
@@ -123,7 +123,7 @@ export function Randomizer({
               return (
                 <div
                   key={`${movie.id}-${i}`}
-                  className="relative aspect-2/3 w-[260px] shrink-0 overflow-hidden bg-surface-hover"
+                  className="relative aspect-2/3 w-[225px] shrink-0 overflow-hidden bg-surface-hover"
                 >
                   {poster && (
                     <Image src={poster} alt={movie.title} fill className="object-cover" />
