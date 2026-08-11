@@ -52,6 +52,21 @@ const NOISE_PATTERNS = [
   /\bsummit\s*entertainment\b/gi,
   /\bstudiocanal\b/gi,
   /\bweinstein\s*company\b/gi,
+
+  // Retail category/genre tags — UPC databases often append the store's
+  // own genre taxonomy after the title (e.g. "Tarzan Video Kids &
+  // Family"), which is noise for search purposes, same problem as the
+  // studio names above.
+  /\bvideo\b/gi,
+  /\bkids\s*(&|and)\s*family\b/gi,
+  /\baction\s*(&|and)\s*adventure\b/gi,
+  /\b(sci-?fi|science\s*fiction)\s*(&|and)\s*fantasy\b/gi,
+  /\bmystery\s*(&|and)\s*suspense\b/gi,
+  /\bmusic\s*(&|and)\s*performing\s*arts\b/gi,
+  /\banime\s*(&|and)\s*manga\b/gi,
+  /\bfaith\s*(&|and)\s*spirituality\b/gi,
+  /\bsports\s*(&|and)\s*recreation\b/gi,
+  /\bdocumentary\b/gi,
 ];
 
 /** Strips retail packaging noise ("Blu-ray", "4K UHD", "(Steelbook)") from a
