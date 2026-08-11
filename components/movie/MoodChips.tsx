@@ -76,7 +76,7 @@ export function MoodChips({
             type="button"
             onClick={scrollHint}
             aria-label="Scroll to see more genres"
-            className="absolute right-0 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg animate-pulse"
+            className="absolute right-0 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg"
           >
             <ChevronRightIcon className="h-5 w-5" />
           </button>
