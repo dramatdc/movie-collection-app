@@ -11,8 +11,8 @@ export function AuthSplash() {
       <Image
         src="/brand/lockup.png"
         alt="Hardcopy"
-        width={2695}
-        height={1353}
+        width={2699}
+        height={1217}
         priority
         className="relative h-32 w-auto"
         style={{ animation: "float 5s ease-in-out infinite" }}
