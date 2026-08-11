@@ -13,6 +13,7 @@ export async function signUp(email: string, password: string) {
   await setDoc(doc(db, "users", cred.user.uid), {
     email: cred.user.email,
     createdAt: serverTimestamp(),
+    acceptedTermsAt: serverTimestamp(),
   });
   return cred.user;
 }
