@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hardcopy</string>
+    <string name="title_activity_main">Hardcopy</string>
+    <string name="package_name">com.hardcopyapp.hardcopy</string>
+    <string name="custom_url_scheme">com.hardcopyapp.hardcopy</string>
+</resources>

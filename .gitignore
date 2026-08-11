@@ -44,3 +44,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Capacitor native build output (native projects themselves are committed)
+/android/local.properties
+/android/.gradle/
+/android/app/build/
+/android/build/
+/android/captures/
+/android/.idea/
+*.iml
+/ios/App/Pods/
+/ios/App/App/public/
+/ios/App/DerivedData/
+/ios/.xcode.env.local
+xcuserdata/
+*.xcuserstate
