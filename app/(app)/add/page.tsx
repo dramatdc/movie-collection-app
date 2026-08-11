@@ -8,8 +8,8 @@ import { TMDbSearchResults } from "@/components/movie/TMDbSearchResults";
 import { lookupUpcClient } from "@/lib/upc/lookup";
 import { useAddFlow } from "@/lib/context/AddFlowContext";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { useWatchlist } from "@/lib/hooks/useWatchlist";
-import { addToWatchlist } from "@/lib/firebase/watchlist";
+import { useWishlist } from "@/lib/hooks/useWishlist";
+import { addToWishlist } from "@/lib/firebase/wishlist";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
 export default function AddPage() {
@@ -18,12 +18,12 @@ export default function AddPage() {
   const [scannedUpc, setScannedUpc] = useState<string | null>(null);
   const { setCandidate, setBarcodeUpc } = useAddFlow();
   const { user } = useAuth();
-  const { items: watchlist } = useWatchlist();
+  const { items: wishlist } = useWishlist();
   const router = useRouter();
 
-  const watchlistTmdbIds = useMemo(
-    () => new Set(watchlist.map((i) => i.tmdbId)),
-    [watchlist]
+  const wishlistTmdbIds = useMemo(
+    () => new Set(wishlist.map((i) => i.tmdbId)),
+    [wishlist]
   );
 
   const handleDetected = useCallback(async (code: string) => {
@@ -47,9 +47,9 @@ export default function AddPage() {
     router.push("/add/confirm");
   }
 
-  function handleAddToWatchlist(result: TMDbSearchResult) {
+  function handleAddToWishlist(result: TMDbSearchResult) {
     if (!user) return;
-    addToWatchlist(user.uid, {
+    addToWishlist(user.uid, {
       tmdbId: result.id,
       title: result.title,
       posterPath: result.poster_path,
@@ -91,8 +91,8 @@ export default function AddPage() {
           <TMDbSearchResults
             query={searchQuery}
             onSelect={selectForCollection}
-            onAddToWatchlist={handleAddToWatchlist}
-            watchlistTmdbIds={watchlistTmdbIds}
+            onAddToWishlist={handleAddToWishlist}
+            wishlistTmdbIds={wishlistTmdbIds}
           />
         </div>
       </section>

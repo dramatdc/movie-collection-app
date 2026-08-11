@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { subscribeToWatchlist } from "@/lib/firebase/watchlist";
-import type { WatchlistItem } from "@/lib/firebase/types";
+import { subscribeToWishlist } from "@/lib/firebase/wishlist";
+import type { WishlistItem } from "@/lib/firebase/types";
 import { useAuth } from "./useAuth";
 
-export function useWatchlist() {
+export function useWishlist() {
   const { user } = useAuth();
-  const [items, setItems] = useState<WatchlistItem[]>([]);
+  const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,7 +16,7 @@ export function useWatchlist() {
       return;
     }
     setLoading(true);
-    return subscribeToWatchlist(user.uid, (i) => {
+    return subscribeToWishlist(user.uid, (i) => {
       setItems(i);
       setLoading(false);
     });

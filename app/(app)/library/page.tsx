@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useMovies } from "@/lib/hooks/useMovies";
-import { useWatchlist } from "@/lib/hooks/useWatchlist";
+import { useWishlist } from "@/lib/hooks/useWishlist";
 import { MovieGrid } from "@/components/movie/MovieGrid";
 import { MovieRail } from "@/components/movie/MovieRail";
 import { FilterBar } from "@/components/movie/FilterBar";
@@ -13,7 +13,7 @@ const RECENTLY_ADDED_COUNT = 15;
 
 export default function LibraryPage() {
   const { movies, loading } = useMovies();
-  const { items: watchlist } = useWatchlist();
+  const { items: wishlist } = useWishlist();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
   const genres = useMemo(() => collectGenres(movies), [movies]);
@@ -36,16 +36,16 @@ export default function LibraryPage() {
     [movies]
   );
 
-  const myList = useMemo(
+  const wishlistRail = useMemo(
     () =>
-      [...watchlist]
+      [...wishlist]
         .sort((a, b) => b.addedAt - a.addedAt)
         .map((w) => ({
           key: String(w.tmdbId),
           title: w.title,
           posterUrl: posterUrl(w.posterPath, "w185"),
         })),
-    [watchlist]
+    [wishlist]
   );
 
   return (
@@ -58,9 +58,10 @@ export default function LibraryPage() {
             emptyLabel="Nothing added yet — scan or search to build your shelf."
           />
           <MovieRail
-            title="My List"
-            items={myList}
-            emptyLabel="Nothing on your watchlist yet."
+            title="Wishlist"
+            titleHref="/wishlist"
+            items={wishlistRail}
+            emptyLabel="Nothing on your wishlist yet."
           />
         </>
       )}

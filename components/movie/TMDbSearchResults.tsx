@@ -10,13 +10,13 @@ import type { TMDbSearchResult } from "@/lib/tmdb/types";
 export function TMDbSearchResults({
   query,
   onSelect,
-  onAddToWatchlist,
-  watchlistTmdbIds,
+  onAddToWishlist,
+  wishlistTmdbIds,
 }: {
   query: string;
   onSelect: (result: TMDbSearchResult) => void;
-  onAddToWatchlist?: (result: TMDbSearchResult) => void;
-  watchlistTmdbIds?: Set<number>;
+  onAddToWishlist?: (result: TMDbSearchResult) => void;
+  wishlistTmdbIds?: Set<number>;
 }) {
   const [results, setResults] = useState<TMDbSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -56,13 +56,13 @@ export function TMDbSearchResults({
       {results.map((r) => {
         const poster = posterUrl(r.poster_path, "w92");
         const year = r.release_date ? r.release_date.slice(0, 4) : "—";
-        const onWatchlist = watchlistTmdbIds?.has(r.id) ?? false;
+        const onWishlist = wishlistTmdbIds?.has(r.id) ?? false;
         return (
-          <li key={r.id} className="flex items-center gap-1">
+          <li key={r.id} className="flex items-center gap-2 p-2">
             <button
               type="button"
               onClick={() => onSelect(r)}
-              className="flex flex-1 min-w-0 items-center gap-3 p-2 text-left hover:bg-surface"
+              className="flex flex-1 min-w-0 items-center gap-3 text-left"
             >
               <div className="relative h-16 w-11 shrink-0 overflow-hidden rounded bg-surface-hover">
                 {poster && (
@@ -74,18 +74,22 @@ export function TMDbSearchResults({
                 <p className="text-xs text-muted">{year}</p>
               </div>
             </button>
-            {onAddToWatchlist && (
+            {onAddToWishlist && (
               <button
                 type="button"
-                onClick={() => onAddToWatchlist(r)}
-                disabled={onWatchlist}
-                title={onWatchlist ? "On your watchlist" : "Add to watchlist"}
-                className="shrink-0 p-2 mr-1 text-muted hover:text-accent disabled:text-accent"
+                onClick={() => onAddToWishlist(r)}
+                disabled={onWishlist}
+                className={
+                  onWishlist
+                    ? "flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground"
+                    : "flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted hover:border-accent hover:text-accent"
+                }
               >
                 <BookmarkIcon
-                  className="h-5 w-5"
-                  fill={onWatchlist ? "currentColor" : "none"}
+                  className="h-3.5 w-3.5"
+                  fill={onWishlist ? "currentColor" : "none"}
                 />
+                {onWishlist ? "On wishlist" : "Add to wishlist"}
               </button>
             )}
           </li>
