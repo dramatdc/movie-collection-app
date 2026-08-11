@@ -15,10 +15,10 @@ export function AppHeader() {
         <Image
           src="/brand/wordmark.png"
           alt="Hardcopy"
-          width={2540}
-          height={416}
+          width={2695}
+          height={1138}
           priority
-          className="h-6 w-auto"
+          className="h-7 w-auto"
         />
       </Link>
       <nav className="flex gap-5 text-sm text-neutral-300">

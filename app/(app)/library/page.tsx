@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { useMovies } from "@/lib/hooks/useMovies";
 import { useWatchlist } from "@/lib/hooks/useWatchlist";
 import { MovieGrid } from "@/components/movie/MovieGrid";
@@ -50,6 +51,15 @@ export default function LibraryPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <Image
+        src="/brand/wordmark.png"
+        alt="Hardcopy"
+        width={2695}
+        height={1138}
+        priority
+        className="h-6 w-auto md:hidden"
+      />
+
       {!loading && (
         <>
           <MovieRail
