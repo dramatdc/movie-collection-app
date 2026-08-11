@@ -55,9 +55,9 @@ export default function LibraryPage() {
         src="/brand/wordmark.png"
         alt="Hardcopy"
         width={2695}
-        height={1138}
+        height={431}
         priority
-        className="h-6 w-auto md:hidden"
+        className="h-7 w-auto md:hidden"
       />
 
       {!loading && (
