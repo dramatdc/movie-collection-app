@@ -43,7 +43,7 @@ export function playAddedChime() {
   osc.frequency.exponentialRampToValueAtTime(988, now + 0.09);
 
   gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(0.12, now + 0.015);
+  gain.gain.linearRampToValueAtTime(0.18, now + 0.015);
   gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
 
   osc.connect(gain);
