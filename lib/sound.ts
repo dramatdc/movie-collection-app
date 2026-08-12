@@ -18,36 +18,84 @@ function getAudioContext(): AudioContext | null {
 function primeOnFirstTap() {
   const ctx = getAudioContext();
   if (ctx && ctx.state === "suspended") {
-    ctx.resume().catch(() => {});
+    ctx.resume().catch(() => {
+      window.addEventListener("pointerdown", primeOnFirstTap, { once: true });
+    });
   }
 }
 if (typeof window !== "undefined") {
   window.addEventListener("pointerdown", primeOnFirstTap, { once: true });
 }
 
-// A soft, synthesized two-tone "bloop" — no audio asset needed, and it
-// keeps things quiet/non-intrusive by design (short, low gain).
-export function playAddedChime() {
+interface ChimePreset {
+  startFreq: number;
+  endFreq: number;
+  rampTime: number;
+  peakGain: number;
+  attackTime: number;
+  decayTime: number;
+  stopTime: number;
+}
+
+// Rising, bright tone for additions; falling, slightly softer tone for
+// removals — distinct enough to tell apart without looking at the screen.
+const ADD_PRESET: ChimePreset = {
+  startFreq: 740,
+  endFreq: 988,
+  rampTime: 0.09,
+  peakGain: 0.18,
+  attackTime: 0.015,
+  decayTime: 0.22,
+  stopTime: 0.25,
+};
+
+const REMOVE_PRESET: ChimePreset = {
+  startFreq: 640,
+  endFreq: 420,
+  rampTime: 0.1,
+  peakGain: 0.16,
+  attackTime: 0.015,
+  decayTime: 0.2,
+  stopTime: 0.22,
+};
+
+function playTone(preset: ChimePreset) {
   const ctx = getAudioContext();
   if (!ctx) return;
+
+  // Scheduling on a still-suspended context is unreliable across browsers —
+  // wait for resume() to actually resolve before building/starting the
+  // oscillator, so the sound doesn't silently drop.
+  const start = () => {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(preset.startFreq, now);
+    osc.frequency.exponentialRampToValueAtTime(preset.endFreq, now + preset.rampTime);
+
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(preset.peakGain, now + preset.attackTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + preset.decayTime);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + preset.stopTime);
+  };
+
   if (ctx.state === "suspended") {
-    ctx.resume().catch(() => {});
+    ctx.resume().then(start).catch(() => {});
+  } else {
+    start();
   }
+}
 
-  const now = ctx.currentTime;
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
+export function playAddedChime() {
+  playTone(ADD_PRESET);
+}
 
-  osc.type = "sine";
-  osc.frequency.setValueAtTime(740, now);
-  osc.frequency.exponentialRampToValueAtTime(988, now + 0.09);
-
-  gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(0.18, now + 0.015);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
-
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(now);
-  osc.stop(now + 0.25);
+export function playRemovedChime() {
+  playTone(REMOVE_PRESET);
 }

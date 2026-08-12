@@ -8,6 +8,7 @@ import { posterUrl } from "@/lib/tmdb/image";
 import { FormatBadge } from "@/components/movie/FormatBadge";
 import { RatingStars } from "@/components/movie/RatingStars";
 import { removeOwnedMovie, updateOwnedMovie } from "@/lib/firebase/firestore";
+import { playRemovedChime } from "@/lib/sound";
 import type { MovieFormat } from "@/lib/firebase/types";
 
 const FORMATS: MovieFormat[] = ["DVD", "Blu-ray", "4K UHD", "Digital"];
@@ -33,6 +34,7 @@ export default function MovieDetailPage() {
   async function handleDelete() {
     if (!user || !movie) return;
     if (!confirm(`Remove "${movie.title}" from your collection?`)) return;
+    playRemovedChime();
     await removeOwnedMovie(user.uid, movie.id);
     router.push("/library");
   }
