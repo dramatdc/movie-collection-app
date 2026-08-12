@@ -72,6 +72,8 @@ export default function ListDetailPage() {
           onSelect={handleAdd}
           onAddToWishlist={handleAdd}
           wishlistTmdbIds={listedTmdbIds}
+          addLabel="Add to list"
+          addedLabel="In list"
         />
       </div>
 

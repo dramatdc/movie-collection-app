@@ -12,6 +12,8 @@ export function TMDbSearchResults({
   onSelect,
   onAddToWishlist,
   wishlistTmdbIds,
+  addLabel = "Add to wishlist",
+  addedLabel = "On wishlist",
   onAddToCollection,
   collectionTmdbIds,
   addingToCollectionIds,
@@ -20,6 +22,8 @@ export function TMDbSearchResults({
   onSelect: (result: TMDbSearchResult) => void;
   onAddToWishlist?: (result: TMDbSearchResult) => void;
   wishlistTmdbIds?: Set<number>;
+  addLabel?: string;
+  addedLabel?: string;
   onAddToCollection?: (result: TMDbSearchResult) => void;
   collectionTmdbIds?: Set<number>;
   addingToCollectionIds?: Set<number>;
@@ -99,7 +103,7 @@ export function TMDbSearchResults({
                       className="h-3.5 w-3.5"
                       fill={onWishlist ? "currentColor" : "none"}
                     />
-                    {onWishlist ? "On wishlist" : "Add to wishlist"}
+                    {onWishlist ? addedLabel : addLabel}
                   </button>
                 )}
                 {onAddToCollection && (

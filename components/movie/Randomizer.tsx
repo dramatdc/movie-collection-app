@@ -7,11 +7,14 @@ import { ShuffleIcon } from "@/lib/icons";
 import type { OwnedMovie } from "@/lib/firebase/types";
 
 const STRIDE = 108;
-const STEP_TRANSITION_MS = 300;
+const STEP_TRANSITION_MS = 280;
 const IDLE_INTERVAL_MS = 2400;
-const MIN_SPIN_STEPS = 22;
+// Fixed step count, independent of collection size, so a big library
+// doesn't turn into a marathon spin.
+const SPIN_STEPS_BASE = 15;
+const SPIN_STEPS_JITTER = 5;
 const MIN_STEP_DELAY = 45;
-const MAX_STEP_DELAY = 380;
+const MAX_STEP_DELAY = 320;
 
 function mod(n: number, m: number) {
   return ((n % m) + m) % m;
@@ -35,6 +38,9 @@ export function Randomizer({
 }) {
   const [index, setIndex] = useState(0);
   const [spinning, setSpinning] = useState(false);
+  // Once a spin lands, the carousel stays put on the pick instead of
+  // resuming the idle drift — until the tab is hidden and shown again.
+  const [idleFrozen, setIdleFrozen] = useState(false);
   const spinTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const targetRef = useRef<OwnedMovie | null>(null);
 
@@ -49,14 +55,25 @@ export function Randomizer({
     });
   }, [eligible]);
 
-  // Slow idle auto-advance, paused while spinning.
+  // Resume idle drift once the user leaves and comes back to the tab.
   useEffect(() => {
-    if (spinning || eligible.length <= 1) return;
+    function handleVisibility() {
+      if (document.visibilityState === "visible") {
+        setIdleFrozen(false);
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, []);
+
+  // Slow idle auto-advance, paused while spinning or while frozen on a pick.
+  useEffect(() => {
+    if (spinning || idleFrozen || eligible.length <= 1) return;
     const interval = setInterval(() => {
       setIndex((i) => i + 1);
     }, IDLE_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [spinning, eligible.length]);
+  }, [spinning, idleFrozen, eligible.length]);
 
   useEffect(() => {
     return () => {
@@ -68,12 +85,9 @@ export function Randomizer({
     const length = eligible.length;
     if (length === 0 || spinning) return;
 
-    const targetIdx = Math.floor(Math.random() * length);
-    const currentMod = mod(index, length);
-    const remainder = mod(targetIdx - currentMod, length);
-    const extraLoops = Math.max(1, Math.ceil(MIN_SPIN_STEPS / length));
-    const totalSteps = extraLoops * length + remainder;
-    targetRef.current = eligible[targetIdx];
+    const totalSteps =
+      SPIN_STEPS_BASE + Math.floor(Math.random() * (SPIN_STEPS_JITTER + 1));
+    targetRef.current = eligible[mod(index + totalSteps, length)];
 
     setSpinning(true);
     let stepsDone = 0;
@@ -84,6 +98,7 @@ export function Randomizer({
       if (stepsDone >= totalSteps) {
         spinTimer.current = setTimeout(() => {
           setSpinning(false);
+          setIdleFrozen(true);
           if (targetRef.current) onLanded(targetRef.current);
         }, STEP_TRANSITION_MS);
         return;
