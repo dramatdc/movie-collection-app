@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { posterUrl } from "@/lib/tmdb/image";
 import { ShuffleIcon } from "@/lib/icons";
+import { hapticImpact } from "@/lib/haptics";
 import type { OwnedMovie } from "@/lib/firebase/types";
 
 const STRIDE = 108;
@@ -93,6 +94,7 @@ export function Randomizer({
     let stepsDone = 0;
 
     function tick() {
+      hapticImpact();
       setIndex((i) => i + 1);
       stepsDone++;
       if (stepsDone >= totalSteps) {
