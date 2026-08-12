@@ -17,7 +17,6 @@ import { addToWishlist } from "@/lib/firebase/wishlist";
 import { addMovieToCollection } from "@/lib/firebase/quickAdd";
 import { searchMoviesClient } from "@/lib/tmdb/client";
 import { hapticImpact } from "@/lib/haptics";
-import { playAddedChime } from "@/lib/sound";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
 export default function AddPage() {
@@ -85,7 +84,6 @@ export default function AddPage() {
       await addMovieToCollection(uid, topMatch, { barcodeUpc: code, addedVia: "scan" });
       setToast({ tone: "success", message: `Added "${topMatch.title}" to your collection` });
       hapticImpact();
-      playAddedChime();
     } finally {
       setLookingUp(false);
     }
