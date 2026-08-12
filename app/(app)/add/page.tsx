@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CameraPermissionGate } from "@/components/scan/CameraPermissionGate";
 import { BarcodeScanner } from "@/components/scan/BarcodeScanner";
 import { TMDbSearchResults } from "@/components/movie/TMDbSearchResults";
 import { RecentSearchChips } from "@/components/movie/RecentSearchChips";
+import { Toast, type ToastState } from "@/components/ui/Toast";
 import { lookupUpcClient } from "@/lib/upc/lookup";
 import { useAddFlow } from "@/lib/context/AddFlowContext";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -13,8 +14,8 @@ import { useWishlist } from "@/lib/hooks/useWishlist";
 import { useMovies } from "@/lib/hooks/useMovies";
 import { useRecentSearches } from "@/lib/hooks/useRecentSearches";
 import { addToWishlist } from "@/lib/firebase/wishlist";
-import { addOwnedMovie } from "@/lib/firebase/firestore";
-import { getMovieDetailClient } from "@/lib/tmdb/client";
+import { addMovieToCollection } from "@/lib/firebase/quickAdd";
+import { searchMoviesClient } from "@/lib/tmdb/client";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
 export default function AddPage() {
@@ -22,6 +23,7 @@ export default function AddPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [scannedUpc, setScannedUpc] = useState<string | null>(null);
   const [addingIds, setAddingIds] = useState<Set<number>>(new Set());
+  const [toast, setToast] = useState<ToastState | null>(null);
   const { setCandidate, setBarcodeUpc } = useAddFlow();
   const { user } = useAuth();
   const { items: wishlist } = useWishlist();
@@ -38,14 +40,51 @@ export default function AddPage() {
     [movies]
   );
 
+  // BarcodeScanner subscribes to onDetected once at mount and never restarts
+  // the camera to pick up a new reference, so handleDetected must stay a
+  // stable callback — these refs let it always see fresh auth/collection
+  // state without needing to be recreated.
+  const userRef = useRef(user);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+  const collectionTmdbIdsRef = useRef(collectionTmdbIds);
+  useEffect(() => {
+    collectionTmdbIdsRef.current = collectionTmdbIds;
+  }, [collectionTmdbIds]);
+  const lastHandledCodeRef = useRef<string | null>(null);
+
   const handleDetected = useCallback(async (code: string) => {
+    if (lastHandledCodeRef.current === code) return;
+    lastHandledCodeRef.current = code;
+
     setLookingUp(true);
-    const result = await lookupUpcClient(code);
-    if (result.status === "found") {
+    try {
+      const result = await lookupUpcClient(code);
+      if (result.status !== "found") return;
+
       setScannedUpc(code);
       setSearchQuery(result.searchTitle);
+
+      const searchResults = await searchMoviesClient(result.searchTitle);
+      const topMatch = searchResults.results?.[0];
+      if (!topMatch) return;
+
+      if (collectionTmdbIdsRef.current.has(topMatch.id)) {
+        setToast({
+          tone: "warning",
+          message: `Already in your collection: "${topMatch.title}"`,
+        });
+        return;
+      }
+
+      const uid = userRef.current?.uid;
+      if (!uid) return;
+      await addMovieToCollection(uid, topMatch, { barcodeUpc: code, addedVia: "scan" });
+      setToast({ tone: "success", message: `Added "${topMatch.title}" to your collection` });
+    } finally {
+      setLookingUp(false);
     }
-    setLookingUp(false);
   }, []);
 
   function handleSearchQueryChange(value: string) {
@@ -76,22 +115,7 @@ export default function AddPage() {
     record(searchQuery);
     setAddingIds((prev) => new Set(prev).add(result.id));
     try {
-      const detail = await getMovieDetailClient(result.id);
-      await addOwnedMovie(user.uid, {
-        tmdbId: detail.id,
-        title: detail.title,
-        posterPath: detail.poster_path,
-        year: detail.release_date ? Number(detail.release_date.slice(0, 4)) : null,
-        genres: detail.genres.map((g) => g.name),
-        runtimeMinutes: detail.runtime,
-        overview: detail.overview,
-        format: "Blu-ray",
-        location: null,
-        watched: false,
-        personalRating: null,
-        barcodeUpc: null,
-        addedVia: "manual",
-      });
+      await addMovieToCollection(user.uid, result, { barcodeUpc: null, addedVia: "manual" });
     } finally {
       setAddingIds((prev) => {
         const next = new Set(prev);
@@ -103,6 +127,8 @@ export default function AddPage() {
 
   return (
     <div className="flex h-full min-h-[calc(100vh-8rem)] flex-col gap-4 md:flex-row">
+      <Toast toast={toast} onDismiss={() => setToast(null)} />
+
       <section className="flex flex-1 flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-lg shadow-black/40">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wide">
           Scan barcode

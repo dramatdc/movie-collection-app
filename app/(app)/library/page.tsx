@@ -6,6 +6,7 @@ import { useWishlist } from "@/lib/hooks/useWishlist";
 import { AlphabeticalGrid } from "@/components/movie/AlphabeticalGrid";
 import { MovieRail } from "@/components/movie/MovieRail";
 import { FilterBar } from "@/components/movie/FilterBar";
+import { LibraryLookupScanner } from "@/components/scan/LibraryLookupScanner";
 import { DEFAULT_FILTERS, applyFilters, collectGenres, sortAlphabetically } from "@/lib/filters";
 import { posterUrl } from "@/lib/tmdb/image";
 
@@ -78,6 +79,7 @@ export default function LibraryPage() {
               </span>
             )}
           </h1>
+          <LibraryLookupScanner movies={movies} />
         </div>
 
         <FilterBar filters={filters} onChange={setFilters} genres={genres} />
