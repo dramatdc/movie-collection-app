@@ -8,7 +8,6 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "./client";
-import { playAddedChime } from "@/lib/sound";
 import type { WishlistItem } from "./types";
 
 function wishlistCollection(uid: string) {
@@ -23,7 +22,6 @@ export async function addToWishlist(
     ...item,
     addedAt: serverTimestamp(),
   });
-  playAddedChime();
 }
 
 export async function removeFromWishlist(uid: string, tmdbId: number) {

@@ -9,6 +9,7 @@ import { useRecentSearches } from "@/lib/hooks/useRecentSearches";
 import { addToWishlist, removeFromWishlist } from "@/lib/firebase/wishlist";
 import { TMDbSearchResults } from "@/components/movie/TMDbSearchResults";
 import { RecentSearchChips } from "@/components/movie/RecentSearchChips";
+import { playAddedChime } from "@/lib/sound";
 import { CloseIcon } from "@/lib/icons";
 import { posterUrl } from "@/lib/tmdb/image";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
@@ -24,6 +25,7 @@ export default function WishlistPage() {
   function handleAdd(result: TMDbSearchResult) {
     if (!user) return;
     record(searchQuery);
+    playAddedChime();
     addToWishlist(user.uid, {
       tmdbId: result.id,
       title: result.title,

@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { getMovieDetailClient } from "@/lib/tmdb/client";
 import { posterUrl } from "@/lib/tmdb/image";
 import { addOwnedMovie } from "@/lib/firebase/firestore";
+import { playAddedChime } from "@/lib/sound";
 import type { TMDbMovieDetail } from "@/lib/tmdb/types";
 import type { MovieFormat } from "@/lib/firebase/types";
 
@@ -40,6 +41,7 @@ export default function ConfirmAddPage() {
 
   async function handleSave() {
     if (!user || !detail) return;
+    playAddedChime();
     setSaving(true);
     try {
       await addOwnedMovie(user.uid, {

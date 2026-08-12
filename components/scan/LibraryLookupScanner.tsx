@@ -9,6 +9,7 @@ import { lookupUpcClient } from "@/lib/upc/lookup";
 import { searchMoviesClient } from "@/lib/tmdb/client";
 import { posterUrl } from "@/lib/tmdb/image";
 import { addMovieToCollection } from "@/lib/firebase/quickAdd";
+import { playAddedChime } from "@/lib/sound";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { CameraIcon, CloseIcon } from "@/lib/icons";
 import type { OwnedMovie } from "@/lib/firebase/types";
@@ -112,6 +113,7 @@ export function LibraryLookupScanner({ movies }: { movies: OwnedMovie[] }) {
 
   async function handleAdd() {
     if (!user || result?.status !== "not-owned") return;
+    playAddedChime();
     setAdding(true);
     try {
       await addMovieToCollection(user.uid, result.match, {

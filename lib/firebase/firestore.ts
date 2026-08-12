@@ -9,7 +9,6 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "./client";
-import { playAddedChime } from "@/lib/sound";
 import type { NewOwnedMovie, OwnedMovie } from "./types";
 
 function moviesCollection(uid: string) {
@@ -26,7 +25,6 @@ export async function addOwnedMovie(uid: string, movie: NewOwnedMovie) {
     ...movie,
     dateAdded: serverTimestamp(),
   });
-  playAddedChime();
   return id;
 }
 

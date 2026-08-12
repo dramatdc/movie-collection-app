@@ -17,6 +17,7 @@ import { addToWishlist } from "@/lib/firebase/wishlist";
 import { addMovieToCollection } from "@/lib/firebase/quickAdd";
 import { searchMoviesClient } from "@/lib/tmdb/client";
 import { hapticImpact } from "@/lib/haptics";
+import { playAddedChime } from "@/lib/sound";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
 export default function AddPage() {
@@ -81,9 +82,10 @@ export default function AddPage() {
 
       const uid = userRef.current?.uid;
       if (!uid) return;
-      await addMovieToCollection(uid, topMatch, { barcodeUpc: code, addedVia: "scan" });
-      setToast({ tone: "success", message: `Added "${topMatch.title}" to your collection` });
+      playAddedChime();
       hapticImpact();
+      setToast({ tone: "success", message: `Added "${topMatch.title}" to your collection` });
+      await addMovieToCollection(uid, topMatch, { barcodeUpc: code, addedVia: "scan" });
     } finally {
       setLookingUp(false);
     }
@@ -104,6 +106,7 @@ export default function AddPage() {
   function handleAddToWishlist(result: TMDbSearchResult) {
     if (!user) return;
     record(searchQuery);
+    playAddedChime();
     addToWishlist(user.uid, {
       tmdbId: result.id,
       title: result.title,
@@ -115,6 +118,7 @@ export default function AddPage() {
   async function handleAddToCollection(result: TMDbSearchResult) {
     if (!user) return;
     record(searchQuery);
+    playAddedChime();
     setAddingIds((prev) => new Set(prev).add(result.id));
     try {
       await addMovieToCollection(user.uid, result, { barcodeUpc: null, addedVia: "manual" });

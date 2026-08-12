@@ -9,6 +9,7 @@ import { useMovies } from "@/lib/hooks/useMovies";
 import { getMovieDetailClient } from "@/lib/tmdb/client";
 import { addToWishlist, removeFromWishlist } from "@/lib/firebase/wishlist";
 import { addOwnedMovie } from "@/lib/firebase/firestore";
+import { playAddedChime } from "@/lib/sound";
 import { posterUrl } from "@/lib/tmdb/image";
 import type { TMDbMovieDetail } from "@/lib/tmdb/types";
 
@@ -45,6 +46,7 @@ export default function WishlistDetailPage() {
 
   async function handleAddBack() {
     if (!user || !detail) return;
+    playAddedChime();
     await addToWishlist(user.uid, {
       tmdbId: detail.id,
       title: detail.title,
@@ -55,6 +57,7 @@ export default function WishlistDetailPage() {
 
   async function handleAddToCollection() {
     if (!user || !detail) return;
+    playAddedChime();
     setSaving(true);
     try {
       await addOwnedMovie(user.uid, {
