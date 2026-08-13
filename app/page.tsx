@@ -9,7 +9,7 @@ import { SplashScreen } from "@/components/layout/SplashScreen";
 export default function RootPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const { showSplash, fadingOut } = useSplash(!loading);
+  const { showSplash, fadingOut } = useSplash(!loading, { minDisplayMs: 1950 });
 
   useEffect(() => {
     if (loading) return;

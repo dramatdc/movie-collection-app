@@ -11,7 +11,7 @@ import { FilterBar } from "@/components/movie/FilterBar";
 import { LibraryLookupScanner } from "@/components/scan/LibraryLookupScanner";
 import { DEFAULT_FILTERS, applyFilters, collectGenres, sortAlphabetically } from "@/lib/filters";
 import { posterUrl } from "@/lib/tmdb/image";
-import { getNowPlayingClient, getTrendingClient } from "@/lib/tmdb/client";
+import { getTrendingClient } from "@/lib/tmdb/client";
 import { ChevronRightIcon } from "@/lib/icons";
 
 const RECENTLY_ADDED_COUNT = 15;
@@ -60,28 +60,30 @@ export default function LibraryPage() {
     });
   }
 
+  const jumpButton = (
+    <button
+      type="button"
+      onClick={jumpToCollection}
+      className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted hover:border-accent hover:text-accent"
+    >
+      Jump to collection
+      <ChevronRightIcon className="h-3.5 w-3.5" style={{ transform: "rotate(90deg)" }} />
+    </button>
+  );
+
   return (
     <div className="flex flex-col gap-6">
       {!loading && (
         <>
-          <button
-            type="button"
-            onClick={jumpToCollection}
-            className="flex w-fit items-center gap-1.5 self-start rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted hover:border-accent hover:text-accent"
-          >
-            Jump to your collection
-            <ChevronRightIcon className="h-3.5 w-3.5" style={{ transform: "rotate(90deg)" }} />
-          </button>
-
           <MovieRail
             title="Recently Added"
             items={recentlyAdded}
             emptyLabel="Nothing added yet — scan or search to build your shelf."
+            headerAction={jumpButton}
           />
 
           <WishlistCompactBox items={wishlistPreview} />
 
-          <DiscoverRail title="In Theaters" fetcher={getNowPlayingClient} />
           <DiscoverRail title="Trending This Week" fetcher={getTrendingClient} />
         </>
       )}

@@ -23,11 +23,13 @@ export function MovieRail({
   titleHref,
   items,
   emptyLabel,
+  headerAction,
 }: {
   title: string;
   titleHref?: string;
   items: RailItem[];
   emptyLabel: string;
+  headerAction?: React.ReactNode;
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const leadingIndexRef = useRef(0);
@@ -81,10 +83,19 @@ export function MovieRail({
     <h2 className="text-base font-semibold">{title}</h2>
   );
 
+  const headerRow = headerAction ? (
+    <div className="flex items-center justify-between gap-3">
+      {heading}
+      {headerAction}
+    </div>
+  ) : (
+    heading
+  );
+
   if (items.length === 0) {
     return (
       <section className="flex flex-col gap-2.5">
-        {heading}
+        {headerRow}
         <p className="text-sm text-muted">{emptyLabel}</p>
       </section>
     );
@@ -92,7 +103,7 @@ export function MovieRail({
 
   return (
     <section className="flex flex-col gap-2.5">
-      {heading}
+      {headerRow}
 
       <div
         ref={scrollerRef}
