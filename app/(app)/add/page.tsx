@@ -18,6 +18,7 @@ import { addMovieToCollection } from "@/lib/firebase/quickAdd";
 import { searchMoviesClient } from "@/lib/tmdb/client";
 import { hapticImpact } from "@/lib/haptics";
 import { playAddedChime } from "@/lib/sound";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
 export default function AddPage() {
@@ -32,6 +33,7 @@ export default function AddPage() {
   const { movies } = useMovies();
   const { recent, record } = useRecentSearches("recent-searches-add");
   const router = useRouter();
+  const confirmDialog = useConfirm();
 
   const wishlistTmdbIds = useMemo(
     () => new Set(wishlist.map((i) => i.tmdbId)),
@@ -103,13 +105,15 @@ export default function AddPage() {
     router.push("/add/confirm");
   }
 
-  function handleAddToWishlist(result: TMDbSearchResult) {
+  async function handleAddToWishlist(result: TMDbSearchResult) {
     if (!user) return;
-    if (
-      collectionTmdbIds.has(result.id) &&
-      !confirm(`You already own "${result.title}". Add it to your wishlist anyway?`)
-    ) {
-      return;
+    if (collectionTmdbIds.has(result.id)) {
+      const confirmed = await confirmDialog({
+        title: "Already in your collection",
+        message: `You already own "${result.title}". Add it to your wishlist anyway?`,
+        confirmLabel: "Add anyway",
+      });
+      if (!confirmed) return;
     }
     record(searchQuery);
     playAddedChime();

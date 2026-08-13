@@ -15,11 +15,13 @@ import {
   isHapticsEnabled,
   setHapticsEnabled,
 } from "@/lib/preferences";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const { movies } = useMovies();
   const router = useRouter();
+  const confirmDialog = useConfirm();
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [soundOn, setSoundOn] = useState(true);
@@ -32,9 +34,13 @@ export default function ProfilePage() {
 
   async function handleDeleteAccount() {
     if (!user) return;
-    const confirmed = confirm(
-      "Delete your account? This permanently removes your collection, wishlist, and lists, and can't be undone."
-    );
+    const confirmed = await confirmDialog({
+      title: "Delete your account?",
+      message:
+        "This permanently removes your collection, wishlist, and lists. This can't be undone.",
+      confirmLabel: "Delete account",
+      tone: "danger",
+    });
     if (!confirmed) return;
 
     setDeleting(true);

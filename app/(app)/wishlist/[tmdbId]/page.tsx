@@ -11,6 +11,7 @@ import { addToWishlist, removeFromWishlist } from "@/lib/firebase/wishlist";
 import { addOwnedMovie } from "@/lib/firebase/firestore";
 import { playAddedChime, playRemovedChime } from "@/lib/sound";
 import { posterUrl } from "@/lib/tmdb/image";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { TMDbMovieDetail } from "@/lib/tmdb/types";
 
 export default function WishlistDetailPage() {
@@ -20,6 +21,7 @@ export default function WishlistDetailPage() {
   const { items: wishlist } = useWishlist();
   const { movies } = useMovies();
   const router = useRouter();
+  const confirmDialog = useConfirm();
 
   const [detail, setDetail] = useState<TMDbMovieDetail | null>(null);
   const [saving, setSaving] = useState(false);
@@ -47,11 +49,13 @@ export default function WishlistDetailPage() {
 
   async function handleAddBack() {
     if (!user || !detail) return;
-    if (
-      inCollection &&
-      !confirm(`You already own "${detail.title}". Add it to your wishlist anyway?`)
-    ) {
-      return;
+    if (inCollection) {
+      const confirmed = await confirmDialog({
+        title: "Already in your collection",
+        message: `You already own "${detail.title}". Add it to your wishlist anyway?`,
+        confirmLabel: "Add anyway",
+      });
+      if (!confirmed) return;
     }
     playAddedChime();
     await addToWishlist(user.uid, {

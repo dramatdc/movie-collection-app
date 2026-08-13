@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { InstallPrompt } from "@/components/layout/InstallPrompt";
+import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
 
 export default function AppShellLayout({
   children,
@@ -30,13 +31,15 @@ export default function AppShellLayout({
   }
 
   return (
-    <div className="flex flex-1 flex-col">
-      <AppHeader />
-      <main className="flex-1 px-4 py-4 pb-36 md:px-6 md:py-6 md:pb-6">
-        {children}
-      </main>
-      <BottomNav />
-      <InstallPrompt />
-    </div>
+    <ConfirmDialogProvider>
+      <div className="flex flex-1 flex-col">
+        <AppHeader />
+        <main className="flex-1 px-4 py-4 pb-36 md:px-6 md:py-6 md:pb-6">
+          {children}
+        </main>
+        <BottomNav />
+        <InstallPrompt />
+      </div>
+    </ConfirmDialogProvider>
   );
 }

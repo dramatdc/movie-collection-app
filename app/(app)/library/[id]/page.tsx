@@ -9,6 +9,7 @@ import { FormatBadge } from "@/components/movie/FormatBadge";
 import { RatingStars } from "@/components/movie/RatingStars";
 import { removeOwnedMovie, updateOwnedMovie } from "@/lib/firebase/firestore";
 import { playRemovedChime } from "@/lib/sound";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { MovieFormat } from "@/lib/firebase/types";
 
 const FORMATS: MovieFormat[] = ["DVD", "Blu-ray", "4K UHD", "Digital"];
@@ -18,6 +19,7 @@ export default function MovieDetailPage() {
   const { movies } = useMovies();
   const { user } = useAuth();
   const router = useRouter();
+  const confirmDialog = useConfirm();
 
   const movie = movies.find((m) => m.id === id);
 
@@ -33,7 +35,13 @@ export default function MovieDetailPage() {
 
   async function handleDelete() {
     if (!user || !movie) return;
-    if (!confirm(`Remove "${movie.title}" from your collection?`)) return;
+    const confirmed = await confirmDialog({
+      title: "Remove from collection?",
+      message: `"${movie.title}" will be removed from your collection.`,
+      confirmLabel: "Remove",
+      tone: "danger",
+    });
+    if (!confirmed) return;
     playRemovedChime();
     await removeOwnedMovie(user.uid, movie.id);
     router.push("/library");

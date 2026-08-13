@@ -10,6 +10,7 @@ import { addItemToList, removeItemFromList, deleteList } from "@/lib/firebase/li
 import { TMDbSearchResults } from "@/components/movie/TMDbSearchResults";
 import { CloseIcon } from "@/lib/icons";
 import { posterUrl } from "@/lib/tmdb/image";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
 export default function ListDetailPage() {
@@ -19,6 +20,7 @@ export default function ListDetailPage() {
   const { lists } = useLists();
   const { items, loading } = useListItems(id);
   const [searchQuery, setSearchQuery] = useState("");
+  const confirmDialog = useConfirm();
 
   const list = lists.find((l) => l.id === id);
   const listedTmdbIds = useMemo(() => new Set(items.map((i) => i.tmdbId)), [items]);
@@ -40,7 +42,13 @@ export default function ListDetailPage() {
 
   async function handleDeleteList() {
     if (!user || !list) return;
-    if (!confirm(`Delete the list "${list.name}"? This can't be undone.`)) return;
+    const confirmed = await confirmDialog({
+      title: "Delete this list?",
+      message: `"${list.name}" and everything in it will be deleted. This can't be undone.`,
+      confirmLabel: "Delete",
+      tone: "danger",
+    });
+    if (!confirmed) return;
     await deleteList(user.uid, id);
     router.push("/lists");
   }

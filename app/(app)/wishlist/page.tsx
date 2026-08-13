@@ -13,6 +13,7 @@ import { RecentSearchChips } from "@/components/movie/RecentSearchChips";
 import { playAddedChime, playRemovedChime } from "@/lib/sound";
 import { CloseIcon } from "@/lib/icons";
 import { posterUrl } from "@/lib/tmdb/image";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
 export default function WishlistPage() {
@@ -21,17 +22,20 @@ export default function WishlistPage() {
   const { movies } = useMovies();
   const [searchQuery, setSearchQuery] = useState("");
   const { recent, record } = useRecentSearches("recent-searches-wishlist");
+  const confirmDialog = useConfirm();
 
   const wishlistTmdbIds = useMemo(() => new Set(items.map((i) => i.tmdbId)), [items]);
   const collectionTmdbIds = useMemo(() => new Set(movies.map((m) => m.tmdbId)), [movies]);
 
-  function handleAdd(result: TMDbSearchResult) {
+  async function handleAdd(result: TMDbSearchResult) {
     if (!user) return;
-    if (
-      collectionTmdbIds.has(result.id) &&
-      !confirm(`You already own "${result.title}". Add it to your wishlist anyway?`)
-    ) {
-      return;
+    if (collectionTmdbIds.has(result.id)) {
+      const confirmed = await confirmDialog({
+        title: "Already in your collection",
+        message: `You already own "${result.title}". Add it to your wishlist anyway?`,
+        confirmLabel: "Add anyway",
+      });
+      if (!confirmed) return;
     }
     record(searchQuery);
     playAddedChime();
