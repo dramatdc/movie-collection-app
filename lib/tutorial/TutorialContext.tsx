@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { hasSeenTutorial, markTutorialSeen } from "@/lib/firebase/tutorial";
 import { isTutorialSeenLocally, markTutorialSeenLocally } from "./localFlag";
+import { setCollectionViewMode } from "@/lib/preferences";
 import { TUTORIAL_STEPS } from "./steps";
 
 interface TutorialContextValue {
@@ -51,6 +52,10 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
 
   function dismiss() {
     setActive(false);
+    // The view-toggle step makes the user actually flip the collection into
+    // list view to demonstrate it — put it back the way they found it once
+    // the tour is done, whether they finished or skipped partway through.
+    setCollectionViewMode("card");
     if (user) {
       // Set the local flag synchronously first — the Firestore write below
       // is async and could still be in flight if the tab closes right after.

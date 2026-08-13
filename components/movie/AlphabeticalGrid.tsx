@@ -2,7 +2,9 @@
 
 import { groupByLetter } from "@/lib/filters";
 import { MovieCard } from "./MovieCard";
+import { MovieListRow } from "./MovieListRow";
 import type { OwnedMovie } from "@/lib/firebase/types";
+import type { CollectionViewMode } from "@/lib/preferences";
 
 const ALL_LETTERS = ["#", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
 
@@ -13,7 +15,13 @@ function jumpTo(letter: string) {
   });
 }
 
-export function AlphabeticalGrid({ movies }: { movies: OwnedMovie[] }) {
+export function AlphabeticalGrid({
+  movies,
+  view = "card",
+}: {
+  movies: OwnedMovie[];
+  view?: CollectionViewMode;
+}) {
   if (movies.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center py-16 text-sm text-muted">
@@ -31,11 +39,19 @@ export function AlphabeticalGrid({ movies }: { movies: OwnedMovie[] }) {
         {groups.map(({ letter, movies: letterMovies }) => (
           <section key={letter} id={`shelf-${letter}`} className="scroll-mt-20">
             <h3 className="mb-2 text-sm font-semibold text-accent">{letter}</h3>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-              {letterMovies.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} />
-              ))}
-            </div>
+            {view === "list" ? (
+              <div className="flex flex-col gap-2">
+                {letterMovies.map((movie) => (
+                  <MovieListRow key={movie.id} movie={movie} />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                {letterMovies.map((movie) => (
+                  <MovieCard key={movie.id} movie={movie} />
+                ))}
+              </div>
+            )}
           </section>
         ))}
       </div>

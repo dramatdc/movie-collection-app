@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMovies } from "@/lib/hooks/useMovies";
 import { useWishlist } from "@/lib/hooks/useWishlist";
 import { AlphabeticalGrid } from "@/components/movie/AlphabeticalGrid";
@@ -12,7 +12,14 @@ import { LibraryLookupScanner } from "@/components/scan/LibraryLookupScanner";
 import { DEFAULT_FILTERS, applyFilters, collectGenres, sortAlphabetically } from "@/lib/filters";
 import { posterUrl } from "@/lib/tmdb/image";
 import { getTrendingClient } from "@/lib/tmdb/client";
-import { ChevronRightIcon } from "@/lib/icons";
+import { ChevronRightIcon, LibraryIcon, ListIcon } from "@/lib/icons";
+import {
+  getCollectionViewMode,
+  setCollectionViewMode,
+  VIEW_MODE_KEY,
+  type CollectionViewMode,
+} from "@/lib/preferences";
+import { useTutorial } from "@/lib/tutorial/TutorialContext";
 
 const RECENTLY_ADDED_COUNT = 15;
 
@@ -20,6 +27,27 @@ export default function LibraryPage() {
   const { movies, loading } = useMovies();
   const { items: wishlist } = useWishlist();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [viewMode, setViewMode] = useState<CollectionViewMode>("card");
+  const tutorial = useTutorial();
+
+  useEffect(() => {
+    setViewMode(getCollectionViewMode());
+    // The tutorial resets this from a different component when it ends —
+    // pick that up here rather than only reading it once on mount.
+    function sync() {
+      setViewMode(getCollectionViewMode());
+    }
+    window.addEventListener(VIEW_MODE_KEY, sync);
+    return () => window.removeEventListener(VIEW_MODE_KEY, sync);
+  }, []);
+
+  function handleSetView(mode: CollectionViewMode) {
+    setViewMode(mode);
+    setCollectionViewMode(mode);
+    if (tutorial.active && tutorial.step?.id === "view-toggle") {
+      setTimeout(() => tutorial.next(), 700);
+    }
+  }
 
   const genres = useMemo(() => collectGenres(movies), [movies]);
   const filtered = useMemo(
@@ -109,7 +137,38 @@ export default function LibraryPage() {
               </span>
             )}
           </h1>
-          <LibraryLookupScanner movies={movies} />
+          <div className="flex items-center gap-2">
+            <div
+              data-tutorial="view-toggle"
+              className="flex shrink-0 items-center gap-0.5 rounded-full border border-border p-0.5"
+            >
+              <button
+                type="button"
+                onClick={() => handleSetView("card")}
+                aria-label="Card view"
+                className={`flex items-center justify-center rounded-full p-1.5 transition ${
+                  viewMode === "card"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted hover:text-accent"
+                }`}
+              >
+                <LibraryIcon className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSetView("list")}
+                aria-label="List view"
+                className={`flex items-center justify-center rounded-full p-1.5 transition ${
+                  viewMode === "list"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted hover:text-accent"
+                }`}
+              >
+                <ListIcon className="h-4 w-4" />
+              </button>
+            </div>
+            <LibraryLookupScanner movies={movies} />
+          </div>
         </div>
 
         <FilterBar filters={filters} onChange={setFilters} genres={genres} />
@@ -117,7 +176,7 @@ export default function LibraryPage() {
         {loading ? (
           <p className="py-16 text-center text-sm text-muted">Loading...</p>
         ) : (
-          <AlphabeticalGrid movies={filtered} />
+          <AlphabeticalGrid movies={filtered} view={viewMode} />
         )}
       </div>
     </div>

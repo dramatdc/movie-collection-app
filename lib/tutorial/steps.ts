@@ -6,6 +6,10 @@ export interface TutorialStep {
   selector: string | null;
   title: string;
   body: string;
+  // When true, there's no Next button — the highlighted control itself
+  // advances the tour once the user actually presses it, so they can't
+  // click past the demo without having tried the real thing.
+  requireAction?: boolean;
 }
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
@@ -50,6 +54,14 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     selector: "your-collection",
     title: "Your Collection",
     body: "Everything you own lives here, sorted A-Z. Search it or filter by format and watched status.",
+  },
+  {
+    id: "view-toggle",
+    route: "/library",
+    selector: "view-toggle",
+    title: "Card or list view",
+    body: "Tap the toggle above to switch between grid and list layout. Give it a try.",
+    requireAction: true,
   },
   {
     id: "add",

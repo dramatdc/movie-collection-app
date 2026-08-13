@@ -200,13 +200,17 @@ export function TutorialOverlay() {
           >
             Back
           </button>
-          <button
-            type="button"
-            onClick={next}
-            className="rounded bg-accent px-4 py-1.5 text-sm font-medium text-accent-foreground hover:bg-accent-hover"
-          >
-            {stepIndex === totalSteps - 1 ? "Done" : "Next"}
-          </button>
+          {step.requireAction ? (
+            <p className="text-xs italic text-muted">Tap the highlighted button to continue</p>
+          ) : (
+            <button
+              type="button"
+              onClick={next}
+              className="rounded bg-accent px-4 py-1.5 text-sm font-medium text-accent-foreground hover:bg-accent-hover"
+            >
+              {stepIndex === totalSteps - 1 ? "Done" : "Next"}
+            </button>
+          )}
         </div>
       </div>
     </div>
