@@ -47,6 +47,12 @@ export default function WishlistDetailPage() {
 
   async function handleAddBack() {
     if (!user || !detail) return;
+    if (
+      inCollection &&
+      !confirm(`You already own "${detail.title}". Add it to your wishlist anyway?`)
+    ) {
+      return;
+    }
     playAddedChime();
     await addToWishlist(user.uid, {
       tmdbId: detail.id,
@@ -98,20 +104,7 @@ export default function WishlistDetailPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {detail.genres.map((g) => (
-            <span
-              key={g.id}
-              className="rounded bg-surface-hover px-2 py-0.5 text-xs text-muted"
-            >
-              {g.name}
-            </span>
-          ))}
-        </div>
-
-        <p className="text-sm leading-relaxed text-neutral-300">{detail.overview}</p>
-
-        <div className="mt-2 flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {onWishlist ? (
             <button
               type="button"
@@ -139,6 +132,19 @@ export default function WishlistDetailPage() {
             {inCollection ? "In your collection" : saving ? "Adding..." : "Add to collection"}
           </button>
         </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {detail.genres.map((g) => (
+            <span
+              key={g.id}
+              className="rounded bg-surface-hover px-2 py-0.5 text-xs text-muted"
+            >
+              {g.name}
+            </span>
+          ))}
+        </div>
+
+        <p className="text-sm leading-relaxed text-neutral-300">{detail.overview}</p>
       </div>
     </div>
   );

@@ -1,3 +1,5 @@
+import { isSoundEnabled } from "@/lib/preferences";
+
 let audioCtx: AudioContext | null = null;
 
 function getAudioContext(): AudioContext | null {
@@ -63,6 +65,7 @@ const REMOVE_PRESET: ChimePreset = {
 };
 
 function playTone(preset: ChimePreset) {
+  if (!isSoundEnabled()) return;
   const ctx = getAudioContext();
   if (!ctx) return;
 

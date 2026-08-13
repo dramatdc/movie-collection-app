@@ -1,5 +1,9 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { hapticImpact } from "@/lib/haptics";
 
 export interface RailItem {
   key: string;
@@ -8,72 +12,120 @@ export interface RailItem {
   href?: string;
 }
 
-const SIZES = {
-  md: { wrapper: "w-28", sizes: "112px" },
-  sm: { wrapper: "w-20", sizes: "80px" },
-};
+const CARD_WIDTH = 80;
+const GAP = 12;
+const STRIDE = CARD_WIDTH + GAP;
+const FEATURED_SCALE = 1.25;
 
 export function MovieRail({
   title,
   titleHref,
   items,
   emptyLabel,
-  size = "md",
 }: {
   title: string;
   titleHref?: string;
   items: RailItem[];
   emptyLabel: string;
-  size?: "md" | "sm";
 }) {
-  const { wrapper, sizes } = SIZES[size];
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const leadingIndexRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
+  const [leadingIndex, setLeadingIndex] = useState(0);
+
+  useEffect(() => {
+    if (leadingIndexRef.current > items.length - 1) {
+      const clamped = Math.max(0, items.length - 1);
+      leadingIndexRef.current = clamped;
+      setLeadingIndex(clamped);
+    }
+  }, [items.length]);
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  function handleScroll() {
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      const el = scrollerRef.current;
+      if (!el) return;
+      const idx = Math.max(
+        0,
+        Math.min(items.length - 1, Math.round(el.scrollLeft / STRIDE))
+      );
+      if (idx !== leadingIndexRef.current) {
+        leadingIndexRef.current = idx;
+        setLeadingIndex(idx);
+        hapticImpact();
+      }
+    });
+  }
+
+  const heading = titleHref ? (
+    <Link href={titleHref} className="text-base font-semibold hover:text-accent">
+      {title}
+    </Link>
+  ) : (
+    <h2 className="text-base font-semibold">{title}</h2>
+  );
+
+  if (items.length === 0) {
+    return (
+      <section className="flex flex-col gap-2.5">
+        {heading}
+        <p className="text-sm text-muted">{emptyLabel}</p>
+      </section>
+    );
+  }
 
   return (
     <section className="flex flex-col gap-2.5">
-      {titleHref ? (
-        <Link href={titleHref} className="text-base font-semibold hover:text-accent">
-          {title}
-        </Link>
-      ) : (
-        <h2 className="text-base font-semibold">{title}</h2>
-      )}
+      {heading}
 
-      {items.length === 0 ? (
-        <p className="text-sm text-muted">{emptyLabel}</p>
-      ) : (
-        <div className="flex gap-3 overflow-x-auto pt-3 pb-12 -mb-9 snap-x snap-mandatory scroll-px-4 -mx-4 px-4">
-          {items.map((item) => {
-            const card = (
-              <div
-                className={`relative aspect-2/3 ${wrapper} shrink-0 overflow-hidden rounded-2xl bg-surface-hover shadow-xl shadow-black/50 transition active:scale-95`}
-              >
-                {item.posterUrl ? (
-                  <Image
-                    src={item.posterUrl}
-                    alt={item.title}
-                    fill
-                    sizes={sizes}
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center px-2 text-center text-xs text-muted">
-                    {item.title}
-                  </div>
-                )}
-              </div>
-            );
-            return (
-              <div key={item.key} className="snap-start">
-                {item.href ? (
-                  <Link href={item.href}>{card}</Link>
-                ) : (
-                  card
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <div
+        ref={scrollerRef}
+        onScroll={handleScroll}
+        className="flex gap-3 overflow-x-auto pt-8 pb-16 -mb-12 snap-x snap-mandatory scroll-px-4 -mx-4 px-4"
+      >
+        {items.map((item, i) => {
+          const featured = i === leadingIndex;
+          const card = (
+            <div
+              className="relative aspect-2/3 w-20 shrink-0 overflow-hidden rounded-2xl bg-surface-hover shadow-xl shadow-black/50 active:scale-95"
+              style={{
+                transform: featured ? `scale(${FEATURED_SCALE})` : undefined,
+                outline: featured ? "1.5px solid var(--color-accent)" : undefined,
+                outlineOffset: featured ? "1px" : undefined,
+                transition: "transform 200ms ease-out",
+                zIndex: featured ? 1 : 0,
+              }}
+            >
+              {item.posterUrl ? (
+                <Image
+                  src={item.posterUrl}
+                  alt={item.title}
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center px-2 text-center text-xs text-muted">
+                  {item.title}
+                </div>
+              )}
+            </div>
+          );
+          return (
+            <div key={item.key} className="snap-start">
+              {item.href ? <Link href={item.href}>{card}</Link> : card}
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
 }

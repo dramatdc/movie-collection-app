@@ -105,6 +105,12 @@ export default function AddPage() {
 
   function handleAddToWishlist(result: TMDbSearchResult) {
     if (!user) return;
+    if (
+      collectionTmdbIds.has(result.id) &&
+      !confirm(`You already own "${result.title}". Add it to your wishlist anyway?`)
+    ) {
+      return;
+    }
     record(searchQuery);
     playAddedChime();
     addToWishlist(user.uid, {

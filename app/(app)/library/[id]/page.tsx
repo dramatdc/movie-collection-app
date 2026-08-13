@@ -55,6 +55,14 @@ export default function MovieDetailPage() {
           </p>
         </div>
 
+        <button
+          type="button"
+          onClick={handleDelete}
+          className="w-fit rounded border border-red-800 px-3 py-1.5 text-sm text-red-400 hover:bg-red-950"
+        >
+          Remove from collection
+        </button>
+
         <div className="flex flex-wrap items-center gap-2">
           <FormatBadge format={movie.format} />
           {movie.genres.map((g) => (
@@ -129,14 +137,6 @@ export default function MovieDetailPage() {
             />
           </label>
         </div>
-
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="mt-4 w-fit rounded border border-red-800 px-3 py-1.5 text-sm text-red-400 hover:bg-red-950"
-        >
-          Remove from collection
-        </button>
       </div>
     </div>
   );

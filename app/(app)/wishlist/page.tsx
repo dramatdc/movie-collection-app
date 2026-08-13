@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useWishlist } from "@/lib/hooks/useWishlist";
+import { useMovies } from "@/lib/hooks/useMovies";
 import { useRecentSearches } from "@/lib/hooks/useRecentSearches";
 import { addToWishlist, removeFromWishlist } from "@/lib/firebase/wishlist";
 import { TMDbSearchResults } from "@/components/movie/TMDbSearchResults";
@@ -17,13 +18,21 @@ import type { TMDbSearchResult } from "@/lib/tmdb/types";
 export default function WishlistPage() {
   const { user } = useAuth();
   const { items, loading } = useWishlist();
+  const { movies } = useMovies();
   const [searchQuery, setSearchQuery] = useState("");
   const { recent, record } = useRecentSearches("recent-searches-wishlist");
 
   const wishlistTmdbIds = useMemo(() => new Set(items.map((i) => i.tmdbId)), [items]);
+  const collectionTmdbIds = useMemo(() => new Set(movies.map((m) => m.tmdbId)), [movies]);
 
   function handleAdd(result: TMDbSearchResult) {
     if (!user) return;
+    if (
+      collectionTmdbIds.has(result.id) &&
+      !confirm(`You already own "${result.title}". Add it to your wishlist anyway?`)
+    ) {
+      return;
+    }
     record(searchQuery);
     playAddedChime();
     addToWishlist(user.uid, {

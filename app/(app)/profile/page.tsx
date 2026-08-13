@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FirebaseError } from "firebase/app";
@@ -8,6 +8,13 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { useMovies } from "@/lib/hooks/useMovies";
 import { signOut } from "@/lib/firebase/auth";
 import { deleteAccount } from "@/lib/firebase/account";
+import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
+import {
+  isSoundEnabled,
+  setSoundEnabled,
+  isHapticsEnabled,
+  setHapticsEnabled,
+} from "@/lib/preferences";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -15,6 +22,13 @@ export default function ProfilePage() {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [soundOn, setSoundOn] = useState(true);
+  const [hapticsOn, setHapticsOn] = useState(true);
+
+  useEffect(() => {
+    setSoundOn(isSoundEnabled());
+    setHapticsOn(isHapticsEnabled());
+  }, []);
 
   async function handleDeleteAccount() {
     if (!user) return;
@@ -50,6 +64,27 @@ export default function ProfilePage() {
 
       <div className="rounded-lg border border-border bg-surface p-4 text-sm shadow-lg shadow-black/40">
         <p className="text-neutral-300">{movies.length} movies in your collection</p>
+      </div>
+
+      <div className="flex flex-col divide-y divide-border rounded-lg border border-border bg-surface px-4 shadow-lg shadow-black/40">
+        <ToggleSwitch
+          label="Sound effects"
+          description="The chime when a movie is added or removed"
+          checked={soundOn}
+          onChange={(value) => {
+            setSoundOn(value);
+            setSoundEnabled(value);
+          }}
+        />
+        <ToggleSwitch
+          label="Haptic feedback"
+          description="Vibration when scanning or using the randomizer"
+          checked={hapticsOn}
+          onChange={(value) => {
+            setHapticsOn(value);
+            setHapticsEnabled(value);
+          }}
+        />
       </div>
 
       <button

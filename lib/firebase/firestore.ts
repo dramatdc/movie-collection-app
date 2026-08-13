@@ -9,6 +9,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "./client";
+import { removeFromWishlist } from "./wishlist";
 import type { NewOwnedMovie, OwnedMovie } from "./types";
 
 function moviesCollection(uid: string) {
@@ -25,6 +26,9 @@ export async function addOwnedMovie(uid: string, movie: NewOwnedMovie) {
     ...movie,
     dateAdded: serverTimestamp(),
   });
+  // Now owned, so it no longer needs to be on the "want to buy" list —
+  // a harmless no-op if it was never on the wishlist to begin with.
+  await removeFromWishlist(uid, movie.tmdbId);
   return id;
 }
 

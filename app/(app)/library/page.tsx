@@ -31,7 +31,7 @@ export default function LibraryPage() {
         .map((m) => ({
           key: m.id,
           title: m.title,
-          posterUrl: posterUrl(m.posterPath, "w185"),
+          posterUrl: posterUrl(m.posterPath, "w154"),
           href: `/library/${m.id}`,
         })),
     [movies]
@@ -44,7 +44,7 @@ export default function LibraryPage() {
         .map((w) => ({
           key: String(w.tmdbId),
           title: w.title,
-          posterUrl: posterUrl(w.posterPath, "w185"),
+          posterUrl: posterUrl(w.posterPath, "w154"),
           href: "/wishlist",
         })),
     [wishlist]
@@ -64,7 +64,6 @@ export default function LibraryPage() {
             titleHref="/wishlist"
             items={wishlistRail}
             emptyLabel="Nothing on your wishlist yet."
-            size="sm"
           />
         </>
       )}
