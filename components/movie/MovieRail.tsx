@@ -16,6 +16,7 @@ const CARD_WIDTH = 80;
 const GAP = 12;
 const STRIDE = CARD_WIDTH + GAP;
 const FEATURED_SCALE = 1.25;
+const MAX_TICKS_PER_FRAME = 8;
 
 export function MovieRail({
   title,
@@ -30,10 +31,11 @@ export function MovieRail({
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const leadingIndexRef = useRef(0);
-  const rafRef = useRef<number | null>(null);
+  const itemsLengthRef = useRef(items.length);
   const [leadingIndex, setLeadingIndex] = useState(0);
 
   useEffect(() => {
+    itemsLengthRef.current = items.length;
     if (leadingIndexRef.current > items.length - 1) {
       const clamped = Math.max(0, items.length - 1);
       leadingIndexRef.current = clamped;
@@ -41,29 +43,35 @@ export function MovieRail({
     }
   }, [items.length]);
 
+  // Mobile browsers (Safari especially) fire very few "scroll" events during
+  // a fast momentum fling — sometimes only one, right at the end — so an
+  // event-driven handler misses whatever cards flew past in between.
+  // Polling the actual scroll position every frame instead means a fast
+  // flick still ticks through every card it passes, not just the one it
+  // lands on.
   useEffect(() => {
-    return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
+    let rafId: number;
+    let lastScrollLeft = -1;
 
-  function handleScroll() {
-    if (rafRef.current !== null) return;
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = null;
+    function loop() {
       const el = scrollerRef.current;
-      if (!el) return;
-      const idx = Math.max(
-        0,
-        Math.min(items.length - 1, Math.round(el.scrollLeft / STRIDE))
-      );
-      if (idx !== leadingIndexRef.current) {
-        leadingIndexRef.current = idx;
-        setLeadingIndex(idx);
-        hapticImpact();
+      if (el && el.scrollLeft !== lastScrollLeft) {
+        lastScrollLeft = el.scrollLeft;
+        const length = itemsLengthRef.current;
+        const idx = Math.max(0, Math.min(length - 1, Math.round(el.scrollLeft / STRIDE)));
+        const prev = leadingIndexRef.current;
+        if (idx !== prev) {
+          leadingIndexRef.current = idx;
+          setLeadingIndex(idx);
+          const steps = Math.min(MAX_TICKS_PER_FRAME, Math.abs(idx - prev));
+          for (let i = 0; i < steps; i++) hapticImpact();
+        }
       }
-    });
-  }
+      rafId = requestAnimationFrame(loop);
+    }
+    rafId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
 
   const heading = titleHref ? (
     <Link href={titleHref} className="text-base font-semibold hover:text-accent">
@@ -88,7 +96,6 @@ export function MovieRail({
 
       <div
         ref={scrollerRef}
-        onScroll={handleScroll}
         className="flex gap-3 overflow-x-auto pt-8 pb-16 -mb-12 snap-x snap-mandatory scroll-px-4 -mx-4 px-4"
       >
         {items.map((item, i) => {
