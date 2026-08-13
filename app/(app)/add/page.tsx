@@ -8,6 +8,7 @@ import { TMDbSearchResults } from "@/components/movie/TMDbSearchResults";
 import { RecentSearchChips } from "@/components/movie/RecentSearchChips";
 import { Toast, type ToastState } from "@/components/ui/Toast";
 import { lookupUpcClient } from "@/lib/upc/lookup";
+import { recordUpcResolution } from "@/lib/upc/crowdsource";
 import { useAddFlow } from "@/lib/context/AddFlowContext";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useWishlist } from "@/lib/hooks/useWishlist";
@@ -25,6 +26,11 @@ export default function AddPage() {
   const [lookingUp, setLookingUp] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [scannedUpc, setScannedUpc] = useState<string | null>(null);
+  // True when the scanned barcode didn't resolve automatically (miss or
+  // rate limit) — if the user then finds and adds the right movie by hand,
+  // we link that barcode to the title in upc_cache so the next scan of it
+  // is a free cache hit instead of another API call.
+  const [needsCrowdsourcing, setNeedsCrowdsourcing] = useState(false);
   const [addingIds, setAddingIds] = useState<Set<number>>(new Set());
   const [toast, setToast] = useState<ToastState | null>(null);
   const { setCandidate, setBarcodeUpc } = useAddFlow();
@@ -66,15 +72,26 @@ export default function AddPage() {
     try {
       const result = await lookupUpcClient(code);
       if (result.status === "rate_limited") {
+        setScannedUpc(code);
+        setNeedsCrowdsourcing(true);
         setToast({
           tone: "warning",
           message: "Daily barcode lookup limit reached — search by title instead for now.",
         });
         return;
       }
-      if (result.status !== "found") return;
+      if (result.status !== "found") {
+        setScannedUpc(code);
+        setNeedsCrowdsourcing(true);
+        setToast({
+          tone: "warning",
+          message: "Couldn't identify that barcode — search by title instead.",
+        });
+        return;
+      }
 
       setScannedUpc(code);
+      setNeedsCrowdsourcing(false);
       setSearchQuery(result.searchTitle);
 
       const searchResults = await searchMoviesClient(result.searchTitle);
@@ -103,10 +120,14 @@ export default function AddPage() {
   function handleSearchQueryChange(value: string) {
     setSearchQuery(value);
     setScannedUpc(null);
+    setNeedsCrowdsourcing(false);
   }
 
   function selectForCollection(result: TMDbSearchResult) {
     record(searchQuery);
+    if (needsCrowdsourcing && scannedUpc) {
+      recordUpcResolution(scannedUpc, result.title);
+    }
     setBarcodeUpc(scannedUpc);
     setCandidate(result);
     router.push("/add/confirm");
@@ -135,10 +156,16 @@ export default function AddPage() {
   async function handleAddToCollection(result: TMDbSearchResult) {
     if (!user) return;
     record(searchQuery);
+    if (needsCrowdsourcing && scannedUpc) {
+      recordUpcResolution(scannedUpc, result.title);
+    }
     playAddedChime();
     setAddingIds((prev) => new Set(prev).add(result.id));
     try {
-      await addMovieToCollection(user.uid, result, { barcodeUpc: null, addedVia: "manual" });
+      await addMovieToCollection(user.uid, result, {
+        barcodeUpc: scannedUpc,
+        addedVia: scannedUpc ? "scan" : "manual",
+      });
     } finally {
       setAddingIds((prev) => {
         const next = new Set(prev);

@@ -11,3 +11,15 @@ export async function getMovieDetailClient(id: number): Promise<TMDbMovieDetail>
   if (!res.ok) throw new Error("Failed to load movie detail");
   return res.json();
 }
+
+export async function getNowPlayingClient(): Promise<TMDbSearchResponse> {
+  const res = await fetch("/api/tmdb/now-playing");
+  if (!res.ok) throw new Error("Failed to load now-playing movies");
+  return res.json();
+}
+
+export async function getTrendingClient(): Promise<TMDbSearchResponse> {
+  const res = await fetch("/api/tmdb/trending");
+  if (!res.ok) throw new Error("Failed to load trending movies");
+  return res.json();
+}

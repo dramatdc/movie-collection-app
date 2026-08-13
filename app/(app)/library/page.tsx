@@ -5,10 +5,14 @@ import { useMovies } from "@/lib/hooks/useMovies";
 import { useWishlist } from "@/lib/hooks/useWishlist";
 import { AlphabeticalGrid } from "@/components/movie/AlphabeticalGrid";
 import { MovieRail } from "@/components/movie/MovieRail";
+import { WishlistCompactBox } from "@/components/movie/WishlistCompactBox";
+import { DiscoverRail } from "@/components/movie/DiscoverRail";
 import { FilterBar } from "@/components/movie/FilterBar";
 import { LibraryLookupScanner } from "@/components/scan/LibraryLookupScanner";
 import { DEFAULT_FILTERS, applyFilters, collectGenres, sortAlphabetically } from "@/lib/filters";
 import { posterUrl } from "@/lib/tmdb/image";
+import { getNowPlayingClient, getTrendingClient } from "@/lib/tmdb/client";
+import { ChevronRightIcon } from "@/lib/icons";
 
 const RECENTLY_ADDED_COUNT = 15;
 
@@ -37,7 +41,7 @@ export default function LibraryPage() {
     [movies]
   );
 
-  const wishlistRail = useMemo(
+  const wishlistPreview = useMemo(
     () =>
       [...wishlist]
         .sort((a, b) => b.addedAt - a.addedAt)
@@ -45,30 +49,44 @@ export default function LibraryPage() {
           key: String(w.tmdbId),
           title: w.title,
           posterUrl: posterUrl(w.posterPath, "w154"),
-          href: "/wishlist",
         })),
     [wishlist]
   );
+
+  function jumpToCollection() {
+    document.getElementById("your-collection")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
 
   return (
     <div className="flex flex-col gap-6">
       {!loading && (
         <>
+          <button
+            type="button"
+            onClick={jumpToCollection}
+            className="flex w-fit items-center gap-1.5 self-start rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted hover:border-accent hover:text-accent"
+          >
+            Jump to your collection
+            <ChevronRightIcon className="h-3.5 w-3.5" style={{ transform: "rotate(90deg)" }} />
+          </button>
+
           <MovieRail
             title="Recently Added"
             items={recentlyAdded}
             emptyLabel="Nothing added yet — scan or search to build your shelf."
           />
-          <MovieRail
-            title="Wishlist"
-            titleHref="/wishlist"
-            items={wishlistRail}
-            emptyLabel="Nothing on your wishlist yet."
-          />
+
+          <WishlistCompactBox items={wishlistPreview} />
+
+          <DiscoverRail title="In Theaters" fetcher={getNowPlayingClient} />
+          <DiscoverRail title="Trending This Week" fetcher={getTrendingClient} />
         </>
       )}
 
-      <div className="flex flex-col gap-4 border-t border-border pt-6">
+      <div id="your-collection" className="flex flex-col gap-4 border-t border-border pt-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-semibold">
             Your collection

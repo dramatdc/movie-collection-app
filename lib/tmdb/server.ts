@@ -40,3 +40,11 @@ export function getMovieDetail(id: string): Promise<TMDbMovieDetail> {
     append_to_response: "credits",
   });
 }
+
+export function getNowPlaying(): Promise<TMDbSearchResponse> {
+  return tmdbFetch<TMDbSearchResponse>("/movie/now_playing", { region: "US" });
+}
+
+export function getTrendingWeek(): Promise<TMDbSearchResponse> {
+  return tmdbFetch<TMDbSearchResponse>("/trending/movie/week");
+}

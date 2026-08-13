@@ -86,17 +86,31 @@ export function Randomizer({
     const length = eligible.length;
     if (length === 0 || spinning) return;
 
+    // The landing card is chosen uniformly at random across every eligible
+    // movie first — independent of where the reel currently sits — so every
+    // title has an equal shot regardless of collection size or spin history.
+    // The visual spin then just walks the reel there over a fixed number of
+    // ticks (covering more index positions per tick for a far-away target),
+    // purely for the slot-machine feel; it never changes which movie wins.
+    const currentPos = mod(index, length);
+    let targetIndex = Math.floor(Math.random() * length);
+    if (length > 1 && targetIndex === currentPos) {
+      targetIndex = mod(targetIndex + 1, length);
+    }
+    const distance = mod(targetIndex - currentPos, length) || length;
+    targetRef.current = eligible[targetIndex];
+
     const totalSteps =
       SPIN_STEPS_BASE + Math.floor(Math.random() * (SPIN_STEPS_JITTER + 1));
-    targetRef.current = eligible[mod(index + totalSteps, length)];
 
     setSpinning(true);
     let stepsDone = 0;
 
     function tick() {
       hapticImpact();
-      setIndex((i) => i + 1);
       stepsDone++;
+      const covered = Math.round((distance * stepsDone) / totalSteps);
+      setIndex(currentPos + covered);
       if (stepsDone >= totalSteps) {
         spinTimer.current = setTimeout(() => {
           setSpinning(false);
