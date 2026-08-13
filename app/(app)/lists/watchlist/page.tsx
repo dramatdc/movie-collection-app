@@ -45,7 +45,7 @@ export default function WatchlistPage() {
     <div className="mx-auto flex max-w-md flex-col gap-6">
       <div>
         <h1 className="text-xl font-semibold">Watchlist</h1>
-        <p className="text-sm text-muted">Movies you want to watch — nothing to do with your shelf.</p>
+        <p className="text-sm text-muted">Movies you want to watch, separate from your collection.</p>
       </div>
 
       <div className="flex flex-col gap-3">

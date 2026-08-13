@@ -122,12 +122,6 @@ export default function PrivacyPage() {
           contact listed on the app&apos;s store listing.
         </p>
       </section>
-
-      <p className="mt-4 rounded border border-border bg-surface p-3 text-xs text-muted">
-        This document is a general-purpose template, not legal advice. Review
-        it with a qualified professional before relying on it for a commercial
-        App Store or Play Store submission.
-      </p>
     </div>
   );
 }

@@ -45,7 +45,7 @@ export function FavoritesSection() {
     <section className="flex flex-col gap-2.5">
       <div>
         <h2 className="text-base font-semibold">Favorites</h2>
-        <p className="text-sm text-muted">Your top {MAX_FAVORITES}, front and center.</p>
+        <p className="text-sm text-muted">Your {MAX_FAVORITES} favorite movies.</p>
       </div>
 
       <div className="grid grid-cols-4 gap-2">

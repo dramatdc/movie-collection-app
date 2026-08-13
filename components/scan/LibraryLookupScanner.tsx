@@ -137,10 +137,10 @@ export function LibraryLookupScanner({ movies }: { movies: OwnedMovie[] }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Check if a movie is already in your collection"
-        title="Check if a movie is already in your collection"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border text-muted hover:border-accent hover:text-accent"
+        className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-2 text-sm font-medium text-muted hover:border-accent hover:text-accent"
       >
         <CameraIcon className="h-4 w-4" />
+        Check collection
       </button>
 
       {open && (
