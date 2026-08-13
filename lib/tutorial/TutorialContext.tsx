@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { hasSeenTutorial, markTutorialSeen } from "@/lib/firebase/tutorial";
+import { isTutorialSeenLocally, markTutorialSeenLocally } from "./localFlag";
 import { TUTORIAL_STEPS } from "./steps";
 
 interface TutorialContextValue {
@@ -26,12 +27,17 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
 
   // Auto-start once per session for any account that's never dismissed the
   // tour — covers brand-new signups and pre-existing accounts from before
-  // this feature existed alike.
+  // this feature existed alike. checkedRef makes sure this only ever fires
+  // once per uid per mount, so it can't pop up again mid-session even if
+  // `user` changes reference without changing uid.
   useEffect(() => {
     if (!user || checkedRef.current === user.uid) return;
     checkedRef.current = user.uid;
+    if (isTutorialSeenLocally(user.uid)) return;
     hasSeenTutorial(user.uid).then((seen) => {
-      if (!seen) {
+      if (seen) {
+        markTutorialSeenLocally(user.uid);
+      } else {
         setStepIndex(0);
         setActive(true);
       }
@@ -45,7 +51,12 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
 
   function dismiss() {
     setActive(false);
-    if (user) markTutorialSeen(user.uid);
+    if (user) {
+      // Set the local flag synchronously first — the Firestore write below
+      // is async and could still be in flight if the tab closes right after.
+      markTutorialSeenLocally(user.uid);
+      markTutorialSeen(user.uid);
+    }
   }
 
   function next() {
