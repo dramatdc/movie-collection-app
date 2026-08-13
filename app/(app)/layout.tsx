@@ -20,10 +20,13 @@ export default function AppShellLayout({
   const { showSplash, fadingOut } = useSplash(!loading, { minDisplayMs: 1950 });
 
   useEffect(() => {
-    if (!loading && !user) {
+    // Wait out the splash's own minimum-display floor too — see the same
+    // fix in app/page.tsx for why this can't key off `loading` alone.
+    if (loading || showSplash) return;
+    if (!user) {
       router.replace("/login");
     }
-  }, [loading, user, router]);
+  }, [loading, showSplash, user, router]);
 
   if (showSplash) {
     return <SplashScreen fadingOut={fadingOut} />;

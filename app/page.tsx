@@ -12,9 +12,13 @@ export default function RootPage() {
   const { showSplash, fadingOut } = useSplash(!loading, { minDisplayMs: 1950 });
 
   useEffect(() => {
-    if (loading) return;
+    // Wait for the splash's own minimum-display floor too, not just auth —
+    // otherwise an already-signed-in user (whose auth state resolves near
+    // instantly from cache) redirects away and unmounts the splash within
+    // milliseconds, long before the animation is ever visible.
+    if (loading || showSplash) return;
     router.replace(user ? "/library" : "/login");
-  }, [loading, user, router]);
+  }, [loading, showSplash, user, router]);
 
   if (showSplash) {
     return <SplashScreen fadingOut={fadingOut} />;

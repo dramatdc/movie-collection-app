@@ -24,8 +24,9 @@ export function WishlistCompactBox({ items }: { items: WishlistPreviewItem[] }) 
         ) : (
           <div className="flex gap-2 overflow-x-auto">
             {preview.map((item) => (
-              <div
+              <Link
                 key={item.key}
+                href="/wishlist"
                 className="relative aspect-2/3 w-14 shrink-0 overflow-hidden rounded-lg bg-surface-hover"
               >
                 {item.posterUrl ? (
@@ -41,7 +42,7 @@ export function WishlistCompactBox({ items }: { items: WishlistPreviewItem[] }) 
                     {item.title}
                   </div>
                 )}
-              </div>
+              </Link>
             ))}
           </div>
         )}

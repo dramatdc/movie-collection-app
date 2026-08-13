@@ -12,8 +12,8 @@ export interface RailItem {
   href?: string;
 }
 
-const CARD_WIDTH = 80;
-const GAP = 12;
+const CARD_WIDTH = 64;
+const GAP = 10;
 const STRIDE = CARD_WIDTH + GAP;
 const FEATURED_SCALE = 1.25;
 const MAX_TICKS_PER_FRAME = 8;
@@ -107,13 +107,13 @@ export function MovieRail({
 
       <div
         ref={scrollerRef}
-        className="flex gap-3 overflow-x-auto pt-8 pb-16 -mb-12 snap-x snap-mandatory scroll-px-4 -mx-4 px-4"
+        className="flex gap-2.5 overflow-x-auto pt-6 pb-12 -mb-9 snap-x snap-mandatory scroll-px-4 -mx-4 px-4"
       >
         {items.map((item, i) => {
           const featured = i === leadingIndex;
           const card = (
             <div
-              className="relative aspect-2/3 w-20 shrink-0 overflow-hidden rounded-2xl bg-surface-hover shadow-xl shadow-black/50 active:scale-95"
+              className="relative aspect-2/3 w-16 shrink-0 overflow-hidden rounded-2xl bg-surface-hover shadow-xl shadow-black/50 active:scale-95"
               style={{
                 transform: featured ? `scale(${FEATURED_SCALE})` : undefined,
                 outline: featured ? "1.5px solid var(--color-accent)" : undefined,
@@ -127,7 +127,7 @@ export function MovieRail({
                   src={item.posterUrl}
                   alt={item.title}
                   fill
-                  sizes="80px"
+                  sizes="64px"
                   className="object-cover"
                 />
               ) : (

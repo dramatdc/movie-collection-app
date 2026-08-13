@@ -14,10 +14,22 @@ export function useSplash(
   ready: boolean,
   { fadeMs = 350, minDisplayMs = 0 }: { fadeMs?: number; minDisplayMs?: number } = {}
 ) {
-  const [enabled] = useState(claimSplash);
-  const [showSplash, setShowSplash] = useState(enabled);
+  const [enabled, setEnabled] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
   const [fadingOut, setFadingOut] = useState(false);
   const [mountedAt] = useState(() => Date.now());
+
+  // The claim touches shared module state, so it can only run client-side,
+  // after hydration — doing it during render (e.g. as a useState initializer)
+  // runs it during SSR/static generation too and under React's dev-mode
+  // double-invocation, both of which produced a real hydration mismatch here
+  // since the server and client ended up disagreeing about who "won".
+  useEffect(() => {
+    if (!claimSplash()) {
+      setEnabled(false);
+      setShowSplash(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!enabled || !ready) return;

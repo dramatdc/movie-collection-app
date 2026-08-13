@@ -5,9 +5,11 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useWishlist } from "@/lib/hooks/useWishlist";
+import { useWatchlist } from "@/lib/hooks/useWatchlist";
 import { useMovies } from "@/lib/hooks/useMovies";
 import { getMovieDetailClient } from "@/lib/tmdb/client";
 import { addToWishlist, removeFromWishlist } from "@/lib/firebase/wishlist";
+import { addToWatchlist, removeFromWatchlist } from "@/lib/firebase/watchlist";
 import { addOwnedMovie } from "@/lib/firebase/firestore";
 import { playAddedChime, playRemovedChime } from "@/lib/sound";
 import { posterUrl } from "@/lib/tmdb/image";
@@ -19,6 +21,7 @@ export default function WishlistDetailPage() {
   const id = Number(tmdbId);
   const { user } = useAuth();
   const { items: wishlist } = useWishlist();
+  const { items: watchlist } = useWatchlist();
   const { movies } = useMovies();
   const router = useRouter();
   const confirmDialog = useConfirm();
@@ -32,6 +35,7 @@ export default function WishlistDetailPage() {
   }, [id]);
 
   const onWishlist = useMemo(() => wishlist.some((w) => w.tmdbId === id), [wishlist, id]);
+  const onWatchlist = useMemo(() => watchlist.some((w) => w.tmdbId === id), [watchlist, id]);
   const inCollection = useMemo(() => movies.some((m) => m.tmdbId === id), [movies, id]);
 
   if (!detail) {
@@ -59,6 +63,22 @@ export default function WishlistDetailPage() {
     }
     playAddedChime();
     await addToWishlist(user.uid, {
+      tmdbId: detail.id,
+      title: detail.title,
+      posterPath: detail.poster_path,
+      year: detail.release_date ? Number(detail.release_date.slice(0, 4)) : null,
+    });
+  }
+
+  async function handleToggleWatchlist() {
+    if (!user || !detail) return;
+    if (onWatchlist) {
+      playRemovedChime();
+      await removeFromWatchlist(user.uid, id);
+      return;
+    }
+    playAddedChime();
+    await addToWatchlist(user.uid, {
       tmdbId: detail.id,
       title: detail.title,
       posterPath: detail.poster_path,
@@ -135,6 +155,24 @@ export default function WishlistDetailPage() {
           >
             {inCollection ? "In your collection" : saving ? "Adding..." : "Add to collection"}
           </button>
+
+          {onWatchlist ? (
+            <button
+              type="button"
+              onClick={handleToggleWatchlist}
+              className="rounded border border-red-800 px-3 py-1.5 text-sm text-red-400 hover:bg-red-950"
+            >
+              Remove from watchlist
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleToggleWatchlist}
+              className="rounded border border-border px-3 py-1.5 text-sm text-muted hover:border-accent hover:text-accent"
+            >
+              Add to watchlist
+            </button>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

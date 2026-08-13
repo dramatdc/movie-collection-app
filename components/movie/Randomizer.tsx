@@ -10,10 +10,12 @@ import type { OwnedMovie } from "@/lib/firebase/types";
 const STRIDE = 108;
 const STEP_TRANSITION_MS = 280;
 const IDLE_INTERVAL_MS = 2400;
-// Fixed step count, independent of collection size, so a big library
-// doesn't turn into a marathon spin.
-const SPIN_STEPS_BASE = 15;
-const SPIN_STEPS_JITTER = 5;
+// The spin always covers at least this many single-card steps (padding out
+// short hops with extra full laps) so it never feels like a token flick, but
+// never more than this many (falling back to a coarser multi-card stride for
+// very large collections) so a big library doesn't turn into a marathon spin.
+const MIN_SPIN_STEPS = 12;
+const MAX_SPIN_STEPS = 24;
 const MIN_STEP_DELAY = 45;
 const MAX_STEP_DELAY = 320;
 
@@ -89,19 +91,24 @@ export function Randomizer({
     // The landing card is chosen uniformly at random across every eligible
     // movie first — independent of where the reel currently sits — so every
     // title has an equal shot regardless of collection size or spin history.
-    // The visual spin then just walks the reel there over a fixed number of
-    // ticks (covering more index positions per tick for a far-away target),
-    // purely for the slot-machine feel; it never changes which movie wins.
+    // The visual spin then walks the reel there one card at a time (the same
+    // smooth motion as the idle drift), padding short hops with extra full
+    // laps so it never feels like a token flick — it never changes which
+    // movie wins, just how the reel gets there.
     const currentPos = mod(index, length);
     let targetIndex = Math.floor(Math.random() * length);
     if (length > 1 && targetIndex === currentPos) {
       targetIndex = mod(targetIndex + 1, length);
     }
-    const distance = mod(targetIndex - currentPos, length) || length;
     targetRef.current = eligible[targetIndex];
 
-    const totalSteps =
-      SPIN_STEPS_BASE + Math.floor(Math.random() * (SPIN_STEPS_JITTER + 1));
+    let distance = mod(targetIndex - currentPos, length) || length;
+    while (distance < MIN_SPIN_STEPS) distance += length;
+
+    // Only a very long hop (a large collection) needs more than one card
+    // covered per tick, to keep the whole spin from running too long.
+    const stride = Math.max(1, Math.ceil(distance / MAX_SPIN_STEPS));
+    const totalSteps = Math.ceil(distance / stride);
 
     setSpinning(true);
     let stepsDone = 0;
@@ -109,7 +116,7 @@ export function Randomizer({
     function tick() {
       hapticImpact();
       stepsDone++;
-      const covered = Math.round((distance * stepsDone) / totalSteps);
+      const covered = Math.min(distance, stride * stepsDone);
       setIndex(currentPos + covered);
       if (stepsDone >= totalSteps) {
         spinTimer.current = setTimeout(() => {
