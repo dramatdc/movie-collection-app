@@ -8,26 +8,26 @@ import { hapticImpact } from "@/lib/haptics";
 import type { OwnedMovie } from "@/lib/firebase/types";
 
 const STRIDE = 108;
-const STEP_TRANSITION_MS = 280;
 const IDLE_INTERVAL_MS = 2400;
+const IDLE_TRANSITION_MS = 320;
+const SPIN_DURATION_MS = 2600;
 // The spin always covers at least this many single-card steps (padding out
-// short hops with extra full laps) so it never feels like a token flick, but
-// never more than this many (falling back to a coarser multi-card stride for
-// very large collections) so a big library doesn't turn into a marathon spin.
+// short hops with extra full laps) so it never feels like a token flick.
 const MIN_SPIN_STEPS = 12;
-const MAX_SPIN_STEPS = 24;
-const MIN_STEP_DELAY = 45;
-const MAX_STEP_DELAY = 320;
+// Slots rendered on each side of center — kept small since the outer ones
+// fade to fully transparent well before the edge, so new keyed elements
+// entering the window are already invisible when they appear.
+const HALF_WINDOW = 3;
 
 function mod(n: number, m: number) {
   return ((n % m) + m) % m;
 }
 
-// Eased delay curve for the spin: quick ticks at first, decelerating into
-// the landing — a classic slot-machine feel.
-function stepDelay(progress: number) {
-  const eased = progress * progress;
-  return MIN_STEP_DELAY + (MAX_STEP_DELAY - MIN_STEP_DELAY) * eased;
+// Fast start, smooth deceleration to a dead stop — the reel "spins rapidly"
+// early on and settles calmly into the landing rather than ticking down in
+// discrete steps.
+function easeOutQuint(t: number) {
+  return 1 - Math.pow(1 - t, 5);
 }
 
 export function Randomizer({
@@ -39,13 +39,19 @@ export function Randomizer({
   onLanded: (movie: OwnedMovie) => void;
   disabled?: boolean;
 }) {
-  const [index, setIndex] = useState(0);
+  // A continuous position along the reel (not an integer tick count) — the
+  // slot at the nearest whole number is "center". Driven every frame during
+  // a spin so cards slide smoothly past a fixed center point instead of
+  // popping between positions.
+  const [reelPos, setReelPos] = useState(0);
+  const reelPosRef = useRef(0);
   const [spinning, setSpinning] = useState(false);
   // Once a spin lands, the carousel stays put on the pick instead of
   // resuming the idle drift — until the tab is hidden and shown again.
   const [idleFrozen, setIdleFrozen] = useState(false);
-  const spinTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rafRef = useRef<number | null>(null);
   const targetRef = useRef<OwnedMovie | null>(null);
+  const lastHapticSlotRef = useRef(0);
 
   // Preload every eligible poster up front so a card never shows an empty
   // grey frame the first time it scrolls into view.
@@ -70,17 +76,21 @@ export function Randomizer({
   }, []);
 
   // Slow idle auto-advance, paused while spinning or while frozen on a pick.
+  // A whole-step jump, but the card below eases into it via a CSS
+  // transition rather than the frame-by-frame rAF driving used for spins.
   useEffect(() => {
     if (spinning || idleFrozen || eligible.length <= 1) return;
     const interval = setInterval(() => {
-      setIndex((i) => i + 1);
+      const next = Math.round(reelPosRef.current) + 1;
+      reelPosRef.current = next;
+      setReelPos(next);
     }, IDLE_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [spinning, idleFrozen, eligible.length]);
 
   useEffect(() => {
     return () => {
-      if (spinTimer.current) clearTimeout(spinTimer.current);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
   }, []);
 
@@ -91,48 +101,55 @@ export function Randomizer({
     // The landing card is chosen uniformly at random across every eligible
     // movie first — independent of where the reel currently sits — so every
     // title has an equal shot regardless of collection size or spin history.
-    // The visual spin then walks the reel there one card at a time (the same
-    // smooth motion as the idle drift), padding short hops with extra full
-    // laps so it never feels like a token flick — it never changes which
-    // movie wins, just how the reel gets there.
-    const currentPos = mod(index, length);
-    let targetIndex = Math.floor(Math.random() * length);
-    if (length > 1 && targetIndex === currentPos) {
-      targetIndex = mod(targetIndex + 1, length);
+    const startPos = Math.round(reelPosRef.current);
+    const currentSlot = mod(startPos, length);
+    let targetSlot = Math.floor(Math.random() * length);
+    if (length > 1 && targetSlot === currentSlot) {
+      targetSlot = mod(targetSlot + 1, length);
     }
-    targetRef.current = eligible[targetIndex];
 
-    let distance = mod(targetIndex - currentPos, length) || length;
+    let distance = mod(targetSlot - currentSlot, length) || length;
     while (distance < MIN_SPIN_STEPS) distance += length;
 
-    // Only a very long hop (a large collection) needs more than one card
-    // covered per tick, to keep the whole spin from running too long.
-    const stride = Math.max(1, Math.ceil(distance / MAX_SPIN_STEPS));
-    const totalSteps = Math.ceil(distance / stride);
+    const targetPos = startPos + distance;
+    targetRef.current = eligible[mod(targetPos, length)];
 
     setSpinning(true);
-    let stepsDone = 0;
+    lastHapticSlotRef.current = startPos;
+    const startTime = performance.now();
 
-    function tick() {
-      hapticImpact();
-      stepsDone++;
-      const covered = Math.min(distance, stride * stepsDone);
-      setIndex(currentPos + covered);
-      if (stepsDone >= totalSteps) {
-        spinTimer.current = setTimeout(() => {
-          setSpinning(false);
-          setIdleFrozen(true);
-          if (targetRef.current) onLanded(targetRef.current);
-        }, STEP_TRANSITION_MS);
+    function frame(now: number) {
+      const t = Math.min(1, (now - startTime) / SPIN_DURATION_MS);
+      const pos = startPos + distance * easeOutQuint(t);
+      reelPosRef.current = pos;
+      setReelPos(pos);
+
+      const nearestSlot = Math.round(pos);
+      if (nearestSlot !== lastHapticSlotRef.current) {
+        hapticImpact();
+        lastHapticSlotRef.current = nearestSlot;
+      }
+
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(frame);
         return;
       }
-      spinTimer.current = setTimeout(tick, stepDelay(stepsDone / totalSteps));
+
+      reelPosRef.current = targetPos;
+      setReelPos(targetPos);
+      setSpinning(false);
+      setIdleFrozen(true);
+      if (targetRef.current) onLanded(targetRef.current);
     }
 
-    spinTimer.current = setTimeout(tick, stepDelay(0));
+    rafRef.current = requestAnimationFrame(frame);
   }
 
-  const slots = eligible.length <= 1 ? [0] : [-2, -1, 0, 1, 2];
+  const centerSlot = Math.round(reelPos);
+  const slots =
+    eligible.length <= 1
+      ? [centerSlot]
+      : Array.from({ length: HALF_WINDOW * 2 + 1 }, (_, i) => centerSlot - HALF_WINDOW + i);
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -140,22 +157,25 @@ export function Randomizer({
         {eligible.length === 0 ? (
           <div className="absolute left-1/2 top-1/2 h-[220px] w-[150px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-surface-hover" />
         ) : (
-          slots.map((k) => {
-            const absPos = index + k;
+          slots.map((absPos) => {
             const movie = eligible[mod(absPos, eligible.length)];
             const poster = posterUrl(movie.posterPath, "w342");
-            const isCenter = k === 0;
-            const scale = isCenter ? 1 : Math.abs(k) === 1 ? 0.72 : 0.55;
-            const opacity = isCenter ? 1 : Math.abs(k) === 1 ? 0.65 : 0;
+            const offset = absPos - reelPos;
+            const dist = Math.abs(offset);
+            const isCenter = dist < 0.5;
+            const scale = dist < 0.5 ? 1 : dist < 1.5 ? 0.72 : 0.55;
+            const opacity = dist < 0.5 ? 1 : dist < 1.5 ? 0.65 : Math.max(0, 1 - (dist - 1.5));
             return (
               <div
                 key={absPos}
                 className="absolute left-1/2 top-1/2 h-[220px] w-[150px] overflow-hidden rounded-2xl bg-surface-hover"
                 style={{
-                  transform: `translate(-50%, -50%) translateX(${k * STRIDE}px) scale(${scale})`,
+                  transform: `translate(-50%, -50%) translateX(${offset * STRIDE}px) scale(${scale})`,
                   opacity,
-                  zIndex: 10 - Math.abs(k),
-                  transition: `transform ${STEP_TRANSITION_MS}ms ease-out, opacity ${STEP_TRANSITION_MS}ms ease-out`,
+                  zIndex: 10 - Math.round(dist),
+                  transition: spinning
+                    ? "none"
+                    : `transform ${IDLE_TRANSITION_MS}ms ease-out, opacity ${IDLE_TRANSITION_MS}ms ease-out`,
                   boxShadow: isCenter ? "0 20px 40px -10px rgba(0,0,0,0.6)" : undefined,
                   outline: isCenter ? "2px solid var(--color-accent)" : undefined,
                 }}

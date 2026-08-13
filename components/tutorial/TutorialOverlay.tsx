@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTutorial } from "@/lib/tutorial/TutorialContext";
 
 const SPOTLIGHT_PADDING = 8;
 const CARD_MAX_WIDTH = 380;
 const CARD_MARGIN = 16;
-const ESTIMATED_CARD_HEIGHT = 190;
+const FALLBACK_CARD_HEIGHT = 190;
+const SCROLL_BLOCK_KEYS = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "PageUp",
+  "PageDown",
+  "Home",
+  "End",
+  " ",
+]);
 
 interface Rect {
   top: number;
@@ -34,6 +43,8 @@ export function TutorialOverlay() {
   const router = useRouter();
   const [rect, setRect] = useState<Rect | null>(null);
   const [ready, setReady] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [cardHeight, setCardHeight] = useState(FALLBACK_CARD_HEIGHT);
 
   // Each step change: navigate to its route if we're not already there, then
   // poll for its target element (it may not exist yet — the route's data
@@ -99,16 +110,70 @@ export function TutorialOverlay() {
       const el = findVisibleTarget(selector);
       if (el) {
         const r = el.getBoundingClientRect();
-        setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+        setRect((prev) =>
+          prev && prev.top === r.top && prev.left === r.left && prev.width === r.width && prev.height === r.height
+            ? prev
+            : { top: r.top, left: r.left, width: r.width, height: r.height }
+        );
       }
     }
     window.addEventListener("scroll", recompute, true);
     window.addEventListener("resize", recompute);
+    // The scroll/resize listeners miss some causes of drift — e.g. the
+    // browser's own smooth-scroll animation still settling after the
+    // initial measurement, or anything else that repositions the page
+    // without firing a native scroll event. A cheap poll catches those too,
+    // so the spotlight can't end up permanently stuck covering the exact
+    // control a step is asking the user to press.
+    const pollId = setInterval(recompute, 200);
     return () => {
       window.removeEventListener("scroll", recompute, true);
       window.removeEventListener("resize", recompute);
+      clearInterval(pollId);
     };
   }, [ready, step]);
+
+  // Scrolling while a step is showing moves the page out from under the
+  // spotlight's measured coordinates — the highlight and the real element
+  // can drift out of sync (and stop matching up at all with a fast scroll),
+  // which risks covering the very control a step is asking the user to
+  // press. The one scroll that should still happen (bringing a new target
+  // into view) is triggered programmatically above, before this locks in.
+  useEffect(() => {
+    if (!ready) return;
+
+    function blockDefault(e: Event) {
+      e.preventDefault();
+    }
+    function blockKeys(e: KeyboardEvent) {
+      if (SCROLL_BLOCK_KEYS.has(e.key)) e.preventDefault();
+    }
+
+    window.addEventListener("wheel", blockDefault, { passive: false });
+    window.addEventListener("touchmove", blockDefault, { passive: false });
+    window.addEventListener("keydown", blockKeys);
+    return () => {
+      window.removeEventListener("wheel", blockDefault);
+      window.removeEventListener("touchmove", blockDefault);
+      window.removeEventListener("keydown", blockKeys);
+    };
+  }, [ready]);
+
+  // Measured on every render rather than assumed — a fixed height estimate
+  // could be shorter than the real card (longer body copy, no Next button
+  // to show a hint instead, narrower viewports wrapping to more lines),
+  // which let the card overlap and cover the very control a step was
+  // asking the user to press.
+  // Deliberately runs every render (not just when cardHeight changes) so a
+  // step change or viewport resize re-measures; the equality check above
+  // prevents any update loop.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    const measured = cardRef.current?.getBoundingClientRect().height;
+    if (measured && measured !== cardHeight) {
+      setCardHeight(measured);
+    }
+  });
 
   if (!active || !step || !ready) return null;
 
@@ -125,29 +190,45 @@ export function TutorialOverlay() {
 
   const roomBelow = highlight ? vh - (highlight.top + highlight.height) : 0;
   const cardTop = highlight
-    ? roomBelow > ESTIMATED_CARD_HEIGHT + 24
+    ? roomBelow > cardHeight + 24
       ? highlight.top + highlight.height + 16
-      : Math.max(CARD_MARGIN, highlight.top - ESTIMATED_CARD_HEIGHT - 16)
+      : Math.max(CARD_MARGIN, highlight.top - cardHeight - 16)
     : null;
 
   return (
-    <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="App tour">
+    <div
+      className="fixed inset-0 z-[100] pointer-events-none"
+      role="dialog"
+      aria-modal="true"
+      aria-label="App tour"
+    >
+      {/* The container itself is click-through by default — otherwise, even
+          the "hole" over the highlighted target has nothing painted there to
+          hit-test against, so the full-viewport container catches the click
+          instead of letting it reach the real button underneath. Each piece
+          that should actually block or receive clicks opts back in below. */}
       {highlight ? (
         <>
+          {/* No transition on these — a smooth glide sounds nice, but while
+              a poll or scroll correction is repositioning them mid-animation
+              their painted position can drift away from where React thinks
+              the highlight is, and hit-testing (elementFromPoint / a real
+              click) follows the painted position. Snapping instantly keeps
+              the "hole" always exactly matching the real target's hitbox. */}
           <div
-            className="absolute bg-black/75 transition-all duration-300"
+            className="pointer-events-auto absolute bg-black/75"
             style={{ top: 0, left: 0, right: 0, height: highlight.top }}
           />
           <div
-            className="absolute bg-black/75 transition-all duration-300"
+            className="pointer-events-auto absolute bg-black/75"
             style={{ top: highlight.top + highlight.height, left: 0, right: 0, bottom: 0 }}
           />
           <div
-            className="absolute bg-black/75 transition-all duration-300"
+            className="pointer-events-auto absolute bg-black/75"
             style={{ top: highlight.top, left: 0, width: highlight.left, height: highlight.height }}
           />
           <div
-            className="absolute bg-black/75 transition-all duration-300"
+            className="pointer-events-auto absolute bg-black/75"
             style={{
               top: highlight.top,
               left: highlight.left + highlight.width,
@@ -156,7 +237,7 @@ export function TutorialOverlay() {
             }}
           />
           <div
-            className="pointer-events-none absolute rounded-xl transition-all duration-300"
+            className="pointer-events-none absolute rounded-xl"
             style={{
               top: highlight.top,
               left: highlight.left,
@@ -167,11 +248,12 @@ export function TutorialOverlay() {
           />
         </>
       ) : (
-        <div className="absolute inset-0 bg-black/75" />
+        <div className="pointer-events-auto absolute inset-0 bg-black/75" />
       )}
 
       <div
-        className="absolute flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-2xl shadow-black/60"
+        ref={cardRef}
+        className="pointer-events-auto absolute flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-2xl shadow-black/60"
         style={{
           left: CARD_MARGIN,
           right: CARD_MARGIN,

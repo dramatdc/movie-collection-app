@@ -20,6 +20,7 @@ import {
   type CollectionViewMode,
 } from "@/lib/preferences";
 import { useTutorial } from "@/lib/tutorial/TutorialContext";
+import { TUTORIAL_PLACEHOLDER_MOVIES } from "@/lib/tutorial/placeholderMovies";
 
 const RECENTLY_ADDED_COUNT = 15;
 
@@ -54,6 +55,14 @@ export default function LibraryPage() {
     () => sortAlphabetically(applyFilters(movies, filters)),
     [movies, filters]
   );
+  // A brand-new account has nothing to show the card/list toggle actually
+  // doing — fill it with a few sample entries during the tour only, so
+  // switching views has something visible to demonstrate. The instant a
+  // real movie exists, this never shows again, tour or not.
+  const showPlaceholders = tutorial.active && !loading && movies.length === 0;
+  const displayedMovies = showPlaceholders
+    ? sortAlphabetically(TUTORIAL_PLACEHOLDER_MOVIES)
+    : filtered;
 
   const recentlyAdded = useMemo(
     () =>
@@ -176,7 +185,7 @@ export default function LibraryPage() {
         {loading ? (
           <p className="py-16 text-center text-sm text-muted">Loading...</p>
         ) : (
-          <AlphabeticalGrid movies={filtered} view={viewMode} />
+          <AlphabeticalGrid movies={displayedMovies} view={viewMode} />
         )}
       </div>
     </div>

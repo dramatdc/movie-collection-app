@@ -4,14 +4,17 @@ import type { OwnedMovie } from "@/lib/firebase/types";
 import { posterUrl } from "@/lib/tmdb/image";
 import { FormatBadge } from "./FormatBadge";
 
+const WRAPPER_CLASS =
+  "group flex flex-col gap-2 rounded-xl overflow-hidden bg-surface shadow-lg shadow-black/40 hover:ring-2 hover:ring-accent/60 transition";
+
 export function MovieCard({ movie }: { movie: OwnedMovie }) {
   const poster = posterUrl(movie.posterPath, "w342");
+  // Tutorial-only sample data for a new, empty collection — never a real
+  // navigable movie, so it shouldn't link anywhere.
+  const isPlaceholder = movie.id.startsWith("placeholder-");
 
-  return (
-    <Link
-      href={`/library/${movie.id}`}
-      className="group flex flex-col gap-2 rounded-xl overflow-hidden bg-surface shadow-lg shadow-black/40 hover:ring-2 hover:ring-accent/60 transition"
-    >
+  const content = (
+    <>
       <div className="relative aspect-2/3 bg-surface-hover rounded-xl overflow-hidden">
         {poster ? (
           <Image
@@ -41,6 +44,16 @@ export function MovieCard({ movie }: { movie: OwnedMovie }) {
           <FormatBadge format={movie.format} />
         </div>
       </div>
+    </>
+  );
+
+  if (isPlaceholder) {
+    return <div className={WRAPPER_CLASS}>{content}</div>;
+  }
+
+  return (
+    <Link href={`/library/${movie.id}`} className={WRAPPER_CLASS}>
+      {content}
     </Link>
   );
 }
