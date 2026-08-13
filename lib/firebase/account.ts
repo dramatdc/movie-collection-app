@@ -2,7 +2,7 @@ import { collection, doc, getDocs, writeBatch } from "firebase/firestore";
 import { deleteUser } from "firebase/auth";
 import { auth, db } from "./client";
 
-const MOVIE_SUBCOLLECTION_NAMES = ["movies", "wishlist"] as const;
+const MOVIE_SUBCOLLECTION_NAMES = ["movies", "wishlist", "watchlist"] as const;
 
 async function deleteCollection(first: string, ...rest: string[]) {
   const snap = await getDocs(collection(db, first, ...rest));

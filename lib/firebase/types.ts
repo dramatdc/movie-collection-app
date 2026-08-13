@@ -35,3 +35,14 @@ export interface CustomList {
 }
 
 export type CustomListItem = WishlistItem;
+
+// Letterboxd-style "want to watch" list — entirely separate from the
+// physical-media Wishlist (which means "want to buy").
+export type WatchlistItem = WishlistItem;
+
+export interface FavoriteMovie {
+  tmdbId: number;
+  title: string;
+  posterPath: string | null;
+  year: number | null;
+}
