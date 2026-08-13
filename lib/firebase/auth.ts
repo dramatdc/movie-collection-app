@@ -6,6 +6,10 @@ import {
   OAuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
   type User,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
@@ -61,4 +65,19 @@ export function signOut() {
 
 export function subscribeToAuth(callback: (user: User | null) => void) {
   return onAuthStateChanged(auth, callback);
+}
+
+export function sendPasswordReset(email: string) {
+  return sendPasswordResetEmail(auth, email);
+}
+
+// Firebase requires a recent sign-in before allowing a password change, so
+// re-authenticate with the current password first rather than surfacing a
+// confusing "requires-recent-login" error on every attempt.
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const user = auth.currentUser;
+  if (!user?.email) throw new Error("Not signed in.");
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  await updatePassword(user, newPassword);
 }

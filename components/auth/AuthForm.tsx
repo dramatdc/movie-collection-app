@@ -16,6 +16,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -29,6 +30,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     setError(null);
     if (needsConsent) {
       setError("You must agree to the Terms of Service and Privacy Policy to continue.");
+      return;
+    }
+    if (mode === "signup" && password !== confirmPassword) {
+      setError("Passwords don't match.");
       return;
     }
     setSubmitting(true);
@@ -101,6 +106,17 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         onChange={(e) => setPassword(e.target.value)}
         className="rounded border border-border bg-canvas px-3 py-2 text-sm focus:border-accent focus:outline-none"
       />
+      {mode === "signup" && (
+        <input
+          type="password"
+          required
+          minLength={6}
+          placeholder="Confirm password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          className="rounded border border-border bg-canvas px-3 py-2 text-sm focus:border-accent focus:outline-none"
+        />
+      )}
       {mode === "signup" && (
         <label className="flex items-start gap-2 text-xs text-muted">
           <input

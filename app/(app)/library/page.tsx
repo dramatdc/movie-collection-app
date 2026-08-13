@@ -64,7 +64,7 @@ export default function LibraryPage() {
     <button
       type="button"
       onClick={jumpToCollection}
-      className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted hover:border-accent hover:text-accent"
+      className="flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground hover:bg-accent-hover"
     >
       Jump to collection
       <ChevronRightIcon className="h-3.5 w-3.5" style={{ transform: "rotate(90deg)" }} />
@@ -82,9 +82,10 @@ export default function LibraryPage() {
             headerAction={jumpButton}
           />
 
-          <WishlistCompactBox items={wishlistPreview} />
-
-          <DiscoverRail title="Trending This Week" fetcher={getTrendingClient} />
+          <div className="flex flex-col gap-6 border-t border-border pt-6">
+            <WishlistCompactBox items={wishlistPreview} />
+            <DiscoverRail title="Trending This Week" fetcher={getTrendingClient} />
+          </div>
         </>
       )}
 

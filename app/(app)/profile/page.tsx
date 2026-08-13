@@ -9,6 +9,7 @@ import { useMovies } from "@/lib/hooks/useMovies";
 import { signOut } from "@/lib/firebase/auth";
 import { deleteAccount } from "@/lib/firebase/account";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
+import { PasswordSection } from "@/components/profile/PasswordSection";
 import {
   isSoundEnabled,
   setSoundEnabled,
@@ -92,6 +93,8 @@ export default function ProfilePage() {
           }}
         />
       </div>
+
+      {user && <PasswordSection user={user} />}
 
       <button
         type="button"

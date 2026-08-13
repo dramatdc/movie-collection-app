@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MovieRail, type RailItem } from "./MovieRail";
+import { CompactMovieBox, type CompactMovieItem } from "./CompactMovieBox";
 import { posterUrl } from "@/lib/tmdb/image";
 import type { TMDbSearchResponse } from "@/lib/tmdb/types";
 
@@ -12,7 +12,7 @@ export function DiscoverRail({
   title: string;
   fetcher: () => Promise<TMDbSearchResponse>;
 }) {
-  const [items, setItems] = useState<RailItem[] | null>(null);
+  const [items, setItems] = useState<CompactMovieItem[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,7 +40,7 @@ export function DiscoverRail({
   if (items === null || items.length === 0) return null;
 
   return (
-    <MovieRail
+    <CompactMovieBox
       title={title}
       items={items}
       emptyLabel="Nothing to show right now — check back later."
