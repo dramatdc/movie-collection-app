@@ -8,7 +8,7 @@ export interface CompactMovieItem {
   href: string;
 }
 
-const PREVIEW_COUNT = 6;
+const DEFAULT_PREVIEW_COUNT = 6;
 
 // Shared "sleek secondary panel" look — a bordered box of small poster
 // thumbnails — used to visually separate lighter-weight sections (Wishlist,
@@ -20,6 +20,7 @@ export function CompactMovieBox({
   emptyLabel,
   footerHref,
   footerLabel,
+  previewCount = DEFAULT_PREVIEW_COUNT,
 }: {
   title: string;
   titleHref?: string;
@@ -27,8 +28,12 @@ export function CompactMovieBox({
   emptyLabel: string;
   footerHref?: string;
   footerLabel?: string;
+  // Wishlist caps at a short preview since there's a "View Full Wishlist"
+  // link to see the rest; Trending has no such page, so it passes a higher
+  // count so the whole fetched batch stays scrollable instead of cutting off.
+  previewCount?: number;
 }) {
-  const preview = items.slice(0, PREVIEW_COUNT);
+  const preview = items.slice(0, previewCount);
 
   const heading = titleHref ? (
     <Link href={titleHref} className="text-base font-semibold hover:text-accent">

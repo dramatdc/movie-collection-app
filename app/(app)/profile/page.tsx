@@ -10,6 +10,7 @@ import { signOut } from "@/lib/firebase/auth";
 import { deleteAccount } from "@/lib/firebase/account";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { PasswordSection } from "@/components/profile/PasswordSection";
+import { useTutorial } from "@/lib/tutorial/TutorialContext";
 import {
   isSoundEnabled,
   setSoundEnabled,
@@ -23,6 +24,7 @@ export default function ProfilePage() {
   const { movies } = useMovies();
   const router = useRouter();
   const confirmDialog = useConfirm();
+  const tutorial = useTutorial();
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [soundOn, setSoundOn] = useState(true);
@@ -73,28 +75,38 @@ export default function ProfilePage() {
         <p className="text-neutral-300">{movies.length} movies in your collection</p>
       </div>
 
-      <div className="flex flex-col divide-y divide-border rounded-lg border border-border bg-surface px-4 shadow-lg shadow-black/40">
-        <ToggleSwitch
-          label="Sound effects"
-          description="The chime when a movie is added or removed"
-          checked={soundOn}
-          onChange={(value) => {
-            setSoundOn(value);
-            setSoundEnabled(value);
-          }}
-        />
-        <ToggleSwitch
-          label="Haptic feedback"
-          description="Vibration when scanning or using the randomizer"
-          checked={hapticsOn}
-          onChange={(value) => {
-            setHapticsOn(value);
-            setHapticsEnabled(value);
-          }}
-        />
-      </div>
+      <div data-tutorial="profile-page" className="flex flex-col gap-3">
+        <div className="flex flex-col divide-y divide-border rounded-lg border border-border bg-surface px-4 shadow-lg shadow-black/40">
+          <ToggleSwitch
+            label="Sound effects"
+            description="The chime when a movie is added or removed"
+            checked={soundOn}
+            onChange={(value) => {
+              setSoundOn(value);
+              setSoundEnabled(value);
+            }}
+          />
+          <ToggleSwitch
+            label="Haptic feedback"
+            description="Vibration when scanning or using the randomizer"
+            checked={hapticsOn}
+            onChange={(value) => {
+              setHapticsOn(value);
+              setHapticsEnabled(value);
+            }}
+          />
+        </div>
 
-      {user && <PasswordSection user={user} />}
+        {user && <PasswordSection user={user} />}
+
+        <button
+          type="button"
+          onClick={tutorial.start}
+          className="w-fit rounded border border-border px-3 py-1.5 text-sm text-neutral-300 hover:border-accent hover:text-accent"
+        >
+          Retake the tour
+        </button>
+      </div>
 
       <button
         type="button"

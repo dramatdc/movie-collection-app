@@ -37,11 +37,12 @@ export default function ListsPage() {
         <p className="text-sm text-muted">Group movies your own way.</p>
       </div>
 
-      <FavoritesSection />
+      <div data-tutorial="lists-top" className="flex flex-col gap-6">
+        <FavoritesSection />
+        <WatchlistPreviewCard items={watchlistItems} />
+      </div>
 
-      <WatchlistPreviewCard items={watchlistItems} />
-
-      <div className="flex flex-col gap-4 border-t border-border pt-6">
+      <div data-tutorial="custom-lists" className="flex flex-col gap-4 border-t border-border pt-6">
         <h2 className="text-base font-semibold">Your lists</h2>
 
         <form onSubmit={handleCreate} className="flex gap-2">

@@ -26,7 +26,7 @@ export function AppHeader() {
           className="h-6 w-auto md:h-7"
         />
       </Link>
-      <nav className="hidden gap-5 text-sm text-neutral-300 md:flex">
+      <nav data-tutorial="bottom-nav" className="hidden gap-5 text-sm text-neutral-300 md:flex">
         {NAV.map((item) => (
           <Link key={item.href} href={item.href} className="hover:text-white">
             {item.label}

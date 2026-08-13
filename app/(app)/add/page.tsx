@@ -179,7 +179,10 @@ export default function AddPage() {
     <div className="flex h-full min-h-[calc(100vh-8rem)] flex-col gap-4 md:flex-row">
       <Toast toast={toast} onDismiss={() => setToast(null)} />
 
-      <section className="flex flex-1 flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-lg shadow-black/40">
+      <section
+        data-tutorial="add-search"
+        className="flex flex-1 flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-lg shadow-black/40"
+      >
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wide">
           Search by title
         </h2>

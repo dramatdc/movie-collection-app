@@ -51,7 +51,9 @@ export default function PickerPage() {
         </p>
       )}
 
-      <Randomizer eligible={eligible} onLanded={setPick} disabled={loading} />
+      <div data-tutorial="randomizer">
+        <Randomizer eligible={eligible} onLanded={setPick} disabled={loading} />
+      </div>
 
       {pick && (
         <Link

@@ -75,21 +75,31 @@ export default function LibraryPage() {
     <div className="flex flex-col gap-6">
       {!loading && (
         <>
-          <MovieRail
-            title="Recently Added"
-            items={recentlyAdded}
-            emptyLabel="Nothing added yet — scan or search to build your shelf."
-            headerAction={jumpButton}
-          />
+          <div data-tutorial="recently-added">
+            <MovieRail
+              title="Recently Added"
+              items={recentlyAdded}
+              emptyLabel="Nothing added yet — scan or search to build your shelf."
+              headerAction={jumpButton}
+            />
+          </div>
 
           <div className="flex flex-col gap-6 border-t border-border pt-6">
-            <WishlistCompactBox items={wishlistPreview} />
-            <DiscoverRail title="Trending This Week" fetcher={getTrendingClient} />
+            <div data-tutorial="wishlist-box">
+              <WishlistCompactBox items={wishlistPreview} />
+            </div>
+            <div data-tutorial="trending-box">
+              <DiscoverRail title="Trending This Week" fetcher={getTrendingClient} />
+            </div>
           </div>
         </>
       )}
 
-      <div id="your-collection" className="flex flex-col gap-4 border-t border-border pt-6">
+      <div
+        id="your-collection"
+        data-tutorial="your-collection"
+        className="flex flex-col gap-4 border-t border-border pt-6"
+      >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-semibold">
             Your collection

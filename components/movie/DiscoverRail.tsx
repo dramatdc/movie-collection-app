@@ -44,6 +44,7 @@ export function DiscoverRail({
       title={title}
       items={items}
       emptyLabel="Nothing to show right now — check back later."
+      previewCount={items.length}
     />
   );
 }
