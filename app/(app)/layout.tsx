@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useSplash } from "@/lib/hooks/useSplash";
+import { SplashScreen } from "@/components/layout/SplashScreen";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { InstallPrompt } from "@/components/layout/InstallPrompt";
@@ -15,6 +17,7 @@ export default function AppShellLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const { showSplash, fadingOut } = useSplash(!loading);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -22,12 +25,12 @@ export default function AppShellLayout({
     }
   }, [loading, user, router]);
 
-  if (loading || !user) {
-    return (
-      <div className="flex flex-1 items-center justify-center text-muted text-sm">
-        Loading...
-      </div>
-    );
+  if (showSplash) {
+    return <SplashScreen fadingOut={fadingOut} />;
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (

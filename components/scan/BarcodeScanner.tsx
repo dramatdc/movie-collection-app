@@ -152,9 +152,17 @@ export function BarcodeScanner({
 
   if (error) {
     return (
-      <div className="rounded-lg border border-border bg-surface p-4 text-sm text-neutral-300">
-        {error === "denied" &&
-          "Camera access was denied. Enable camera permission for this site in Settings, or search by title instead."}
+      <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 text-sm text-neutral-300">
+        {error === "denied" && (
+          <>
+            <p>Camera access is turned off for this site.</p>
+            <p className="text-xs text-muted">
+              iPhone: Settings → Safari → Camera → Allow. Android: tap the lock
+              icon next to the address bar → Permissions → Camera. Or just
+              search by title instead.
+            </p>
+          </>
+        )}
         {error === "no-camera" &&
           "No camera was found on this device. Search by title instead."}
         {error === "in-use" &&

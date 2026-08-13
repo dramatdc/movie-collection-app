@@ -65,6 +65,13 @@ export default function AddPage() {
     setLookingUp(true);
     try {
       const result = await lookupUpcClient(code);
+      if (result.status === "rate_limited") {
+        setToast({
+          tone: "warning",
+          message: "Daily barcode lookup limit reached — search by title instead for now.",
+        });
+        return;
+      }
       if (result.status !== "found") return;
 
       setScannedUpc(code);
@@ -147,23 +154,6 @@ export default function AddPage() {
 
       <section className="flex flex-1 flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-lg shadow-black/40">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wide">
-          Scan barcode
-        </h2>
-
-        <div className="relative flex flex-1 items-center justify-center">
-          <CameraPermissionGate>
-            <BarcodeScanner onDetected={handleDetected} />
-          </CameraPermissionGate>
-          {lookingUp && (
-            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/60">
-              <p className="text-sm text-white">Looking up barcode...</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="flex flex-1 flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-lg shadow-black/40">
-        <h2 className="text-sm font-semibold text-muted uppercase tracking-wide">
           Search by title
         </h2>
         <input
@@ -186,6 +176,23 @@ export default function AddPage() {
             collectionTmdbIds={collectionTmdbIds}
             addingToCollectionIds={addingIds}
           />
+        </div>
+      </section>
+
+      <section className="flex flex-1 flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-lg shadow-black/40">
+        <h2 className="text-sm font-semibold text-muted uppercase tracking-wide">
+          Scan barcode
+        </h2>
+
+        <div className="relative flex flex-1 items-center justify-center">
+          <CameraPermissionGate>
+            <BarcodeScanner onDetected={handleDetected} />
+          </CameraPermissionGate>
+          {lookingUp && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/60">
+              <p className="text-sm text-white">Looking up barcode...</p>
+            </div>
+          )}
         </div>
       </section>
     </div>

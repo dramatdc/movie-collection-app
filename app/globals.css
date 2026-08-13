@@ -37,6 +37,21 @@
   }
 }
 
+@keyframes splash-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @keyframes glow-pulse {
   0%,
   100% {
@@ -47,5 +62,30 @@
     opacity: 0.55;
     transform: scale(1.08);
   }
+}
+
+/* Slim, pill-shaped scrollbars everywhere, instead of each browser's own
+   default size (WebKit/Blink here; scrollbar-width/-color cover Firefox). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-muted);
 }
 
