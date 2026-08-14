@@ -11,6 +11,7 @@ import { InstallPrompt } from "@/components/layout/InstallPrompt";
 import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
 import { TutorialProvider } from "@/lib/tutorial/TutorialContext";
 import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay";
+import { MovieAddedProvider } from "@/lib/context/MovieAddedContext";
 
 export default function AppShellLayout({
   children,
@@ -19,11 +20,11 @@ export default function AppShellLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const { showSplash, fadingOut, onVideoEnd } = useSplash(!loading);
+  const { showSplash, fadingOut, onVideoEnd } = useSplash();
 
   useEffect(() => {
-    // Wait for the splash video to actually finish too — see the same fix
-    // in app/page.tsx for why this can't key off `loading` alone.
+    // The splash has its own fixed 3-second budget — see the same note in
+    // app/page.tsx.
     if (loading || showSplash) return;
     if (!user) {
       router.replace("/login");
@@ -41,14 +42,16 @@ export default function AppShellLayout({
   return (
     <ConfirmDialogProvider>
       <TutorialProvider>
-        <div className="flex flex-1 flex-col">
-          <AppHeader />
-          <main className="flex-1 px-4 py-4 pb-36 md:px-6 md:py-6 md:pb-6">
-            {children}
-          </main>
-          <BottomNav />
-          <InstallPrompt />
-        </div>
+        <MovieAddedProvider>
+          <div className="flex flex-1 flex-col">
+            <AppHeader />
+            <main className="flex-1 px-4 py-4 pb-36 md:px-6 md:py-6 md:pb-6">
+              {children}
+            </main>
+            <BottomNav />
+            <InstallPrompt />
+          </div>
+        </MovieAddedProvider>
         <TutorialOverlay />
       </TutorialProvider>
     </ConfirmDialogProvider>

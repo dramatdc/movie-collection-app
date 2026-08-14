@@ -9,13 +9,12 @@ import { SplashScreen } from "@/components/layout/SplashScreen";
 export default function RootPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const { showSplash, fadingOut, onVideoEnd } = useSplash(!loading);
+  const { showSplash, fadingOut, onVideoEnd } = useSplash();
 
   useEffect(() => {
-    // Wait for the splash video to actually finish too, not just auth —
-    // otherwise an already-signed-in user (whose auth state resolves near
-    // instantly from cache) redirects away and unmounts the splash within
-    // milliseconds, long before the animation is ever visible.
+    // The splash has its own fixed 3-second budget regardless of auth — if
+    // auth is still resolving once it's done, this just waits the extra
+    // moment for `loading` to flip rather than redirecting too early.
     if (loading || showSplash) return;
     router.replace(user ? "/library" : "/login");
   }, [loading, showSplash, user, router]);

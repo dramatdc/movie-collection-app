@@ -3,25 +3,23 @@
 import { useCallback, useEffect, useState } from "react";
 import { claimSplash } from "./splashOnce";
 
-// Absolute upper bound in case the video is blocked from autoplaying or
-// never fires `ended` for some other reason — without this, a playback
-// failure would leave the splash on screen forever instead of just
-// skipping it. Comfortably longer than the video itself so it never fires
-// in the normal case.
-const MAX_DISPLAY_MS = 6000;
+// The whole splash, fade included, must never take longer than this —
+// however long the video file itself runs, or however slow auth is to
+// resolve. Not a "usually" — a hard cap for every device every time.
+const TOTAL_DISPLAY_MS = 3000;
 
 /**
  * Shows the splash only for whichever loading gate mounts first this
- * session (see splashOnce.ts), keeping it up until the splash video has
- * actually finished playing — never cut short, regardless of how long the
- * video runs — then holding it a bit longer after `ready` flips true so the
- * caller can fade it out instead of swapping straight to real content.
+ * session (see splashOnce.ts). Fades out as soon as the splash video
+ * finishes — or after TOTAL_DISPLAY_MS minus the fade time, whichever
+ * comes first — so a short video gets to play naturally while a longer (or
+ * stalled) one never holds the splash past the 3-second budget.
  */
-export function useSplash(ready: boolean, { fadeMs = 350 }: { fadeMs?: number } = {}) {
+export function useSplash({ fadeMs = 300 }: { fadeMs?: number } = {}) {
   const [enabled, setEnabled] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
   const [fadingOut, setFadingOut] = useState(false);
-  const [videoEnded, setVideoEnded] = useState(false);
+  const [done, setDone] = useState(false);
 
   // The claim touches shared module state, so it can only run client-side,
   // after hydration — doing it during render (e.g. as a useState initializer)
@@ -37,14 +35,14 @@ export function useSplash(ready: boolean, { fadeMs = 350 }: { fadeMs?: number } 
 
   useEffect(() => {
     if (!enabled) return;
-    const timer = setTimeout(() => setVideoEnded(true), MAX_DISPLAY_MS);
+    const timer = setTimeout(() => setDone(true), Math.max(0, TOTAL_DISPLAY_MS - fadeMs));
     return () => clearTimeout(timer);
-  }, [enabled]);
+  }, [enabled, fadeMs]);
 
   useEffect(() => {
-    if (!enabled || !ready || !videoEnded) return;
+    if (!enabled || !done) return;
     setFadingOut(true);
-  }, [enabled, ready, videoEnded]);
+  }, [enabled, done]);
 
   useEffect(() => {
     if (!fadingOut) return;
@@ -52,7 +50,7 @@ export function useSplash(ready: boolean, { fadeMs = 350 }: { fadeMs?: number } 
     return () => clearTimeout(timer);
   }, [fadingOut, fadeMs]);
 
-  const onVideoEnd = useCallback(() => setVideoEnded(true), []);
+  const onVideoEnd = useCallback(() => setDone(true), []);
 
   return { showSplash, fadingOut, onVideoEnd };
 }

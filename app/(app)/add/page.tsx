@@ -25,6 +25,7 @@ import { searchMoviesClient } from "@/lib/tmdb/client";
 import { hapticImpact } from "@/lib/haptics";
 import { playAddedChime } from "@/lib/sound";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { useMovieAdded } from "@/lib/context/MovieAddedContext";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
 type AddMode = "collection" | "wishlist" | "watchlist" | "list";
@@ -67,6 +68,7 @@ function AddPageContent() {
   const { recent, record } = useRecentSearches("recent-searches-add");
   const router = useRouter();
   const confirmDialog = useConfirm();
+  const { celebrate } = useMovieAdded();
 
   const list = mode === "list" ? lists.find((l) => l.id === listId) : undefined;
 
@@ -214,12 +216,17 @@ function AddPageContent() {
       if (!uid) return;
       playAddedChime();
       hapticImpact();
-      setToast({ tone: "success", message: `Added "${topMatch.title}" to your collection` });
+      celebrate({
+        title: topMatch.title,
+        year: topMatch.release_date ? Number(topMatch.release_date.slice(0, 4)) : null,
+        format: "Blu-ray",
+        posterPath: topMatch.poster_path,
+      });
       await addMovieToCollection(uid, topMatch, { barcodeUpc: code, addedVia: "scan" });
     } finally {
       setLookingUp(false);
     }
-  }, []);
+  }, [celebrate]);
 
   function handleSearchQueryChange(value: string) {
     setSearchQuery(value);
@@ -271,6 +278,12 @@ function AddPageContent() {
       recordUpcResolution(scannedUpc, result.title);
     }
     playAddedChime();
+    celebrate({
+      title: result.title,
+      year: result.release_date ? Number(result.release_date.slice(0, 4)) : null,
+      format: "Blu-ray",
+      posterPath: result.poster_path,
+    });
     setAddingIds((prev) => new Set(prev).add(result.id));
     try {
       await addMovieToCollection(user.uid, result, {

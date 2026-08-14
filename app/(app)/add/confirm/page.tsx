@@ -9,6 +9,7 @@ import { getMovieDetailClient } from "@/lib/tmdb/client";
 import { posterUrl } from "@/lib/tmdb/image";
 import { addOwnedMovie } from "@/lib/firebase/firestore";
 import { playAddedChime } from "@/lib/sound";
+import { useMovieAdded } from "@/lib/context/MovieAddedContext";
 import type { TMDbMovieDetail } from "@/lib/tmdb/types";
 import type { MovieFormat } from "@/lib/firebase/types";
 
@@ -18,6 +19,7 @@ export default function ConfirmAddPage() {
   const { candidate, barcodeUpc } = useAddFlow();
   const { user } = useAuth();
   const router = useRouter();
+  const { celebrate } = useMovieAdded();
 
   const [detail, setDetail] = useState<TMDbMovieDetail | null>(null);
   const [format, setFormat] = useState<MovieFormat>("Blu-ray");
@@ -58,6 +60,12 @@ export default function ConfirmAddPage() {
         personalRating: null,
         barcodeUpc,
         addedVia: barcodeUpc ? "scan" : "manual",
+      });
+      celebrate({
+        title: detail.title,
+        year: detail.release_date ? Number(detail.release_date.slice(0, 4)) : null,
+        format,
+        posterPath: detail.poster_path,
       });
       router.push("/library");
     } finally {

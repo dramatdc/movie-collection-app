@@ -94,6 +94,14 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     interactive: false,
   },
   {
+    id: "share-feature",
+    route: "/library",
+    selector: "movie-added-card",
+    title: "Show it off",
+    body: "Every time you add a movie, a card like this pops up. Tap Share with friends to copy an image of it, ready to paste straight into a chat — the closest thing to bragging about your rarest pull.",
+    interactive: false,
+  },
+  {
     id: "lists-top",
     route: "/lists",
     selector: "lists-top",
