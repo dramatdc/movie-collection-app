@@ -88,7 +88,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     route: "/add",
     selector: "add-search",
     title: "Adding a movie",
-    body: "Search by title for something you own. Scanning the barcode works too, but search is quicker since barcode lookups are limited each day. Either way, you'll pick the format and shelf location next.",
+    body: "Search by title to pick the format and shelf location before it's added. Scanning a barcode adds the movie to your collection right away — as Blu-ray by default, which you can change anytime from the movie's page — so you can scan several in a row.",
     interactive: false,
   },
   {

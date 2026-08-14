@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CameraPermissionGate } from "@/components/scan/CameraPermissionGate";
 import { BarcodeScanner } from "@/components/scan/BarcodeScanner";
 import { TMDbSearchResults } from "@/components/movie/TMDbSearchResults";
@@ -22,7 +22,14 @@ import { playAddedChime } from "@/lib/sound";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
-export default function AddPage() {
+function AddPageContent() {
+  const searchParams = useSearchParams();
+  // Reached via the Wishlist page's own "+" button — both the search and
+  // scan panels below add straight to the wishlist instead of the owned
+  // collection while this is set, since some users specifically want that
+  // entry point rather than the inline "search to add" box on that page.
+  const isWishlistMode = searchParams.get("mode") === "wishlist";
+
   const [lookingUp, setLookingUp] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [scannedUpc, setScannedUpc] = useState<string | null>(null);
@@ -62,6 +69,14 @@ export default function AddPage() {
   useEffect(() => {
     collectionTmdbIdsRef.current = collectionTmdbIds;
   }, [collectionTmdbIds]);
+  const wishlistTmdbIdsRef = useRef(wishlistTmdbIds);
+  useEffect(() => {
+    wishlistTmdbIdsRef.current = wishlistTmdbIds;
+  }, [wishlistTmdbIds]);
+  const isWishlistModeRef = useRef(isWishlistMode);
+  useEffect(() => {
+    isWishlistModeRef.current = isWishlistMode;
+  }, [isWishlistMode]);
   const lastHandledCodeRef = useRef<string | null>(null);
 
   const handleDetected = useCallback(async (code: string) => {
@@ -102,6 +117,31 @@ export default function AddPage() {
         return;
       }
 
+      const wishlistMode = isWishlistModeRef.current;
+      const uid = userRef.current?.uid;
+
+      if (wishlistMode) {
+        if (wishlistTmdbIdsRef.current.has(topMatch.id)) {
+          setSearchQuery(result.searchTitle);
+          setToast({
+            tone: "warning",
+            message: `Already on your wishlist: "${topMatch.title}"`,
+          });
+          return;
+        }
+        if (!uid) return;
+        playAddedChime();
+        hapticImpact();
+        setToast({ tone: "success", message: `Added "${topMatch.title}" to your wishlist` });
+        await addToWishlist(uid, {
+          tmdbId: topMatch.id,
+          title: topMatch.title,
+          posterPath: topMatch.poster_path,
+          year: topMatch.release_date ? Number(topMatch.release_date.slice(0, 4)) : null,
+        });
+        return;
+      }
+
       if (collectionTmdbIdsRef.current.has(topMatch.id)) {
         setSearchQuery(result.searchTitle);
         setToast({
@@ -111,7 +151,6 @@ export default function AddPage() {
         return;
       }
 
-      const uid = userRef.current?.uid;
       if (!uid) return;
       playAddedChime();
       hapticImpact();
@@ -184,6 +223,12 @@ export default function AddPage() {
     <div className="flex h-full min-h-[calc(100vh-8rem)] flex-col gap-4 md:flex-row">
       <Toast toast={toast} onDismiss={() => setToast(null)} />
 
+      {isWishlistMode && (
+        <div className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-sm text-accent md:hidden">
+          Adding to your wishlist
+        </div>
+      )}
+
       <section
         data-tutorial="add-search"
         className="flex flex-1 flex-col gap-3 rounded-lg border border-border bg-surface p-4 shadow-lg shadow-black/40"
@@ -204,10 +249,10 @@ export default function AddPage() {
         <div className="flex-1 min-h-0">
           <TMDbSearchResults
             query={searchQuery}
-            onSelect={selectForCollection}
+            onSelect={isWishlistMode ? handleAddToWishlist : selectForCollection}
             onAddToWishlist={handleAddToWishlist}
             wishlistTmdbIds={wishlistTmdbIds}
-            onAddToCollection={handleAddToCollection}
+            onAddToCollection={isWishlistMode ? undefined : handleAddToCollection}
             collectionTmdbIds={collectionTmdbIds}
             addingToCollectionIds={addingIds}
           />
@@ -231,5 +276,13 @@ export default function AddPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function AddPage() {
+  return (
+    <Suspense fallback={null}>
+      <AddPageContent />
+    </Suspense>
   );
 }

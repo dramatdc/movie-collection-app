@@ -10,7 +10,7 @@ import {
   signInWithGoogle,
   signInWithApple,
 } from "@/lib/firebase/auth";
-import { GoogleIcon, AppleIcon } from "@/lib/icons";
+import { GoogleIcon, AppleIcon, EyeIcon, EyeOffIcon } from "@/lib/icons";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
@@ -21,6 +21,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [oauthSubmitting, setOauthSubmitting] = useState<"google" | "apple" | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const needsConsent = mode === "signup" && !acceptedTerms;
   const busy = submitting || oauthSubmitting !== null;
@@ -97,25 +99,49 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         onChange={(e) => setEmail(e.target.value)}
         className="rounded border border-border bg-canvas px-3 py-2 text-sm focus:border-accent focus:outline-none"
       />
-      <input
-        type="password"
-        required
-        minLength={6}
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="rounded border border-border bg-canvas px-3 py-2 text-sm focus:border-accent focus:outline-none"
-      />
-      {mode === "signup" && (
+      <div className="relative">
         <input
-          type="password"
+          type={showPassword ? "text" : "password"}
           required
           minLength={6}
-          placeholder="Confirm password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="rounded border border-border bg-canvas px-3 py-2 text-sm focus:border-accent focus:outline-none"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full rounded border border-border bg-canvas px-3 py-2 pr-10 text-sm focus:border-accent focus:outline-none"
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword((v) => !v)}
+          aria-label={showPassword ? "Hide password" : "Show password"}
+          className="absolute inset-y-0 right-0 flex items-center px-3 text-muted hover:text-accent"
+        >
+          {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+        </button>
+      </div>
+      {mode === "signup" && (
+        <div className="relative">
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            required
+            minLength={6}
+            placeholder="Confirm password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="w-full rounded border border-border bg-canvas px-3 py-2 pr-10 text-sm focus:border-accent focus:outline-none"
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword((v) => !v)}
+            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            className="absolute inset-y-0 right-0 flex items-center px-3 text-muted hover:text-accent"
+          >
+            {showConfirmPassword ? (
+              <EyeOffIcon className="h-4 w-4" />
+            ) : (
+              <EyeIcon className="h-4 w-4" />
+            )}
+          </button>
+        </div>
       )}
       {mode === "signup" && (
         <label className="flex items-start gap-2 text-xs text-muted">

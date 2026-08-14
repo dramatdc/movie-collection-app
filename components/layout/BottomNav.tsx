@@ -41,6 +41,10 @@ function NavLink({
 
 export function BottomNav() {
   const pathname = usePathname();
+  // On the Wishlist page, the FAB should add to the wishlist instead of the
+  // owned collection — some users specifically want that entry point rather
+  // than the inline "search to add" box already on that page.
+  const addHref = pathname.startsWith("/wishlist") ? "/add?mode=wishlist" : "/add";
 
   return (
     <nav
@@ -88,7 +92,7 @@ export function BottomNav() {
 
         <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
           <Link
-            href="/add"
+            href={addHref}
             aria-label="Add a movie"
             className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg ring-4 ring-canvas transition active:scale-90"
           >
@@ -96,7 +100,7 @@ export function BottomNav() {
           </Link>
         </div>
         <Link
-          href="/add"
+          href={addHref}
           className="absolute left-1/2 top-8 -translate-x-1/2 text-[10px] font-medium text-accent"
         >
           Add

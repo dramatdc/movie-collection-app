@@ -120,6 +120,33 @@ export function ChevronRightIcon(props: IconProps) {
   );
 }
 
+export function ChevronLeftIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <polyline points="15 5 8 12 15 19" />
+    </svg>
+  );
+}
+
+export function EyeIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M2 12c2-4 5.8-7 10-7s8 3 10 7c-2 4-5.8 7-10 7s-8-3-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+export function EyeOffIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3 3l18 18" />
+      <path d="M10.6 5.2A10.6 10.6 0 0 1 12 5c4.2 0 8 3 10 7-.75 1.5-1.75 2.83-2.94 3.9M6.6 6.6C4.7 7.8 3.1 9.7 2 12c2 4 5.8 7 10 7 1.36 0 2.65-.3 3.83-.86" />
+      <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+    </svg>
+  );
+}
+
 export function StarIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
