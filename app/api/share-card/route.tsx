@@ -1,5 +1,4 @@
 import { ImageResponse } from "next/og";
-import sharp from "sharp";
 import type { NextRequest } from "next/server";
 import { INTER_REGULAR_BASE64, INTER_BOLD_BASE64, LOGO_MARK_BASE64 } from "./embedded-assets";
 
@@ -165,16 +164,21 @@ export async function GET(req: NextRequest) {
     }
   );
 
-  // Satori's own PNG encoder isn't especially size-optimized — re-compress
-  // through sharp (keeping the alpha channel, so the transparent rounded
-  // corners survive) before this gets copied to someone's clipboard.
-  const rawPng = Buffer.from(await rendered.arrayBuffer());
-  const optimizedPng = await sharp(rawPng).png({ compressionLevel: 9, effort: 10 }).toBuffer();
+  // Satori's raw PNG output is served as-is — an extra sharp re-compression
+  // pass here was previously trading a few hundred KB of file size for
+  // several extra seconds of CPU time on every request, which is the wrong
+  // trade for something the user is actively waiting on.
+  const png = Buffer.from(await rendered.arrayBuffer());
 
-  return new Response(new Uint8Array(optimizedPng), {
+  return new Response(new Uint8Array(png), {
     headers: {
       "Content-Type": "image/png",
-      "Cache-Control": "no-store",
+      // The query params fully determine the output, so the exact same URL
+      // always produces the exact same bytes — safe to cache aggressively.
+      // This also means the modal's <img> preview and the later "Share with
+      // friends" fetch (same URL) hit the browser cache instead of
+      // regenerating the image from scratch a second time.
+      "Cache-Control": "public, max-age=31536000, immutable",
     },
   });
 }

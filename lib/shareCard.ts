@@ -5,13 +5,16 @@ export interface ShareCardMovie {
   posterPath: string | null;
 }
 
-function shareCardUrl(movie: ShareCardMovie, output?: "png"): string {
+// Always the same URL for a given movie (no extra params that vary by call
+// site) so every fetch — the modal's preview <img>, then this file's copy
+// and share-sheet paths — hits the exact same cache entry instead of
+// regenerating the image again on every step.
+function shareCardUrl(movie: ShareCardMovie): string {
   const params = new URLSearchParams();
   params.set("title", movie.title);
   if (movie.year) params.set("year", String(movie.year));
   if (movie.format) params.set("format", movie.format);
   if (movie.posterPath) params.set("poster", movie.posterPath);
-  if (output) params.set("output", output);
   return `/api/share-card?${params.toString()}`;
 }
 
@@ -28,11 +31,9 @@ export async function shareMovieCard(movie: ShareCardMovie): Promise<ShareCardRe
       // The blob is passed as a pending promise rather than awaited first —
       // Safari only allows a clipboard write tied to a direct user gesture,
       // and constructing the ClipboardItem this way keeps the write inside
-      // that gesture even though the fetch behind it is async. PNG here
-      // specifically (see the route) since clipboard image support is
-      // pickier about MIME types than a plain image request would be.
+      // that gesture even though the fetch behind it is async.
       const item = new ClipboardItem({
-        "image/png": fetch(shareCardUrl(movie, "png")).then((res) => {
+        "image/png": fetch(shareCardUrl(movie)).then((res) => {
           if (!res.ok) throw new Error(`share-card fetch failed: ${res.status}`);
           return res.blob();
         }),
@@ -49,7 +50,7 @@ export async function shareMovieCard(movie: ShareCardMovie): Promise<ShareCardRe
       const res = await fetch(shareCardUrl(movie));
       if (!res.ok) throw new Error(`share-card fetch failed: ${res.status}`);
       const blob = await res.blob();
-      const file = new File([blob], "hardcopy-share.jpg", { type: blob.type });
+      const file = new File([blob], "hardcopy-share.png", { type: blob.type });
       if (navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file] });
         return "shared";
