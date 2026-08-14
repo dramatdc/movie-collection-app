@@ -46,7 +46,10 @@ export default function LibraryPage() {
     setViewMode(mode);
     setCollectionViewMode(mode);
     if (tutorial.active && tutorial.step?.id === "view-toggle") {
-      setTimeout(() => tutorial.next(), 700);
+      // Just flag that they've tried it — the tour reveals its own Next
+      // button once this is set, rather than auto-advancing immediately
+      // and giving them no time to actually look at the result.
+      tutorial.markActionDone();
     }
   }
 

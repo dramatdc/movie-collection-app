@@ -6,10 +6,20 @@ export interface TutorialStep {
   selector: string | null;
   title: string;
   body: string;
-  // When true, there's no Next button — the highlighted control itself
-  // advances the tour once the user actually presses it, so they can't
-  // click past the demo without having tried the real thing.
+  // When true, there's no Next button until the user actually presses the
+  // highlighted control (see actionDone in TutorialContext) — they can't
+  // click past the demo without having tried the real thing, but once
+  // they have, Next appears so they move on at their own pace rather than
+  // the tour auto-advancing the instant they act.
   requireAction?: boolean;
+  // Prefer placing the info card above the highlight rather than below,
+  // when there's room — for a target near the top of a section, "below"
+  // would sit right on top of the content the step is trying to show off.
+  preferAbove?: boolean;
+  // When false, the highlighted area itself stays non-interactive (visible
+  // but not clickable) — for a step that's purely explaining a feature
+  // rather than inviting the user to actually use it right now.
+  interactive?: boolean;
 }
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
@@ -62,6 +72,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     title: "Card or list view",
     body: "Tap the toggle above to switch between grid and list layout. Give it a try.",
     requireAction: true,
+    preferAbove: true,
   },
   {
     id: "add",
@@ -69,6 +80,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     selector: "add-search",
     title: "Adding a movie",
     body: "Search by title for something you own. Scanning the barcode works too, but search is quicker since barcode lookups are limited each day. Either way, you'll pick the format and shelf location next.",
+    interactive: false,
   },
   {
     id: "lists-top",

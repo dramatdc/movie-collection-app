@@ -12,6 +12,12 @@ interface TutorialContextValue {
   stepIndex: number;
   step: (typeof TUTORIAL_STEPS)[number] | null;
   totalSteps: number;
+  // For a requireAction step: whether the real control has actually been
+  // pressed yet. False shows a "do this" hint instead of Next, so the user
+  // can't skip past without trying it; true reveals a normal Next button so
+  // they move on when they're ready, not the instant they've pressed it.
+  actionDone: boolean;
+  markActionDone: () => void;
   start: () => void;
   next: () => void;
   back: () => void;
@@ -24,7 +30,14 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [active, setActive] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  const [actionDone, setActionDone] = useState(false);
   const checkedRef = useRef<string | null>(null);
+
+  // A fresh step never starts pre-completed, whether arrived at via Next,
+  // Back, or a fresh start().
+  useEffect(() => {
+    setActionDone(false);
+  }, [stepIndex, active]);
 
   // Auto-start once per session for any account that's never dismissed the
   // tour — covers brand-new signups and pre-existing accounts from before
@@ -80,11 +93,17 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
     dismiss();
   }
 
+  function markActionDone() {
+    setActionDone(true);
+  }
+
   const value: TutorialContextValue = {
     active,
     stepIndex,
     step: active ? TUTORIAL_STEPS[stepIndex] : null,
     totalSteps: TUTORIAL_STEPS.length,
+    actionDone,
+    markActionDone,
     start,
     next,
     back,

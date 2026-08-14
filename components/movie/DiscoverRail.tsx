@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { posterUrl } from "@/lib/tmdb/image";
@@ -18,7 +18,6 @@ interface Item {
 const CARD_WIDTH = 56;
 const GAP = 8;
 const SPEED_PX_PER_SEC = 40;
-const RESUME_DELAY_MS = 5000;
 
 export function DiscoverRail({
   title,
@@ -28,8 +27,6 @@ export function DiscoverRail({
   fetcher: () => Promise<TMDbSearchResponse>;
 }) {
   const [items, setItems] = useState<Item[] | null>(null);
-  const [paused, setPaused] = useState(false);
-  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,18 +51,6 @@ export function DiscoverRail({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-    };
-  }, []);
-
-  function pauseThenResume() {
-    setPaused(true);
-    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-    resumeTimerRef.current = setTimeout(() => setPaused(false), RESUME_DELAY_MS);
-  }
-
   if (items === null || items.length === 0) return null;
 
   const track = [...items, ...items];
@@ -74,24 +59,18 @@ export function DiscoverRail({
   // busy the main thread is, rather than fighting layout/scroll on every
   // frame. Duration is derived from the actual track width so the visual
   // speed (px/sec) stays constant no matter how many items are in it.
+  // There's no native scrolling here to pause for — it never stops, so a
+  // tap on a poster (to open it) doesn't visibly interrupt the reel either.
   const singleSetWidth = items.length * CARD_WIDTH + (items.length - 1) * GAP;
   const durationSec = singleSetWidth / SPEED_PX_PER_SEC;
 
   return (
     <section className="flex flex-col gap-2.5">
       <h2 className="text-base font-semibold">{title}</h2>
-      <div
-        className="overflow-hidden"
-        onPointerDown={pauseThenResume}
-        onWheel={pauseThenResume}
-        onTouchStart={pauseThenResume}
-      >
+      <div className="overflow-hidden">
         <div
           className="flex w-max gap-2"
-          style={{
-            animation: `marquee-scroll ${durationSec}s linear infinite`,
-            animationPlayState: paused ? "paused" : "running",
-          }}
+          style={{ animation: `marquee-scroll ${durationSec}s linear infinite` }}
         >
           {track.map((item, i) => (
             <Link

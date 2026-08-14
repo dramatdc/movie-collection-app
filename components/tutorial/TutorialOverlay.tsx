@@ -38,7 +38,7 @@ function findVisibleTarget(selector: string): HTMLElement | null {
 }
 
 export function TutorialOverlay() {
-  const { active, step, stepIndex, totalSteps, next, back, skip } = useTutorial();
+  const { active, step, stepIndex, totalSteps, actionDone, next, back, skip } = useTutorial();
   const pathname = usePathname();
   const router = useRouter();
   const [rect, setRect] = useState<Rect | null>(null);
@@ -188,12 +188,21 @@ export function TutorialOverlay() {
       }
     : null;
 
+  const roomAbove = highlight ? highlight.top : 0;
   const roomBelow = highlight ? vh - (highlight.top + highlight.height) : 0;
-  const cardTop = highlight
-    ? roomBelow > cardHeight + 24
-      ? highlight.top + highlight.height + 16
-      : Math.max(CARD_MARGIN, highlight.top - cardHeight - 16)
-    : null;
+  let cardTop: number | null = null;
+  if (highlight) {
+    if (step.preferAbove && roomAbove > cardHeight + 24) {
+      // For a target near the top of a section (like the view toggle), the
+      // content it's demonstrating continues below it — placing the card
+      // below would sit right on top of exactly what the step wants shown.
+      cardTop = highlight.top - cardHeight - 16;
+    } else if (roomBelow > cardHeight + 24) {
+      cardTop = highlight.top + highlight.height + 16;
+    } else {
+      cardTop = Math.max(CARD_MARGIN, highlight.top - cardHeight - 16);
+    }
+  }
 
   return (
     <div
@@ -246,6 +255,21 @@ export function TutorialOverlay() {
               boxShadow: "0 0 0 2px var(--color-accent), 0 0 0 6px rgba(0,149,213,0.25)",
             }}
           />
+          {step.interactive === false && (
+            // Some steps are purely explaining a feature rather than
+            // inviting the user to try it right now — the highlight still
+            // shows where it is, but stays non-interactive so nothing gets
+            // typed or clicked into the real page underneath by accident.
+            <div
+              className="pointer-events-auto absolute"
+              style={{
+                top: highlight.top,
+                left: highlight.left,
+                width: highlight.width,
+                height: highlight.height,
+              }}
+            />
+          )}
         </>
       ) : (
         <div className="pointer-events-auto absolute inset-0 bg-black/75" />
@@ -282,7 +306,7 @@ export function TutorialOverlay() {
           >
             Back
           </button>
-          {step.requireAction ? (
+          {step.requireAction && !actionDone ? (
             <p className="text-xs italic text-muted">Tap the highlighted button to continue</p>
           ) : (
             <button
