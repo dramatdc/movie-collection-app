@@ -1,8 +1,7 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { ImageResponse } from "next/og";
 import sharp from "sharp";
 import type { NextRequest } from "next/server";
+import { INTER_REGULAR_BASE64, INTER_BOLD_BASE64, LOGO_MARK_BASE64 } from "./embedded-assets";
 
 // Rendered with next/og (Satori) rather than sharp+raw SVG text, which
 // depended on a system font being installed to rasterize <text> — the
@@ -10,6 +9,17 @@ import type { NextRequest } from "next/server";
 // out as a missing-glyph box. Satori requires fonts to be supplied
 // explicitly instead of assuming one exists, which is exactly what makes
 // this reliable regardless of what's installed where it runs.
+//
+// The font/logo bytes are embedded as base64 constants (see
+// embedded-assets.ts) rather than read from disk with fs.readFile at
+// request time — that worked locally but 500'd in production. Vercel's
+// build only bundles files it can statically prove a deployed function
+// reads, by tracing fs calls back to literal path strings; ours went
+// through a small helper function that took the path as a parameter, and
+// that one level of indirection was apparently enough to lose the trace,
+// so the files never made it into the deployed bundle. Baking the bytes
+// directly into the module removes the file read — and the guesswork
+// about whether some bundler's static analysis will find it — entirely.
 
 const WIDTH = 1080;
 const HEIGHT = 1620;
@@ -42,27 +52,9 @@ function wrapText(text: string, maxChars: number, maxLines: number): string[] {
   return kept;
 }
 
-// Read fresh on every request rather than cached at module scope. These are
-// small local files (a couple hundred KB total) — reading them is cheap
-// enough that caching bought nothing worth the risk it turned out to carry:
-// a `promise ??= ...` cache holds onto whatever it first resolves to,
-// including a *rejection* — one transient failure (a cold read, a hiccup)
-// permanently poisoned every request after it until the process restarted,
-// since every later request just re-awaited the same broken promise.
-// process.cwd()-relative fs reads rather than new URL(asset, import.meta.url)
-// — that pattern is meant for the Edge runtime / client bundling, and on
-// the Node runtime it resolves to a bare "/_next/static/..." path with no
-// origin to fetch it against, which just throws. A literal, statically
-// analyzable path.join(process.cwd(), "...") is what Vercel's own file
-// tracing recognizes and bundles into the deployed function.
-function loadFont(relativePath: string): Promise<Buffer> {
-  return readFile(path.join(process.cwd(), relativePath));
-}
-
-async function loadLogoDataUrl(): Promise<string> {
-  const buf = await readFile(path.join(process.cwd(), "public/brand/mark.png"));
-  return `data:image/png;base64,${buf.toString("base64")}`;
-}
+const fontRegular = Buffer.from(INTER_REGULAR_BASE64, "base64");
+const fontBold = Buffer.from(INTER_BOLD_BASE64, "base64");
+const logoDataUrl = `data:image/png;base64,${LOGO_MARK_BASE64}`;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -70,12 +62,6 @@ export async function GET(req: NextRequest) {
   const year = searchParams.get("year");
   const format = searchParams.get("format");
   const posterPath = searchParams.get("poster");
-
-  const [fontRegular, fontBold, logoDataUrl] = await Promise.all([
-    loadFont("app/api/share-card/fonts/Inter-Regular.woff"),
-    loadFont("app/api/share-card/fonts/Inter-Bold.woff"),
-    loadLogoDataUrl(),
-  ]);
 
   let posterDataUrl: string | null = null;
   if (posterPath) {
