@@ -191,7 +191,18 @@ export default function LibraryPage() {
         <FilterBar filters={filters} onChange={setFilters} genres={genres} />
 
         {loading ? (
-          <p className="py-16 text-center text-sm text-muted">Loading...</p>
+          // A silent skeleton rather than "Loading..." text — the splash
+          // screen's whole job is to cover exactly this moment, and a
+          // page that says "Loading" right after it fades away reads as
+          // the app being stuck rather than a normal, brief data fetch.
+          <div className="grid grid-cols-3 gap-4 sm:grid-cols-4">
+            {Array.from({ length: 8 }, (_, i) => (
+              <div
+                key={i}
+                className="aspect-2/3 animate-pulse rounded-xl bg-surface-hover"
+              />
+            ))}
+          </div>
         ) : (
           <AlphabeticalGrid movies={displayedMovies} view={viewMode} />
         )}

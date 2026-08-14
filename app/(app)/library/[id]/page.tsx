@@ -13,21 +13,10 @@ import { playRemovedChime } from "@/lib/sound";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { BackButton } from "@/components/ui/BackButton";
 import { ShareIcon } from "@/lib/icons";
-import { shareMovieCard, type ShareCardResult } from "@/lib/shareCard";
+import { ShareCardModal } from "@/components/movie/ShareCardModal";
 import type { MovieFormat } from "@/lib/firebase/types";
 
 const FORMATS: MovieFormat[] = ["DVD", "Blu-ray", "4K UHD", "Digital"];
-
-type ShareButtonState = "idle" | "sharing" | ShareCardResult;
-
-const SHARE_LABELS: Record<ShareButtonState, string> = {
-  idle: "Share with friends",
-  sharing: "Preparing...",
-  copied: "Copied! Paste it anywhere",
-  shared: "Shared!",
-  opened: "Opened in new tab",
-  cancelled: "Share with friends",
-};
 
 export default function MovieDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -35,7 +24,7 @@ export default function MovieDetailPage() {
   const { user } = useAuth();
   const router = useRouter();
   const confirmDialog = useConfirm();
-  const [shareState, setShareState] = useState<ShareButtonState>("idle");
+  const [showShareCard, setShowShareCard] = useState(false);
 
   const movie = movies.find((m) => m.id === id);
 
@@ -63,21 +52,6 @@ export default function MovieDetailPage() {
     router.push("/library");
   }
 
-  async function handleShare() {
-    if (!movie) return;
-    setShareState("sharing");
-    const result = await shareMovieCard({
-      title: movie.title,
-      year: movie.year,
-      format: movie.format,
-      posterPath: movie.posterPath,
-    });
-    setShareState(result);
-    if (result !== "cancelled") {
-      setTimeout(() => setShareState("idle"), 2200);
-    }
-  }
-
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
       <BackButton fallbackHref="/library" />
@@ -99,12 +73,11 @@ export default function MovieDetailPage() {
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={handleShare}
-              disabled={shareState === "sharing"}
-              className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-accent-foreground hover:bg-accent-hover disabled:opacity-70"
+              onClick={() => setShowShareCard(true)}
+              className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-accent-foreground hover:bg-accent-hover"
             >
               <ShareIcon className="h-4 w-4" />
-              {SHARE_LABELS[shareState]}
+              Share with friends
             </button>
             <button
               type="button"
@@ -191,6 +164,18 @@ export default function MovieDetailPage() {
           </div>
         </div>
       </div>
+
+      {showShareCard && (
+        <ShareCardModal
+          movie={{
+            title: movie.title,
+            year: movie.year,
+            format: movie.format,
+            posterPath: movie.posterPath,
+          }}
+          onClose={() => setShowShareCard(false)}
+        />
+      )}
     </div>
   );
 }
