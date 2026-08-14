@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { useAuth } from "./useAuth";
 
 interface CacheEntry<T> {
@@ -49,19 +49,30 @@ export function createSubscriptionHook<T>(
           if (!e) return;
           e.data = newData;
           e.loading = false;
-          e.listeners.forEach((l) => l(newData, false));
+          // Marked low-priority: this can land while something more urgent
+          // is animating (most notably the launch splash's video and fade,
+          // which now mounts at the same time as this data starts loading
+          // behind it) — a transition lets React interrupt the resulting
+          // re-render for that instead of blocking a frame on it.
+          startTransition(() => {
+            e.listeners.forEach((l) => l(newData, false));
+          });
         });
         entry = { data: emptyValue, loading: true, listeners, unsubscribe };
         cache.set(uid, entry);
       }
 
       const listener = (newData: T, newLoading: boolean) => {
-        setData(newData);
-        setLoading(newLoading);
+        startTransition(() => {
+          setData(newData);
+          setLoading(newLoading);
+        });
       };
       entry.listeners.add(listener);
-      setData(entry.data);
-      setLoading(entry.loading);
+      startTransition(() => {
+        setData(entry!.data);
+        setLoading(entry!.loading);
+      });
 
       return () => {
         entry!.listeners.delete(listener);
