@@ -10,12 +10,14 @@ import { SplashScreen } from "@/components/layout/SplashScreen";
 // way whatever's underneath has already had time to load by the time the
 // splash fades, instead of only starting to load at that exact moment.
 export function SplashProvider({ children }: { children: React.ReactNode }) {
-  const { showSplash, fadingOut, onVideoEnd } = useSplash();
+  const { showSplash, fadingOut, onVideoEnd, onFadeOutEnd } = useSplash();
 
   return (
     <>
       {children}
-      {showSplash && <SplashScreen fadingOut={fadingOut} onVideoEnd={onVideoEnd} />}
+      {showSplash && (
+        <SplashScreen fadingOut={fadingOut} onVideoEnd={onVideoEnd} onFadeOutEnd={onFadeOutEnd} />
+      )}
     </>
   );
 }

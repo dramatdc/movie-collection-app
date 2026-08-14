@@ -5,9 +5,11 @@ import { useEffect, useRef } from "react";
 export function SplashScreen({
   fadingOut = false,
   onVideoEnd,
+  onFadeOutEnd,
 }: {
   fadingOut?: boolean;
   onVideoEnd?: () => void;
+  onFadeOutEnd?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -46,8 +48,19 @@ export function SplashScreen({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-canvas transition-opacity duration-300 ease-out"
+      // Deliberately above every other z-index in the app (including the
+      // tutorial overlay's z-[100]) — a launch splash needs to win against
+      // anything else that might mount underneath it, present or future,
+      // not just whatever had the highest z-index when this was written.
+      className="fixed inset-0 z-[1000] flex items-center justify-center bg-canvas transition-opacity duration-300 ease-out"
       style={{ opacity: fadingOut ? 0 : 1 }}
+      // Removing this from the tree the instant the *real* transition
+      // finishes (rather than a separately-timed JS timeout) is what keeps
+      // the reveal of the page underneath a clean fade instead of a pop —
+      // see useSplash's onFadeOutEnd.
+      onTransitionEnd={(e) => {
+        if (e.propertyName === "opacity" && fadingOut) onFadeOutEnd?.();
+      }}
     >
       <video
         ref={videoRef}

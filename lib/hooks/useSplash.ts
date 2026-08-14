@@ -44,13 +44,21 @@ export function useSplash({ fadeMs = 300 }: { fadeMs?: number } = {}) {
     setFadingOut(true);
   }, [enabled, done]);
 
+  // Dismissal is driven by the CSS opacity transition actually finishing
+  // (see SplashScreen's onTransitionEnd), not a parallel setTimeout — a
+  // timer that merely matches fadeMs can fire a beat before or after the
+  // real fade paints, and the gap shows up as a visible pop instead of a
+  // smooth reveal of the (now fully-loaded) page underneath. This timer is
+  // just a safety net in case the transition event never fires for some
+  // reason (e.g. a backgrounded tab).
   useEffect(() => {
     if (!fadingOut) return;
-    const timer = setTimeout(() => setShowSplash(false), fadeMs);
+    const timer = setTimeout(() => setShowSplash(false), fadeMs + 200);
     return () => clearTimeout(timer);
   }, [fadingOut, fadeMs]);
 
   const onVideoEnd = useCallback(() => setDone(true), []);
+  const onFadeOutEnd = useCallback(() => setShowSplash(false), []);
 
-  return { showSplash, fadingOut, onVideoEnd };
+  return { showSplash, fadingOut, onVideoEnd, onFadeOutEnd };
 }
