@@ -7,13 +7,23 @@ import { useTutorial } from "@/lib/tutorial/TutorialContext";
 const SPOTLIGHT_PADDING = 8;
 const CARD_MAX_WIDTH = 380;
 const CARD_MARGIN = 16;
-// A plain 16px margin sits right against a phone's status bar / notch when a
-// tall target (like "your collection", which can start near the very top of
-// the viewport once scrolled) pushes the card into the fallback top-clamp
-// branch below. This keeps it clear of that area on every step, not just
-// that one.
+// Fallback only — the real minimum is the sticky header's actual measured
+// bottom edge (see getCardTopSafeMargin below), which correctly accounts
+// for notches/Dynamic Island where the header grows taller than this.
 const CARD_TOP_SAFE_MARGIN = 56;
 const FALLBACK_CARD_HEIGHT = 190;
+
+// A plain fixed margin sits right against a phone's status bar / notch when
+// a tall target (like "your collection", which can start near the very top
+// of the viewport once scrolled) pushes the card into the fallback
+// top-clamp branch below — and a fixed guess can't know how much taller the
+// header grows on a notched device. Measuring it directly is exact on any
+// device instead.
+function getCardTopSafeMargin(): number {
+  const header = document.querySelector("header");
+  if (!header) return CARD_TOP_SAFE_MARGIN;
+  return Math.max(CARD_TOP_SAFE_MARGIN, header.getBoundingClientRect().bottom + 8);
+}
 const SCROLL_BLOCK_KEYS = new Set([
   "ArrowUp",
   "ArrowDown",
@@ -226,8 +236,9 @@ export function TutorialOverlay() {
     // Applied after picking a branch, not just in the fallback one — any of
     // the above can still land close to the top edge (a short highlight near
     // the top of a tall scrolled section, a small viewport), and the card
-    // shouldn't clip under the status bar / notch in any of those cases.
-    cardTop = Math.max(CARD_TOP_SAFE_MARGIN, cardTop);
+    // shouldn't clip under the header / status bar / notch in any of those
+    // cases.
+    cardTop = Math.max(getCardTopSafeMargin(), cardTop);
   }
 
   return (

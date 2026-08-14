@@ -41,6 +41,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     selector: "bottom-nav",
     title: "Getting around",
     body: "Library, Add, Lists, Pick, and Profile are all one tap away down here.",
+    interactive: false,
   },
   {
     id: "recently-added",
@@ -72,6 +73,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     selector: "your-collection",
     title: "Your Collection",
     body: "Everything you own lives here, sorted A-Z. Search it or filter by format and watched status.",
+    interactive: false,
   },
   {
     id: "view-toggle",

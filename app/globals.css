@@ -16,13 +16,16 @@
   --color-accent-foreground: #ffffff;
 }
 
-/* The app header is sticky at the top of the viewport (z-10, ~49px tall).
-   scrollIntoView's "start" alignment doesn't know about it and will happily
-   land a target's top edge at viewport y=0 — directly underneath the header,
-   hiding and blocking clicks to it. This margin makes the browser's own
-   scroll-into-view math account for that overlap on any tutorial target. */
+/* The app header is sticky at the top of the viewport (z-10, ~49px tall on a
+   device with no notch — taller on one with a Dynamic Island/notch, since
+   the header's own top padding grows with env(safe-area-inset-top)).
+   scrollIntoView's "start" alignment doesn't know about any of that and will
+   happily land a target's top edge at viewport y=0 — directly underneath
+   the header, hiding and blocking clicks to it. 100px covers the header
+   with room to spare on a plain device; adding the same safe-area inset the
+   header itself grows by keeps that margin on notched devices too. */
 [data-tutorial] {
-  scroll-margin-top: 64px;
+  scroll-margin-top: calc(100px + env(safe-area-inset-top, 0px));
 }
 
 @keyframes fade-in-up {
