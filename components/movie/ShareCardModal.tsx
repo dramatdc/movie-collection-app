@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { shareMovieCard, type ShareCardMovie, type ShareCardResult } from "@/lib/shareCard";
 import { CloseIcon, ShareIcon } from "@/lib/icons";
+import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 
 type CopyState = "idle" | "copying" | ShareCardResult;
 
@@ -32,6 +33,7 @@ export function ShareCardModal({
   onClose: () => void;
 }) {
   const [copyState, setCopyState] = useState<CopyState>("idle");
+  useLockBodyScroll(!!movie);
 
   if (!movie) return null;
 

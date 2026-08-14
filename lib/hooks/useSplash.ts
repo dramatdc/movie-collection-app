@@ -9,11 +9,11 @@ import { claimSplash } from "./splashOnce";
 const TOTAL_DISPLAY_MS = 3000;
 
 /**
- * Shows the splash only for whichever loading gate mounts first this
- * session (see splashOnce.ts). Fades out as soon as the splash video
- * finishes — or after TOTAL_DISPLAY_MS minus the fade time, whichever
- * comes first — so a short video gets to play naturally while a longer (or
- * stalled) one never holds the splash past the 3-second budget.
+ * Shows the splash once per session (see splashOnce.ts). Fades out as soon
+ * as the splash video finishes — or after TOTAL_DISPLAY_MS minus the fade
+ * time, whichever comes first — so a short video gets to play naturally
+ * while a longer (or stalled) one never holds the splash past the
+ * 3-second budget.
  */
 export function useSplash({ fadeMs = 300 }: { fadeMs?: number } = {}) {
   const [enabled, setEnabled] = useState(true);

@@ -3,11 +3,9 @@ const STORAGE_KEY = "hardcopy:splash-shown";
 let claimed = false;
 
 /**
- * The app has two loading gates (the root redirect page, and the
- * authenticated shell it redirects into) that would otherwise each show
- * their own splash back to back on a fresh launch. Whichever one mounts
- * first claims the splash for this page-load session; the other sees it's
- * already been shown and skips straight through instead of playing it twice.
+ * SplashProvider is the single, persistent owner of the splash (it lives in
+ * the root layout and never remounts on navigation), so this just answers
+ * "has it already played this session" once.
  *
  * Backed by sessionStorage rather than just the in-memory flag above —
  * on a phone especially, the webview can get torn down and its JS

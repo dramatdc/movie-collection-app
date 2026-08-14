@@ -3,8 +3,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { useSplash } from "@/lib/hooks/useSplash";
-import { SplashScreen } from "@/components/layout/SplashScreen";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { InstallPrompt } from "@/components/layout/InstallPrompt";
@@ -20,22 +18,15 @@ export default function AppShellLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const { showSplash, fadingOut, onVideoEnd } = useSplash();
 
   useEffect(() => {
-    // The splash has its own fixed 3-second budget — see the same note in
-    // app/page.tsx.
-    if (loading || showSplash) return;
+    if (loading) return;
     if (!user) {
       router.replace("/login");
     }
-  }, [loading, showSplash, user, router]);
+  }, [loading, user, router]);
 
-  if (showSplash) {
-    return <SplashScreen fadingOut={fadingOut} onVideoEnd={onVideoEnd} />;
-  }
-
-  if (!user) {
+  if (loading || !user) {
     return null;
   }
 
