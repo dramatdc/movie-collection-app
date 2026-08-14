@@ -39,12 +39,21 @@ function NavLink({
   );
 }
 
+// On the Wishlist, Watchlist, or an individual custom list, the FAB should
+// add there instead of to the owned collection — some users specifically
+// want that entry point rather than the inline "search to add" box already
+// on those pages.
+function computeAddHref(pathname: string): string {
+  if (pathname.startsWith("/wishlist")) return "/add?mode=wishlist";
+  if (pathname.startsWith("/lists/watchlist")) return "/add?mode=watchlist";
+  const listMatch = pathname.match(/^\/lists\/([^/]+)$/);
+  if (listMatch) return `/add?mode=list&listId=${encodeURIComponent(listMatch[1])}`;
+  return "/add";
+}
+
 export function BottomNav() {
   const pathname = usePathname();
-  // On the Wishlist page, the FAB should add to the wishlist instead of the
-  // owned collection — some users specifically want that entry point rather
-  // than the inline "search to add" box already on that page.
-  const addHref = pathname.startsWith("/wishlist") ? "/add?mode=wishlist" : "/add";
+  const addHref = computeAddHref(pathname);
 
   return (
     <nav

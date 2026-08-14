@@ -10,6 +10,7 @@ import { signOut } from "@/lib/firebase/auth";
 import { deleteAccount } from "@/lib/firebase/account";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { PasswordSection } from "@/components/profile/PasswordSection";
+import { ShareSection } from "@/components/profile/ShareSection";
 import { useTutorial } from "@/lib/tutorial/TutorialContext";
 import {
   isSoundEnabled,
@@ -96,6 +97,8 @@ export default function ProfilePage() {
             }}
           />
         </div>
+
+        {user && <ShareSection user={user} />}
 
         {user && <PasswordSection user={user} />}
 

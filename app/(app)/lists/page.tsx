@@ -9,6 +9,7 @@ import { AddIcon } from "@/lib/icons";
 import { ListPreviewCard } from "@/components/movie/ListPreviewCard";
 import { FavoritesSection } from "@/components/movie/FavoritesSection";
 import { WatchlistPreviewCard } from "@/components/movie/WatchlistPreviewCard";
+import { BackButton } from "@/components/ui/BackButton";
 
 export default function ListsPage() {
   const { user } = useAuth();
@@ -32,6 +33,7 @@ export default function ListsPage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6">
+      <BackButton fallbackHref="/library" />
       <div>
         <h1 className="text-xl font-semibold">Lists</h1>
         <p className="text-sm text-muted">Group movies your own way.</p>

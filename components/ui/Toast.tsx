@@ -27,11 +27,20 @@ export function Toast({
   if (!toast) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-24 z-30 flex justify-center px-4 md:bottom-6">
+    // Anchored below the header rather than the bottom of the screen —
+    // eye-line is naturally where attention already is, whereas the bottom
+    // (especially on a tall phone) sits well outside normal reading range
+    // and is easy to miss. env(safe-area-inset-top) keeps the same
+    // clearance below the header on notched devices, where the header
+    // itself grows taller.
+    <div
+      className="pointer-events-none fixed inset-x-0 z-30 flex justify-center px-4"
+      style={{ top: "calc(5.5rem + env(safe-area-inset-top))" }}
+    >
       <div
         role="status"
         className={clsx(
-          "pointer-events-auto flex max-w-sm items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium shadow-xl shadow-black/40 animate-[fade-in-up_0.2s_ease-out]",
+          "pointer-events-auto flex max-w-md items-center gap-2.5 rounded-2xl px-6 py-4 text-base font-medium shadow-2xl shadow-black/50 animate-[fade-in-up_0.2s_ease-out]",
           toast.tone === "success"
             ? "bg-accent text-accent-foreground"
             : "bg-surface border border-border text-white"

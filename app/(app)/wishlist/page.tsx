@@ -14,6 +14,7 @@ import { playAddedChime, playRemovedChime } from "@/lib/sound";
 import { CloseIcon } from "@/lib/icons";
 import { posterUrl } from "@/lib/tmdb/image";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { BackButton } from "@/components/ui/BackButton";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
 export default function WishlistPage() {
@@ -57,6 +58,7 @@ export default function WishlistPage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6">
+      <BackButton fallbackHref="/library" />
       <div>
         <h1 className="text-xl font-semibold">Wishlist</h1>
         <p className="text-sm text-muted">Movies you don&apos;t own yet but want to buy.</p>

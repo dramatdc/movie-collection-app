@@ -11,6 +11,7 @@ import { RecentSearchChips } from "@/components/movie/RecentSearchChips";
 import { playAddedChime, playRemovedChime } from "@/lib/sound";
 import { CloseIcon } from "@/lib/icons";
 import { posterUrl } from "@/lib/tmdb/image";
+import { BackButton } from "@/components/ui/BackButton";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
 export default function WatchlistPage() {
@@ -43,6 +44,7 @@ export default function WatchlistPage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6">
+      <BackButton fallbackHref="/lists" />
       <div>
         <h1 className="text-xl font-semibold">Watchlist</h1>
         <p className="text-sm text-muted">Movies you want to watch, separate from your collection.</p>

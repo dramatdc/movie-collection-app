@@ -3,12 +3,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Everything under /users/{uid} is private to that one signed-in user.
+    // Everything under /users/{uid} is private to that one signed-in user,
+    // with one exception: the owned-movies subcollection is also readable
+    // by anyone (including signed-out visitors) while that user's own
+    // shareEnabled flag is true — this is what powers the public
+    // /shared/{shareId} collection view. get() here evaluates against the
+    // document directly, independent of that document's own read rule
+    // above, which is what makes this check possible without granting
+    // public read access to the user doc itself.
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
 
       match /movies/{movieId} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
+        allow read: if (request.auth != null && request.auth.uid == uid)
+          || get(/databases/$(database)/documents/users/$(uid)).data.get('shareEnabled', false) == true;
+        allow write: if request.auth != null && request.auth.uid == uid;
       }
 
       match /wishlist/{tmdbId} {
@@ -40,6 +49,19 @@ service cloud.firestore {
     // it holds no personal data, just UPC codes and product titles.
     match /upc_cache/{upc} {
       allow read, write: if true;
+    }
+
+    // Public share links — an opaque id (handed out in a URL, not
+    // guessable) maps to the owning uid. Anyone with the id can resolve it
+    // to know whose collection to load; only the owner can create or
+    // remove their own link. The actual movie data behind it stays gated
+    // by that user's own shareEnabled flag (see /users/{uid}/movies
+    // above), so turning sharing off immediately cuts off every copy of
+    // the link without needing to delete this doc.
+    match /shareLinks/{shareId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
     }
   }
 }

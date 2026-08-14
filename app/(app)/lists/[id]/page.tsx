@@ -11,6 +11,7 @@ import { TMDbSearchResults } from "@/components/movie/TMDbSearchResults";
 import { CloseIcon } from "@/lib/icons";
 import { posterUrl } from "@/lib/tmdb/image";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { BackButton } from "@/components/ui/BackButton";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
 export default function ListDetailPage() {
@@ -57,6 +58,7 @@ export default function ListDetailPage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6">
+      <BackButton fallbackHref="/lists" />
       <div>
         <h1 className="text-xl font-semibold">{list?.name ?? "List"}</h1>
         <p className="text-sm text-muted">
