@@ -92,13 +92,18 @@ export default function AddPage() {
 
       setScannedUpc(code);
       setNeedsCrowdsourcing(false);
-      setSearchQuery(result.searchTitle);
 
       const searchResults = await searchMoviesClient(result.searchTitle);
       const topMatch = searchResults.results?.[0];
-      if (!topMatch) return;
+      if (!topMatch) {
+        // No auto-add possible — fall back to showing it in the search
+        // results section so the user can find and add it by hand.
+        setSearchQuery(result.searchTitle);
+        return;
+      }
 
       if (collectionTmdbIdsRef.current.has(topMatch.id)) {
+        setSearchQuery(result.searchTitle);
         setToast({
           tone: "warning",
           message: `Already in your collection: "${topMatch.title}"`,

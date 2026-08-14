@@ -16,6 +16,15 @@
   --color-accent-foreground: #ffffff;
 }
 
+/* The app header is sticky at the top of the viewport (z-10, ~49px tall).
+   scrollIntoView's "start" alignment doesn't know about it and will happily
+   land a target's top edge at viewport y=0 — directly underneath the header,
+   hiding and blocking clicks to it. This margin makes the browser's own
+   scroll-into-view math account for that overlap on any tutorial target. */
+[data-tutorial] {
+  scroll-margin-top: 64px;
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;

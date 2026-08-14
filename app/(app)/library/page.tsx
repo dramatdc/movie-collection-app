@@ -152,32 +152,37 @@ export default function LibraryPage() {
           <div className="flex items-center gap-2">
             <div
               data-tutorial="view-toggle"
-              className="flex shrink-0 items-center gap-0.5 rounded-full border border-border p-0.5"
+              role="button"
+              tabIndex={0}
+              aria-label={viewMode === "card" ? "Switch to list view" : "Switch to card view"}
+              onClick={() => handleSetView(viewMode === "card" ? "list" : "card")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleSetView(viewMode === "card" ? "list" : "card");
+                }
+              }}
+              className="flex shrink-0 cursor-pointer items-center gap-0.5 rounded-full border border-border p-0.5"
             >
-              <button
-                type="button"
-                onClick={() => handleSetView("card")}
-                aria-label="Card view"
+              {/* The two icons are purely visual now — a tap anywhere in the
+                  pill toggles between the only two states, rather than
+                  requiring a precise tap on one specific icon. */}
+              <div
+                aria-hidden="true"
                 className={`flex items-center justify-center rounded-full p-1.5 transition ${
-                  viewMode === "card"
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted hover:text-accent"
+                  viewMode === "card" ? "bg-accent text-accent-foreground" : "text-muted"
                 }`}
               >
                 <LibraryIcon className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSetView("list")}
-                aria-label="List view"
+              </div>
+              <div
+                aria-hidden="true"
                 className={`flex items-center justify-center rounded-full p-1.5 transition ${
-                  viewMode === "list"
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted hover:text-accent"
+                  viewMode === "list" ? "bg-accent text-accent-foreground" : "text-muted"
                 }`}
               >
                 <ListIcon className="h-4 w-4" />
-              </button>
+              </div>
             </div>
             <LibraryLookupScanner movies={movies} />
           </div>

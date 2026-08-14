@@ -20,6 +20,11 @@ export interface TutorialStep {
   // but not clickable) — for a step that's purely explaining a feature
   // rather than inviting the user to actually use it right now.
   interactive?: boolean;
+  // When true, the region below the highlight is left undimmed (still
+  // click-blocked, just not darkened) — for a step where the highlighted
+  // control changes content beneath it that the user needs to actually see,
+  // rather than the usual single dimmed backdrop everywhere but the target.
+  revealBelow?: boolean;
 }
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
@@ -43,6 +48,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     selector: "recently-added",
     title: "Recently Added",
     body: "Your latest additions show up first, right at the top of your library.",
+    interactive: false,
   },
   {
     id: "wishlist",
@@ -50,6 +56,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     selector: "wishlist-box",
     title: "Wishlist",
     body: "Movies you want to buy, kept separate from your collection until you actually own them.",
+    interactive: false,
   },
   {
     id: "trending",
@@ -57,6 +64,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     selector: "trending-box",
     title: "Trending This Week",
     body: "See what's popular right now. Tap a poster to add it to your wishlist, watchlist, or straight to your collection.",
+    interactive: false,
   },
   {
     id: "your-collection",
@@ -73,6 +81,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     body: "Tap the toggle above to switch between grid and list layout. Give it a try.",
     requireAction: true,
     preferAbove: true,
+    revealBelow: true,
   },
   {
     id: "add",
@@ -88,6 +97,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     selector: "lists-top",
     title: "Favorites & Watchlist",
     body: "Feature up to 4 favorites, and keep a Watchlist of movies you want to watch. That's different from your Wishlist, which is about buying.",
+    interactive: false,
   },
   {
     id: "custom-lists",
@@ -95,6 +105,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     selector: "custom-lists",
     title: "Your own lists",
     body: "Group movies however you like: by genre, mood, shelf, anything.",
+    interactive: false,
   },
   {
     id: "randomizer",
@@ -102,6 +113,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     selector: "randomizer",
     title: "Pick for me",
     body: "Can't decide? Spin the randomizer. Every movie in your filtered results has a genuinely equal shot at getting picked.",
+    interactive: false,
   },
   {
     id: "profile",
@@ -109,5 +121,6 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     selector: "profile-page",
     title: "Your Profile",
     body: "Turn off sounds or haptics, manage your password, or retake this tour anytime. It's all right here.",
+    interactive: false,
   },
 ];

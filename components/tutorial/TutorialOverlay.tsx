@@ -7,6 +7,12 @@ import { useTutorial } from "@/lib/tutorial/TutorialContext";
 const SPOTLIGHT_PADDING = 8;
 const CARD_MAX_WIDTH = 380;
 const CARD_MARGIN = 16;
+// A plain 16px margin sits right against a phone's status bar / notch when a
+// tall target (like "your collection", which can start near the very top of
+// the viewport once scrolled) pushes the card into the fallback top-clamp
+// branch below. This keeps it clear of that area on every step, not just
+// that one.
+const CARD_TOP_SAFE_MARGIN = 56;
 const FALLBACK_CARD_HEIGHT = 190;
 const SCROLL_BLOCK_KEYS = new Set([
   "ArrowUp",
@@ -50,7 +56,16 @@ export function TutorialOverlay() {
   // poll for its target element (it may not exist yet — the route's data
   // might still be loading) before measuring and revealing the spotlight.
   useEffect(() => {
-    if (!active || !step) return;
+    if (!active || !step) {
+      // Critical: without this, dismissing the tour while a step's target
+      // was already `ready` never flips it back to false, so the scroll
+      // lock and position-poll effects below (keyed on `ready`) never
+      // re-run their cleanup — the wheel/touch/keydown blockers stay
+      // attached to the window forever, breaking scroll app-wide until a
+      // full reload.
+      setReady(false);
+      return;
+    }
     setReady(false);
     setRect(null);
 
@@ -80,7 +95,13 @@ export function TutorialOverlay() {
       if (!el) return;
       clearInterval(pollId);
       clearTimeout(giveUpId);
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      // "start" rather than "center" — for a tall target (the collection
+      // section can be much taller than the viewport), centering tries to
+      // put its midpoint on screen, which can mean scrolling well past its
+      // top edge in one jump. Aligning to the top is a shorter, less jarring
+      // scroll and also keeps the target's actual top edge (where the info
+      // card anchors) predictable.
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
       setTimeout(() => {
         if (cancelled) return;
         measure();
@@ -200,8 +221,13 @@ export function TutorialOverlay() {
     } else if (roomBelow > cardHeight + 24) {
       cardTop = highlight.top + highlight.height + 16;
     } else {
-      cardTop = Math.max(CARD_MARGIN, highlight.top - cardHeight - 16);
+      cardTop = highlight.top - cardHeight - 16;
     }
+    // Applied after picking a branch, not just in the fallback one — any of
+    // the above can still land close to the top edge (a short highlight near
+    // the top of a tall scrolled section, a small viewport), and the card
+    // shouldn't clip under the status bar / notch in any of those cases.
+    cardTop = Math.max(CARD_TOP_SAFE_MARGIN, cardTop);
   }
 
   return (
@@ -229,7 +255,7 @@ export function TutorialOverlay() {
             style={{ top: 0, left: 0, right: 0, height: highlight.top }}
           />
           <div
-            className="pointer-events-auto absolute bg-black/75"
+            className={`pointer-events-auto absolute ${step.revealBelow ? "" : "bg-black/75"}`}
             style={{ top: highlight.top + highlight.height, left: 0, right: 0, bottom: 0 }}
           />
           <div
