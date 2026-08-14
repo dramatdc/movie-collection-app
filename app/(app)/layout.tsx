@@ -19,11 +19,11 @@ export default function AppShellLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const { showSplash, fadingOut } = useSplash(!loading, { minDisplayMs: 1950 });
+  const { showSplash, fadingOut, onVideoEnd } = useSplash(!loading);
 
   useEffect(() => {
-    // Wait out the splash's own minimum-display floor too — see the same
-    // fix in app/page.tsx for why this can't key off `loading` alone.
+    // Wait for the splash video to actually finish too — see the same fix
+    // in app/page.tsx for why this can't key off `loading` alone.
     if (loading || showSplash) return;
     if (!user) {
       router.replace("/login");
@@ -31,7 +31,7 @@ export default function AppShellLayout({
   }, [loading, showSplash, user, router]);
 
   if (showSplash) {
-    return <SplashScreen fadingOut={fadingOut} />;
+    return <SplashScreen fadingOut={fadingOut} onVideoEnd={onVideoEnd} />;
   }
 
   if (!user) {

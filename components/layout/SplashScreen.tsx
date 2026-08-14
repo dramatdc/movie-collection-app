@@ -2,7 +2,13 @@
 
 import { useEffect, useRef } from "react";
 
-export function SplashScreen({ fadingOut = false }: { fadingOut?: boolean }) {
+export function SplashScreen({
+  fadingOut = false,
+  onVideoEnd,
+}: {
+  fadingOut?: boolean;
+  onVideoEnd?: () => void;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -16,9 +22,27 @@ export function SplashScreen({ fadingOut = false }: { fadingOut?: boolean }) {
     video.muted = true;
     video.play().catch(() => {
       // Autoplay can still be blocked in some contexts — the dark splash
-      // background still shows either way, so this is a silent no-op.
+      // background still shows either way, and useSplash's own fallback
+      // timer keeps things moving even if `ended` never fires because of
+      // this.
     });
   }, []);
+
+  // The video finishing is what actually drives the splash away (see
+  // useSplash) — this is what guarantees it always plays start to finish
+  // instead of being cut off by some fixed, guessed duration. `error` is
+  // treated the same as `ended` so a decode failure can't strand the app on
+  // the splash screen forever.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !onVideoEnd) return;
+    video.addEventListener("ended", onVideoEnd);
+    video.addEventListener("error", onVideoEnd);
+    return () => {
+      video.removeEventListener("ended", onVideoEnd);
+      video.removeEventListener("error", onVideoEnd);
+    };
+  }, [onVideoEnd]);
 
   return (
     <div

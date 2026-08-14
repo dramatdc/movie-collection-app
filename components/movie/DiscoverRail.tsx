@@ -19,6 +19,16 @@ const CARD_WIDTH = 56;
 const GAP = 8;
 const SPEED_PX_PER_SEC = 40;
 
+// Keyed by the fetcher function itself (a stable, module-level reference
+// like getTrendingClient) rather than a fixed string, so this stays correct
+// if DiscoverRail is ever reused with a different feed. Without this,
+// navigating away from the library tab and back remounted the component
+// from scratch every time and re-fetched over the network, causing a brief
+// blank flash each time — everything else on that page survives navigation
+// via a cached subscription (see createSubscription.ts) and reappears
+// instantly; this makes the trending rail behave the same way.
+const cache = new Map<() => Promise<TMDbSearchResponse>, Item[]>();
+
 export function DiscoverRail({
   title,
   fetcher,
@@ -26,21 +36,22 @@ export function DiscoverRail({
   title: string;
   fetcher: () => Promise<TMDbSearchResponse>;
 }) {
-  const [items, setItems] = useState<Item[] | null>(null);
+  const [items, setItems] = useState<Item[] | null>(cache.get(fetcher) ?? null);
 
   useEffect(() => {
+    if (cache.has(fetcher)) return;
     let cancelled = false;
     fetcher()
       .then((data) => {
         if (cancelled) return;
-        setItems(
-          (data.results ?? []).slice(0, 20).map((m) => ({
-            key: String(m.id),
-            title: m.title,
-            posterUrl: posterUrl(m.poster_path, "w154"),
-            href: `/wishlist/${m.id}`,
-          }))
-        );
+        const mapped = (data.results ?? []).slice(0, 20).map((m) => ({
+          key: String(m.id),
+          title: m.title,
+          posterUrl: posterUrl(m.poster_path, "w154"),
+          href: `/wishlist/${m.id}`,
+        }));
+        cache.set(fetcher, mapped);
+        setItems(mapped);
       })
       .catch(() => {
         if (!cancelled) setItems([]);
@@ -48,8 +59,7 @@ export function DiscoverRail({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetcher]);
 
   if (items === null || items.length === 0) return null;
 
