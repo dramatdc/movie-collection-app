@@ -21,15 +21,17 @@ import { INTER_REGULAR_BASE64, INTER_BOLD_BASE64, LOGO_MARK_BASE64 } from "./emb
 // about whether some bundler's static analysis will find it — entirely.
 
 const WIDTH = 1080;
-const HEIGHT = 1620;
 const CARD_MARGIN = 28;
+const CARD_GAP = 24;
 const CARD_RADIUS = 56;
 const BORDER_WIDTH = 8;
-// The poster gets the top of the card at full quality with nothing overlaid
-// on it; everything else lives in a solid banner below it instead of a
-// gradient blended into the image — a clean hand-off reads more like an
-// actual banner and lets the poster itself stay the star.
-const POSTER_HEIGHT = 1000;
+// Two independent rounded-rectangle cards, stacked with a gap between them
+// — the poster card is sized tall enough for a full poster to fit via
+// objectFit "contain" without cropping any of it, and the banner is its
+// own separate card underneath rather than sharing the poster's box.
+const POSTER_CARD_HEIGHT = 1300;
+const BANNER_CARD_HEIGHT = 620;
+const HEIGHT = CARD_MARGIN * 2 + POSTER_CARD_HEIGHT + CARD_GAP + BANNER_CARD_HEIGHT;
 
 // Movie titles range from "Up" to "The Lord of the Rings: The Fellowship
 // of the Ring" — greedily wraps to maxLines, ellipsizing the last line if
@@ -84,114 +86,127 @@ export async function GET(req: NextRequest) {
 
   const rendered = new ImageResponse(
     (
-      <div style={{ width: WIDTH, height: HEIGHT, display: "flex", fontFamily: "Inter" }}>
+      <div
+        style={{
+          width: WIDTH,
+          height: HEIGHT,
+          display: "flex",
+          flexDirection: "column",
+          fontFamily: "Inter",
+          padding: CARD_MARGIN,
+        }}
+      >
+        {/* Card 1: the poster, whole — "contain" rather than "cover" so
+            nothing is ever cropped off it regardless of its exact aspect
+            ratio, with the card's own dark background filling any thin
+            letterbox margin that results. */}
         <div
           style={{
-            position: "absolute",
-            top: CARD_MARGIN,
-            left: CARD_MARGIN,
-            right: CARD_MARGIN,
-            bottom: CARD_MARGIN,
             display: "flex",
-            flexDirection: "column",
+            width: "100%",
+            height: POSTER_CARD_HEIGHT,
+            alignItems: "center",
+            justifyContent: "center",
             borderRadius: CARD_RADIUS,
             border: `${BORDER_WIDTH}px solid #0095D5`,
             overflow: "hidden",
             background: "#1e1e1e",
           }}
         >
-          <div style={{ position: "relative", width: "100%", height: POSTER_HEIGHT, display: "flex" }}>
-            {posterDataUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={posterDataUrl}
-                alt=""
-                width={WIDTH}
-                height={POSTER_HEIGHT}
-                style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            )}
-          </div>
+          {posterDataUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={posterDataUrl}
+              alt=""
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
+          )}
+        </div>
 
-          {/* The banner: a solid, unmistakable block instead of a gradient
-              blended into the poster — the whole point is to actually look
-              like a brag banner, not a caption. */}
+        <div style={{ display: "flex", width: "100%", height: CARD_GAP }} />
+
+        {/* Card 2: a completely separate rounded-rectangle banner, not
+            sharing the poster's box — its whole job is to brag. */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            height: BANNER_CARD_HEIGHT,
+            justifyContent: "center",
+            borderRadius: CARD_RADIUS,
+            border: `${BORDER_WIDTH}px solid #0095D5`,
+            overflow: "hidden",
+            background: "#0095D5",
+            padding: "40px 56px",
+          }}
+        >
           <div
             style={{
-              flex: 1,
               display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              padding: "36px 56px",
-              background: "#0095D5",
+              alignSelf: "flex-start",
+              background: "#101820",
+              color: "#ffffff",
+              fontSize: 28,
+              fontWeight: 700,
+              letterSpacing: 1.5,
+              padding: "12px 24px",
+              borderRadius: 999,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignSelf: "flex-start",
-                background: "#101820",
-                color: "#ffffff",
-                fontSize: 26,
-                fontWeight: 700,
-                letterSpacing: 1.5,
-                padding: "10px 22px",
-                borderRadius: 999,
-              }}
-            >
-              NEW ADDITION
-            </div>
-            <div
-              style={{
-                display: "flex",
-                color: "#0b1520",
-                fontSize: 40,
-                fontWeight: 700,
-                letterSpacing: 0.5,
-                marginTop: 22,
-              }}
-            >
-              Look what I just got
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                color: "#ffffff",
-                fontSize: 64,
-                fontWeight: 700,
-                marginTop: 10,
-                lineHeight: 1.15,
-              }}
-            >
-              {titleLines.map((line, i) => (
-                <div key={i} style={{ display: "flex" }}>
-                  {line}
-                </div>
-              ))}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginTop: 30,
-              }}
-            >
-              <div style={{ display: "flex", color: "rgba(11,21,32,0.85)", fontSize: 32, fontWeight: 700 }}>
-                {subtitle}
+            NEW ADDITION
+          </div>
+          <div
+            style={{
+              display: "flex",
+              color: "#ffffff",
+              fontSize: 58,
+              fontWeight: 700,
+              letterSpacing: 0.5,
+              marginTop: 26,
+              lineHeight: 1.1,
+            }}
+          >
+            Look what I just got
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              color: "#0b1520",
+              fontSize: 66,
+              fontWeight: 700,
+              marginTop: 16,
+              lineHeight: 1.12,
+            }}
+          >
+            {titleLines.map((line, i) => (
+              <div key={i} style={{ display: "flex" }}>
+                {line}
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  background: "rgba(16,24,32,0.4)",
-                  borderRadius: 16,
-                  padding: "10px 16px",
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={logoDataUrl} alt="" width={130} height={46} style={{ objectFit: "contain" }} />
-              </div>
+            ))}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: 26,
+            }}
+          >
+            <div style={{ display: "flex", color: "rgba(11,21,32,0.85)", fontSize: 32, fontWeight: 700 }}>
+              {subtitle}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                background: "rgba(16,24,32,0.4)",
+                borderRadius: 16,
+                padding: "10px 16px",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logoDataUrl} alt="" width={130} height={46} style={{ objectFit: "contain" }} />
             </div>
           </div>
         </div>
