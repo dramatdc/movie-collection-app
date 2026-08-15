@@ -124,15 +124,19 @@ export function Randomizer({
     const length = eligible.length;
     if (length === 0 || spinning) return;
 
-    // The landing card is chosen uniformly at random across every eligible
-    // movie first — independent of where the reel currently sits — so every
-    // title has an equal shot regardless of collection size or spin history.
+    // The landing card is chosen uniformly at random across every OTHER
+    // eligible movie — independent of where the reel currently sits — so
+    // every title has an equal shot regardless of collection size or spin
+    // history. Picking from [0, length) and bumping forward by one on a
+    // collision with the current slot (the naive approach) sounds
+    // equivalent but isn't: it makes the very next slot land twice as often
+    // as any other, since it's reachable both directly and via the bump.
+    // Picking the offset from the other length-1 slots instead keeps every
+    // remaining title's odds identical.
     const startPos = Math.round(reelPosRef.current);
     const currentSlot = mod(startPos, length);
-    let targetSlot = Math.floor(Math.random() * length);
-    if (length > 1 && targetSlot === currentSlot) {
-      targetSlot = mod(targetSlot + 1, length);
-    }
+    const targetSlot =
+      length > 1 ? mod(currentSlot + 1 + Math.floor(Math.random() * (length - 1)), length) : currentSlot;
 
     const isFirstSpin = firstSpinRef.current;
     const minSteps = isFirstSpin ? FIRST_SPIN_MIN_STEPS : MIN_SPIN_STEPS;

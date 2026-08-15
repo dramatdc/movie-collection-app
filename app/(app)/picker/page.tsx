@@ -14,10 +14,7 @@ import type { OwnedMovie } from "@/lib/firebase/types";
 
 export default function PickerPage() {
   const { movies, loading } = useMovies();
-  const [filters, setFilters] = useState<MovieFilters>({
-    ...DEFAULT_FILTERS,
-    watched: "unwatched",
-  });
+  const [filters, setFilters] = useState<MovieFilters>(DEFAULT_FILTERS);
   const [moods, setMoods] = useState<string[]>([]);
   const [pick, setPick] = useState<OwnedMovie | null>(null);
 

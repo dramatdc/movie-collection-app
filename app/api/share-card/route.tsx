@@ -25,6 +25,11 @@ const HEIGHT = 1620;
 const CARD_MARGIN = 28;
 const CARD_RADIUS = 56;
 const BORDER_WIDTH = 8;
+// The poster gets the top of the card at full quality with nothing overlaid
+// on it; everything else lives in a solid banner below it instead of a
+// gradient blended into the image — a clean hand-off reads more like an
+// actual banner and lets the poster itself stay the star.
+const POSTER_HEIGHT = 1000;
 
 // Movie titles range from "Up" to "The Lord of the Rings: The Fellowship
 // of the Ring" — greedily wraps to maxLines, ellipsizing the last line if
@@ -88,47 +93,74 @@ export async function GET(req: NextRequest) {
             right: CARD_MARGIN,
             bottom: CARD_MARGIN,
             display: "flex",
+            flexDirection: "column",
             borderRadius: CARD_RADIUS,
             border: `${BORDER_WIDTH}px solid #0095D5`,
             overflow: "hidden",
             background: "#1e1e1e",
           }}
         >
-          {posterDataUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={posterDataUrl}
-              alt=""
-              width={WIDTH}
-              height={HEIGHT}
-              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          )}
+          <div style={{ position: "relative", width: "100%", height: POSTER_HEIGHT, display: "flex" }}>
+            {posterDataUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={posterDataUrl}
+                alt=""
+                width={WIDTH}
+                height={POSTER_HEIGHT}
+                style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            )}
+          </div>
+
+          {/* The banner: a solid, unmistakable block instead of a gradient
+              blended into the poster — the whole point is to actually look
+              like a brag banner, not a caption. */}
           <div
             style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: 660,
+              flex: 1,
               display: "flex",
               flexDirection: "column",
-              justifyContent: "flex-end",
-              padding: "0 56px 56px",
-              backgroundImage: "linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.94))",
+              justifyContent: "center",
+              padding: "36px 56px",
+              background: "#0095D5",
             }}
           >
-            <div style={{ display: "flex", color: "#0095D5", fontSize: 36, fontWeight: 700, letterSpacing: 1 }}>
-              JUST ADDED TO MY COLLECTION
+            <div
+              style={{
+                display: "flex",
+                alignSelf: "flex-start",
+                background: "#101820",
+                color: "#ffffff",
+                fontSize: 26,
+                fontWeight: 700,
+                letterSpacing: 1.5,
+                padding: "10px 22px",
+                borderRadius: 999,
+              }}
+            >
+              NEW ADDITION
+            </div>
+            <div
+              style={{
+                display: "flex",
+                color: "#0b1520",
+                fontSize: 40,
+                fontWeight: 700,
+                letterSpacing: 0.5,
+                marginTop: 22,
+              }}
+            >
+              Look what I just got
             </div>
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
                 color: "#ffffff",
-                fontSize: 62,
+                fontSize: 64,
                 fontWeight: 700,
-                marginTop: 18,
+                marginTop: 10,
                 lineHeight: 1.15,
               }}
             >
@@ -142,13 +174,24 @@ export async function GET(req: NextRequest) {
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                alignItems: "flex-end",
-                marginTop: 28,
+                alignItems: "center",
+                marginTop: 30,
               }}
             >
-              <div style={{ display: "flex", color: "#d4d4d4", fontSize: 34 }}>{subtitle}</div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={logoDataUrl} alt="" width={148} height={52} style={{ objectFit: "contain" }} />
+              <div style={{ display: "flex", color: "rgba(11,21,32,0.85)", fontSize: 32, fontWeight: 700 }}>
+                {subtitle}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  background: "rgba(16,24,32,0.4)",
+                  borderRadius: 16,
+                  padding: "10px 16px",
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={logoDataUrl} alt="" width={130} height={46} style={{ objectFit: "contain" }} />
+              </div>
             </div>
           </div>
         </div>
