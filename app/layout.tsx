@@ -40,6 +40,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-dvh flex flex-col bg-canvas text-white">
+        {/* Hints the browser to fetch the splash video immediately rather
+            than only once SplashScreen mounts and its <video> tag is
+            discovered — one less thing competing for it to catch up on. */}
+        <link rel="preload" href="/brand/splash.mp4" as="video" type="video/mp4" />
         <SplashProvider>{children}</SplashProvider>
       </body>
     </html>

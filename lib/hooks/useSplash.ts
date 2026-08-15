@@ -8,6 +8,15 @@ import { claimSplash } from "./splashOnce";
 // resolve. Not a "usually" — a hard cap for every device every time.
 const TOTAL_DISPLAY_MS = 3000;
 
+// How long SplashProvider holds off mounting the rest of the app once the
+// splash is actually going to play. Mounting the whole destination route
+// (header, nav, movie rails, Firestore subscriptions) is real work, and
+// giving the video this short head start before any of that competes for
+// the main thread is what keeps its first frames from stuttering. Skipped
+// entirely when the splash isn't showing this load (see contentReady below)
+// so it never taxes the common "already shown this session" case.
+const CONTENT_DELAY_MS = 150;
+
 /**
  * Shows the splash once per session (see splashOnce.ts). Fades out as soon
  * as the splash video finishes — or after TOTAL_DISPLAY_MS minus the fade
@@ -20,6 +29,7 @@ export function useSplash({ fadeMs = 300 }: { fadeMs?: number } = {}) {
   const [showSplash, setShowSplash] = useState(true);
   const [fadingOut, setFadingOut] = useState(false);
   const [done, setDone] = useState(false);
+  const [contentReady, setContentReady] = useState(false);
 
   // The claim touches shared module state, so it can only run client-side,
   // after hydration — doing it during render (e.g. as a useState initializer)
@@ -30,7 +40,11 @@ export function useSplash({ fadeMs = 300 }: { fadeMs?: number } = {}) {
     if (!claimSplash()) {
       setEnabled(false);
       setShowSplash(false);
+      setContentReady(true);
+      return;
     }
+    const timer = setTimeout(() => setContentReady(true), CONTENT_DELAY_MS);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -60,5 +74,5 @@ export function useSplash({ fadeMs = 300 }: { fadeMs?: number } = {}) {
   const onVideoEnd = useCallback(() => setDone(true), []);
   const onFadeOutEnd = useCallback(() => setShowSplash(false), []);
 
-  return { showSplash, fadingOut, onVideoEnd, onFadeOutEnd };
+  return { showSplash, fadingOut, onVideoEnd, onFadeOutEnd, contentReady };
 }

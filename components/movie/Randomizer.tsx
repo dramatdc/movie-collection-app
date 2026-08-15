@@ -14,6 +14,11 @@ const SPIN_DURATION_MS = 2600;
 // The spin always covers at least this many single-card steps (padding out
 // short hops with extra full laps) so it never feels like a token flick.
 const MIN_SPIN_STEPS = 12;
+// The very first spin (per tab visit) runs slower and covers more ground to
+// actually build suspense — every spin after that uses the snappier pace
+// above, until the tab is left and comes back, which resets it.
+const FIRST_SPIN_DURATION_MS = 4200;
+const FIRST_SPIN_MIN_STEPS = 22;
 // Slots rendered on each side of center — kept small since the outer ones
 // fade to fully transparent well before the edge, so new keyed elements
 // entering the window are already invisible when they appear.
@@ -52,6 +57,15 @@ export function Randomizer({
   const rafRef = useRef<number | null>(null);
   const targetRef = useRef<OwnedMovie | null>(null);
   const lastHapticSlotRef = useRef(0);
+  // True until the first spin of this tab visit lands, then false for every
+  // spin after that — reset back to true when the tab is left and returned
+  // to (see the visibility handler below), so it builds suspense again next
+  // time rather than only on the very first ever spin.
+  const firstSpinRef = useRef(true);
+  // Randomizes which movies the reel opens on, once per mount — without
+  // this it always starts centered on eligible[0], so the same few movies
+  // showed up every time regardless of collection size.
+  const startedRef = useRef(false);
 
   // Preload every eligible poster up front so a card never shows an empty
   // grey frame the first time it scrolls into view.
@@ -64,11 +78,23 @@ export function Randomizer({
     });
   }, [eligible]);
 
-  // Resume idle drift once the user leaves and comes back to the tab.
+  useEffect(() => {
+    if (startedRef.current || eligible.length === 0) return;
+    startedRef.current = true;
+    const randomStart = Math.floor(Math.random() * eligible.length);
+    reelPosRef.current = randomStart;
+    setReelPos(randomStart);
+  }, [eligible]);
+
+  // Resume idle drift once the user leaves and comes back to the tab, and
+  // treat the next spin after a return as the suspense-building "first" one
+  // again.
   useEffect(() => {
     function handleVisibility() {
       if (document.visibilityState === "visible") {
         setIdleFrozen(false);
+      } else {
+        firstSpinRef.current = true;
       }
     }
     document.addEventListener("visibilitychange", handleVisibility);
@@ -108,18 +134,23 @@ export function Randomizer({
       targetSlot = mod(targetSlot + 1, length);
     }
 
+    const isFirstSpin = firstSpinRef.current;
+    const minSteps = isFirstSpin ? FIRST_SPIN_MIN_STEPS : MIN_SPIN_STEPS;
+    const duration = isFirstSpin ? FIRST_SPIN_DURATION_MS : SPIN_DURATION_MS;
+
     let distance = mod(targetSlot - currentSlot, length) || length;
-    while (distance < MIN_SPIN_STEPS) distance += length;
+    while (distance < minSteps) distance += length;
 
     const targetPos = startPos + distance;
     targetRef.current = eligible[mod(targetPos, length)];
 
     setSpinning(true);
+    firstSpinRef.current = false;
     lastHapticSlotRef.current = startPos;
     const startTime = performance.now();
 
     function frame(now: number) {
-      const t = Math.min(1, (now - startTime) / SPIN_DURATION_MS);
+      const t = Math.min(1, (now - startTime) / duration);
       const pos = startPos + distance * easeOutQuint(t);
       reelPosRef.current = pos;
       setReelPos(pos);
