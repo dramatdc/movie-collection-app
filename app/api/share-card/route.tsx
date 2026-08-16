@@ -196,14 +196,14 @@ export async function GET(req: NextRequest) {
             style={{
               display: "flex",
               color: "#ffffff",
-              fontSize: 72,
+              fontSize: 56,
               fontWeight: 700,
               letterSpacing: 0.5,
               textAlign: "center",
               lineHeight: 1.1,
             }}
           >
-            Look what I just got
+            LOOK WHAT I JUST GOT!
           </div>
         </div>
       </div>
