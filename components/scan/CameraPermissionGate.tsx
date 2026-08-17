@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Capacitor } from "@capacitor/core";
 
 const GRANTED_KEY = "camera-permission-granted";
 
@@ -45,6 +46,14 @@ export function CameraPermissionGate({
       cancelled = true;
     };
   }, []);
+
+  // The checks below use the browser's Permissions API, which reflects the
+  // *website's* camera permission — a different, unrelated permission from
+  // the native app's own camera access (tied to Info.plist's
+  // NSCameraUsageDescription), which the ML Kit scanner requests itself
+  // on demand. Skipping straight to children here avoids gating native
+  // users on a web permission model that doesn't apply to them.
+  if (Capacitor.isNativePlatform()) return <>{children}</>;
 
   if (state === "checking") return null;
 

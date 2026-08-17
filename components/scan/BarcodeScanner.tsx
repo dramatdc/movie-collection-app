@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { BarcodeFormat, DecodeHintType, NotFoundException } from "@zxing/library";
+import { scanBarcodeNative } from "@/lib/scan/nativeScan";
 
 type ScanError = "denied" | "no-camera" | "in-use" | "unknown";
 
@@ -92,6 +94,18 @@ export function BarcodeScanner({
     let controls: ScanControls | undefined;
 
     async function start() {
+      // Wrapped as a native app: use the on-device ML Kit scanner (its own
+      // full-screen native camera UI) instead of anything below, which
+      // either doesn't exist in a native WebView (the web BarcodeDetector
+      // API) or works far less reliably there (zxing). Gated so this can
+      // never run outside an actual Capacitor native build — the web app
+      // and installed PWA always take the unchanged path below.
+      if (Capacitor.isNativePlatform()) {
+        const code = await scanBarcodeNative();
+        if (!stopped && code) onDetected(code);
+        return;
+      }
+
       const video = videoRef.current!;
       try {
         const native = await tryNativeDetector(video, onDetected);
@@ -169,6 +183,17 @@ export function BarcodeScanner({
           "The camera is in use by another app. Close it and try again, or search by title."}
         {error === "unknown" &&
           "Couldn't access the camera. Search by title instead."}
+      </div>
+    );
+  }
+
+  // On native, the ML Kit scanner's own full-screen native UI covers
+  // everything the instant it opens — this just fills the space until then
+  // rather than showing an empty black video box that never gets a stream.
+  if (Capacitor.isNativePlatform()) {
+    return (
+      <div className="flex aspect-square w-full h-full items-center justify-center rounded-lg bg-black text-sm text-muted">
+        Opening camera...
       </div>
     );
   }
