@@ -5,9 +5,9 @@ import type { MovieFormat, OwnedMovie } from "@/lib/firebase/types";
 // estimates of what each format typically goes for, not an appraisal of
 // any specific title.
 export const ESTIMATED_FORMAT_VALUE: Record<MovieFormat, number> = {
-  DVD: 8,
-  "Blu-ray": 15,
-  "4K UHD": 25,
+  DVD: 3,
+  "Blu-ray": 8,
+  "4K UHD": 15,
   Digital: 12,
 };
 
