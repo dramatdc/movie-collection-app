@@ -1,6 +1,6 @@
 require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
 
-platform :ios, '15.0'
+platform :ios, '15.5'
 use_frameworks!
 
 # This project uses Swift Package Manager (via CapApp-SPM/Package.swift) for
@@ -10,12 +10,19 @@ use_frameworks!
 # Package.swift untouched rather than writing a broken reference), so it has
 # to come in through CocoaPods instead, alongside the SPM setup.
 #
-# NOTE: this hasn't been verified against a real `pod install` yet — there's
-# no Mac available in the environment that wrote this file. The plugin's
-# podspec also declares its own `Capacitor` dependency, which could
-# theoretically double up with the SPM-provided Capacitor core; if the first
-# `pod install` / Xcode build surfaces a duplicate-symbol or "ambiguous
-# module" error, that's the thing to fix next.
+# 15.5 rather than 15.0 (the app's previous minimum) because
+# GoogleMLKit/BarcodeScanning ~> 8.0.0 — a transitive dependency of the
+# plugin above — requires it; confirmed by both a failed `pod install` on
+# 15.0 ("required a higher minimum deployment target") and the plugin's own
+# docs, which state 15.5 explicitly. The Xcode project's
+# IPHONEOS_DEPLOYMENT_TARGET was raised to match (see App.xcodeproj).
+#
+# NOTE: this hasn't been verified end-to-end against a real `pod install`
+# yet — there's no Mac available in the environment that wrote this file.
+# The plugin's podspec also declares its own `Capacitor` dependency, which
+# could theoretically double up with the SPM-provided Capacitor core; if a
+# build surfaces a duplicate-symbol or "ambiguous module" error, that's the
+# thing to fix next.
 def capacitor_pods
   pod 'CapacitorMlkitBarcodeScanning', :path => '../../node_modules/@capacitor-mlkit/barcode-scanning'
 end
