@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useAppReady } from "@/lib/context/AppReadyContext";
 import { hasSeenTutorial, markTutorialSeen } from "@/lib/firebase/tutorial";
 import { isTutorialSeenLocally, markTutorialSeenLocally } from "./localFlag";
 import { setCollectionViewMode } from "@/lib/preferences";
@@ -28,6 +29,7 @@ const TutorialContext = createContext<TutorialContextValue | null>(null);
 
 export function TutorialProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
+  const appReady = useAppReady();
   const [active, setActive] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [actionDone, setActionDone] = useState(false);
@@ -44,8 +46,17 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
   // this feature existed alike. checkedRef makes sure this only ever fires
   // once per uid per mount, so it can't pop up again mid-session even if
   // `user` changes reference without changing uid.
+  //
+  // Gated on appReady (the splash being fully done), not just `user` — the
+  // whole app mounts concurrently with the splash so it can load behind it,
+  // which means starting the tour any earlier races it against a page still
+  // actively settling (data loading in, images arriving, the splash itself
+  // still covering/fading). That's exactly what was producing a badly
+  // misaligned spotlight/card on a brand-new account's first launch, and
+  // exactly why it never reproduced when retaking the tour later from
+  // Settings — by then everything's long since settled.
   useEffect(() => {
-    if (!user || checkedRef.current === user.uid) return;
+    if (!user || !appReady || checkedRef.current === user.uid) return;
     checkedRef.current = user.uid;
     if (isTutorialSeenLocally(user.uid)) return;
     hasSeenTutorial(user.uid).then((seen) => {
@@ -56,7 +67,7 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
         setActive(true);
       }
     });
-  }, [user]);
+  }, [user, appReady]);
 
   function start() {
     setStepIndex(0);

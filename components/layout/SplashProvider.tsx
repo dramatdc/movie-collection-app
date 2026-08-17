@@ -2,6 +2,7 @@
 
 import { useSplash } from "@/lib/hooks/useSplash";
 import { SplashScreen } from "@/components/layout/SplashScreen";
+import { AppReadyProvider } from "@/lib/context/AppReadyContext";
 
 // Lives in the root layout, above routing, so it never remounts on
 // navigation. `children` mounts as soon as contentReady flips (near-instant
@@ -16,7 +17,9 @@ export function SplashProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {contentReady && children}
+      {contentReady && (
+        <AppReadyProvider ready={!showSplash}>{children}</AppReadyProvider>
+      )}
       {showSplash && (
         <SplashScreen fadingOut={fadingOut} onVideoEnd={onVideoEnd} onFadeOutEnd={onFadeOutEnd} />
       )}
