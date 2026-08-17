@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Capacitor } from "@capacitor/core";
 import { FirebaseError } from "firebase/app";
 import {
   signIn,
@@ -14,6 +15,12 @@ import { GoogleIcon, AppleIcon, EyeIcon, EyeOffIcon } from "@/lib/icons";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
+  // signInWithPopup fundamentally doesn't work inside a native WebView —
+  // Google and Apple both detect and block it there. Starts false to match
+  // server-rendered HTML (which never knows about the native runtime) and
+  // flips after mount once Capacitor's bridge is actually checkable, same
+  // reasoning as the splash claim in useSplash.ts.
+  const [isNative, setIsNative] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -23,6 +30,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [oauthSubmitting, setOauthSubmitting] = useState<"google" | "apple" | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform());
+  }, []);
 
   const needsConsent = mode === "signup" && !acceptedTerms;
   const busy = submitting || oauthSubmitting !== null;
@@ -173,31 +184,35 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         {submitting ? "Please wait..." : mode === "login" ? "Sign in" : "Sign up"}
       </button>
 
-      <div className="my-1 flex items-center gap-3 text-xs text-muted">
-        <span className="h-px flex-1 bg-border" />
-        or
-        <span className="h-px flex-1 bg-border" />
-      </div>
+      {!isNative && (
+        <>
+          <div className="my-1 flex items-center gap-3 text-xs text-muted">
+            <span className="h-px flex-1 bg-border" />
+            or
+            <span className="h-px flex-1 bg-border" />
+          </div>
 
-      <button
-        type="button"
-        onClick={() => handleOAuth("google")}
-        disabled={busy || needsConsent}
-        className="flex items-center justify-center gap-2 rounded border border-border bg-white px-3 py-2 text-sm font-medium text-neutral-800 transition hover:bg-neutral-100 disabled:opacity-60"
-      >
-        <GoogleIcon className="h-4 w-4" />
-        {oauthSubmitting === "google" ? "Please wait..." : "Continue with Google"}
-      </button>
+          <button
+            type="button"
+            onClick={() => handleOAuth("google")}
+            disabled={busy || needsConsent}
+            className="flex items-center justify-center gap-2 rounded border border-border bg-white px-3 py-2 text-sm font-medium text-neutral-800 transition hover:bg-neutral-100 disabled:opacity-60"
+          >
+            <GoogleIcon className="h-4 w-4" />
+            {oauthSubmitting === "google" ? "Please wait..." : "Continue with Google"}
+          </button>
 
-      <button
-        type="button"
-        onClick={() => handleOAuth("apple")}
-        disabled={busy || needsConsent}
-        className="flex items-center justify-center gap-2 rounded bg-black px-3 py-2 text-sm font-medium text-white transition hover:bg-neutral-900 disabled:opacity-60"
-      >
-        <AppleIcon className="h-4 w-4" />
-        {oauthSubmitting === "apple" ? "Please wait..." : "Continue with Apple"}
-      </button>
+          <button
+            type="button"
+            onClick={() => handleOAuth("apple")}
+            disabled={busy || needsConsent}
+            className="flex items-center justify-center gap-2 rounded bg-black px-3 py-2 text-sm font-medium text-white transition hover:bg-neutral-900 disabled:opacity-60"
+          >
+            <AppleIcon className="h-4 w-4" />
+            {oauthSubmitting === "apple" ? "Please wait..." : "Continue with Apple"}
+          </button>
+        </>
+      )}
     </form>
   );
 }

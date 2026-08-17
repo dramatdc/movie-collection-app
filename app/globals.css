@@ -28,6 +28,31 @@
   scroll-margin-top: calc(100px + env(safe-area-inset-top, 0px));
 }
 
+/* iOS auto-zooms the page in when a focused input's font-size is under
+   16px — and inside a native WKWebView (no visible browser chrome to pinch
+   back out with) it can get stuck zoomed in until the app is force-closed.
+   Every text input across the app was sized via Tailwind's text-sm (14px),
+   which is exactly what was triggering it — bumping the floor to 16px on
+   phone-sized viewports prevents the zoom from firing at all. */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Swiping past the top/bottom of the page triggers the WebView's default
+   rubber-band bounce, which briefly reveals its own background (white,
+   regardless of the app's theme) past the edge of the actual content —
+   overscroll-behavior stops the bounce itself, and the explicit dark
+   background is a second layer of insurance if anything still peeks
+   through it. */
+html {
+  overscroll-behavior-y: none;
+  background-color: var(--color-canvas);
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
