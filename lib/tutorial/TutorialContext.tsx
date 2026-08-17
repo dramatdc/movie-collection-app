@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useAppReady } from "@/lib/context/AppReadyContext";
+import { useMovies } from "@/lib/hooks/useMovies";
 import { hasSeenTutorial, markTutorialSeen } from "@/lib/firebase/tutorial";
 import { isTutorialSeenLocally, markTutorialSeenLocally } from "./localFlag";
 import { setCollectionViewMode } from "@/lib/preferences";
@@ -30,6 +31,7 @@ const TutorialContext = createContext<TutorialContextValue | null>(null);
 export function TutorialProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const appReady = useAppReady();
+  const { loading: moviesLoading } = useMovies();
   const [active, setActive] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [actionDone, setActionDone] = useState(false);
@@ -47,27 +49,44 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
   // once per uid per mount, so it can't pop up again mid-session even if
   // `user` changes reference without changing uid.
   //
-  // Gated on appReady (the splash being fully done), not just `user` — the
-  // whole app mounts concurrently with the splash so it can load behind it,
-  // which means starting the tour any earlier races it against a page still
-  // actively settling (data loading in, images arriving, the splash itself
-  // still covering/fading). That's exactly what was producing a badly
-  // misaligned spotlight/card on a brand-new account's first launch, and
-  // exactly why it never reproduced when retaking the tour later from
-  // Settings — by then everything's long since settled.
+  // Gated on appReady (the splash being fully done) AND movies having
+  // loaded at least once — appReady alone isn't enough for the signup
+  // case specifically: the splash plays and finishes on the login/signup
+  // page itself, well before the account exists, so by the time /library
+  // mounts for the first time right after signup, appReady is already
+  // true and provides no protection at all. The actual race there is
+  // /library mounting for the very first time against Firestore fetching
+  // the (empty, for a brand-new account) movies collection, which is what
+  // the library page's placeholder-movies UI depends on — so waiting for
+  // that fetch to resolve, then a short settle delay for the resulting
+  // render to actually paint, covers both races.
   useEffect(() => {
-    if (!user || !appReady || checkedRef.current === user.uid) return;
+    if (!user || !appReady || moviesLoading || checkedRef.current === user.uid) return;
     checkedRef.current = user.uid;
     if (isTutorialSeenLocally(user.uid)) return;
+
+    let cancelled = false;
+    let settleId: ReturnType<typeof setTimeout> | undefined;
+
     hasSeenTutorial(user.uid).then((seen) => {
+      if (cancelled) return;
       if (seen) {
         markTutorialSeenLocally(user.uid);
-      } else {
-        setStepIndex(0);
-        setActive(true);
+        return;
       }
+      settleId = setTimeout(() => {
+        if (!cancelled) {
+          setStepIndex(0);
+          setActive(true);
+        }
+      }, 500);
     });
-  }, [user, appReady]);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(settleId);
+    };
+  }, [user, appReady, moviesLoading]);
 
   function start() {
     setStepIndex(0);
