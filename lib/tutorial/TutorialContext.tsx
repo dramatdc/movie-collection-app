@@ -62,14 +62,25 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
   // render to actually paint, covers both races.
   useEffect(() => {
     if (!user || !appReady || moviesLoading || checkedRef.current === user.uid) return;
-    checkedRef.current = user.uid;
-    if (isTutorialSeenLocally(user.uid)) return;
+
+    if (isTutorialSeenLocally(user.uid)) {
+      checkedRef.current = user.uid;
+      return;
+    }
 
     let cancelled = false;
     let settleId: ReturnType<typeof setTimeout> | undefined;
 
     hasSeenTutorial(user.uid).then((seen) => {
+      // Only "consumed" once the check has actually resolved — not the
+      // moment an attempt starts. moviesLoading can flicker true/false a
+      // few times as Firestore's subscription settles right after signup,
+      // and each flicker re-runs this effect; marking checkedRef eagerly
+      // meant the very first (often cancelled) attempt permanently used up
+      // the "once per uid" guard, silently skipping every retry after it —
+      // which is exactly why the tour sometimes never auto-started at all.
       if (cancelled) return;
+      checkedRef.current = user.uid;
       if (seen) {
         markTutorialSeenLocally(user.uid);
         return;
