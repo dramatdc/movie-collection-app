@@ -1,0 +1,29 @@
+require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
+
+platform :ios, '15.0'
+use_frameworks!
+
+# This project uses Swift Package Manager (via CapApp-SPM/Package.swift) for
+# its Capacitor core and most plugins — see capacitor.config.ts. This file
+# exists only because @capacitor-mlkit/barcode-scanning doesn't ship Swift
+# Package Manager support yet (`npx cap sync` confirmed this: it left
+# Package.swift untouched rather than writing a broken reference), so it has
+# to come in through CocoaPods instead, alongside the SPM setup.
+#
+# NOTE: this hasn't been verified against a real `pod install` yet — there's
+# no Mac available in the environment that wrote this file. The plugin's
+# podspec also declares its own `Capacitor` dependency, which could
+# theoretically double up with the SPM-provided Capacitor core; if the first
+# `pod install` / Xcode build surfaces a duplicate-symbol or "ambiguous
+# module" error, that's the thing to fix next.
+def capacitor_pods
+  pod 'CapacitorMlkitBarcodeScanning', :path => '../../node_modules/@capacitor-mlkit/barcode-scanning'
+end
+
+target 'App' do
+  capacitor_pods
+end
+
+post_install do |installer|
+  assertDeploymentTarget(installer)
+end
