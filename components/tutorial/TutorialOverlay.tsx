@@ -150,16 +150,26 @@ export function TutorialOverlay() {
     }
     window.addEventListener("scroll", recompute, true);
     window.addEventListener("resize", recompute);
-    // The scroll/resize listeners miss some causes of drift — e.g. the
-    // browser's own smooth-scroll animation still settling after the
-    // initial measurement, or anything else that repositions the page
-    // without firing a native scroll event. A cheap poll catches those too,
-    // so the spotlight can't end up permanently stuck covering the exact
-    // control a step is asking the user to press.
+    // Neither of the above fires when the page's *content* changes size
+    // without the viewport itself scrolling or resizing — e.g. a brand-new
+    // account's placeholder movies swapping for real ones as Firestore data
+    // arrives, or a poster image finishing its load. That's exactly the
+    // scenario a fresh account hits mid-tour, and it's what was leaving the
+    // spotlight frozen over stale coordinates while the real page reflowed
+    // underneath it. ResizeObserver on the whole body catches any of that
+    // directly, regardless of what caused it.
+    const resizeObserver = new ResizeObserver(recompute);
+    resizeObserver.observe(document.body);
+    // The above still misses some causes of drift — e.g. the browser's own
+    // smooth-scroll animation still settling after the initial measurement.
+    // A cheap poll catches those too, so the spotlight can't end up
+    // permanently stuck covering the exact control a step is asking the
+    // user to press.
     const pollId = setInterval(recompute, 200);
     return () => {
       window.removeEventListener("scroll", recompute, true);
       window.removeEventListener("resize", recompute);
+      resizeObserver.disconnect();
       clearInterval(pollId);
     };
   }, [ready, step]);
