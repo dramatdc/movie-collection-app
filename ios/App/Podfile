@@ -1,34 +1,26 @@
 require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
 
+# 15.5, not Capacitor's default 15.0 — GoogleMLKit/BarcodeScanning (a
+# transitive dependency of CapacitorMlkitBarcodeScanning below) requires it.
+# IPHONEOS_DEPLOYMENT_TARGET in App.xcodeproj was raised to match.
 platform :ios, '15.5'
 use_frameworks!
 
-# This project uses Swift Package Manager (via CapApp-SPM/Package.swift) for
-# its Capacitor core and most plugins — see capacitor.config.ts. This file
-# exists only because @capacitor-mlkit/barcode-scanning doesn't ship Swift
-# Package Manager support yet (`npx cap sync` confirmed this: it left
-# Package.swift untouched rather than writing a broken reference), so it has
-# to come in through CocoaPods instead, alongside the SPM setup.
-#
-# 15.5 rather than 15.0 (the app's previous minimum) because
-# GoogleMLKit/BarcodeScanning ~> 8.0.0 — a transitive dependency of the
-# plugin above — requires it; confirmed by both a failed `pod install` on
-# 15.0 ("required a higher minimum deployment target") and the plugin's own
-# docs, which state 15.5 explicitly. The Xcode project's
-# IPHONEOS_DEPLOYMENT_TARGET was raised to match (see App.xcodeproj).
-#
-# NOTE: this hasn't been verified end-to-end against a real `pod install`
-# yet — there's no Mac available in the environment that wrote this file.
-# The plugin's podspec also declares its own `Capacitor` dependency, which
-# could theoretically double up with the SPM-provided Capacitor core; if a
-# build surfaces a duplicate-symbol or "ambiguous module" error, that's the
-# thing to fix next.
+# workaround to avoid Xcode caching of Pods that requires
+# Product -> Clean Build Folder after new Cordova plugins installed
+# Requires CocoaPods 1.6 or newer
+install! 'cocoapods', :disable_input_output_paths => true
+
 def capacitor_pods
+  pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
+  pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
   pod 'CapacitorMlkitBarcodeScanning', :path => '../../node_modules/@capacitor-mlkit/barcode-scanning'
+  pod 'CapacitorHaptics', :path => '../../node_modules/@capacitor/haptics'
 end
 
 target 'App' do
   capacitor_pods
+  # Add your Pods here
 end
 
 post_install do |installer|
