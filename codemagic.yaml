@@ -27,7 +27,7 @@ workflows:
     name: iOS App Store Release
     max_build_duration: 60
     integrations:
-      app_store_connect: codemagic_api_key
+      app_store_connect: Codemagic
     environment:
       ios_signing:
         distribution_type: app_store
