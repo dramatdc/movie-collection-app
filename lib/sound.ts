@@ -17,19 +17,35 @@ function getAudioContext(): AudioContext | null {
 }
 
 // Browsers only let audio start from a trusted user gesture — resuming the
-// context on the very first tap anywhere means it's already running by the
-// time an async moment (a barcode scan resolving, with no fresh gesture of
-// its own) wants to play a sound.
-function primeOnFirstTap() {
+// context on an early tap anywhere means it's already running by the time
+// an async moment (a barcode scan resolving, with no fresh gesture of its
+// own) wants to play a sound. Listens on several gesture types rather than
+// just one, and keeps retrying on every gesture until the context actually
+// reports "running" — inside a native WebView the very first gesture isn't
+// always a reliable unlock (Capacitor's synthetic touch handling can behave
+// differently from a plain browser's), so a single one-shot attempt was
+// silently leaving sound off for the rest of the session on some devices.
+function primeOnGesture() {
   const ctx = getAudioContext();
-  if (ctx && ctx.state === "suspended") {
-    ctx.resume().catch(() => {
-      window.addEventListener("pointerdown", primeOnFirstTap, { once: true });
-    });
+  if (!ctx || ctx.state === "running") {
+    removeUnlockListeners();
+    return;
+  }
+  ctx.resume().catch(() => {});
+}
+
+const UNLOCK_EVENTS = ["pointerdown", "touchstart", "click", "keydown"] as const;
+
+function removeUnlockListeners() {
+  for (const type of UNLOCK_EVENTS) {
+    window.removeEventListener(type, primeOnGesture);
   }
 }
+
 if (typeof window !== "undefined") {
-  window.addEventListener("pointerdown", primeOnFirstTap, { once: true });
+  for (const type of UNLOCK_EVENTS) {
+    window.addEventListener(type, primeOnGesture);
+  }
 }
 
 interface ChimePreset {

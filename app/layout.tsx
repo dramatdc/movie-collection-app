@@ -31,6 +31,12 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  // Without this, the keyboard opening inside the native WebView (e.g. on
+  // the sign-up form) can leave fixed-positioned elements like the bottom
+  // nav bar and the tutorial overlay misaligned relative to the visual
+  // viewport — "resizes-content" tells it to properly reflow the layout
+  // around the keyboard instead of just overlaying it.
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
