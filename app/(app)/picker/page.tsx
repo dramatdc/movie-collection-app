@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useMovies } from "@/lib/hooks/useMovies";
+import { useLists } from "@/lib/hooks/useLists";
+import { useListItems } from "@/lib/hooks/useListItems";
 import { FilterBar } from "@/components/movie/FilterBar";
 import { MoodChips } from "@/components/movie/MoodChips";
 import { FormatBadge } from "@/components/movie/FormatBadge";
@@ -14,16 +16,30 @@ import type { OwnedMovie } from "@/lib/firebase/types";
 
 export default function PickerPage() {
   const { movies, loading } = useMovies();
+  const { lists } = useLists();
   const [filters, setFilters] = useState<MovieFilters>(DEFAULT_FILTERS);
   const [moods, setMoods] = useState<string[]>([]);
   const [pick, setPick] = useState<OwnedMovie | null>(null);
+  // "" means no list restriction — spin from the whole (filtered)
+  // collection, same as before this existed.
+  const [listId, setListId] = useState("");
+  const { items: listItems } = useListItems(listId);
 
   const genres = useMemo(() => collectGenres(movies), [movies]);
   const eligible = useMemo(() => {
-    const base = applyFilters(movies, filters);
-    if (moods.length === 0) return base;
-    return base.filter((m) => m.genres.some((g) => moods.includes(g)));
-  }, [movies, filters, moods]);
+    let base = applyFilters(movies, filters);
+    if (moods.length > 0) {
+      base = base.filter((m) => m.genres.some((g) => moods.includes(g)));
+    }
+    if (listId) {
+      // List items are a denormalized snapshot (tmdbId + title/poster/year),
+      // not owned-movie records, so a movie only counts as "in the list" if
+      // it's also in the owned collection — joined here by tmdbId.
+      const idsInList = new Set(listItems.map((i) => i.tmdbId));
+      base = base.filter((m) => idsInList.has(m.tmdbId));
+    }
+    return base;
+  }, [movies, filters, moods, listId, listItems]);
 
   const poster = pick ? posterUrl(pick.posterPath, "w500") : null;
 
@@ -38,6 +54,24 @@ export default function PickerPage() {
         showSearch={false}
         showGenre={false}
       />
+
+      {lists.length > 0 && (
+        <label className="flex items-center gap-2 text-sm">
+          <span className="text-muted">Spin from</span>
+          <select
+            value={listId}
+            onChange={(e) => setListId(e.target.value)}
+            className="rounded border border-border bg-surface px-2 py-1 text-sm"
+          >
+            <option value="">All my movies</option>
+            {lists.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       <MoodChips genres={genres} selected={moods} onChange={setMoods} />
 

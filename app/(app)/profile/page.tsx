@@ -11,6 +11,7 @@ import { deleteAccount } from "@/lib/firebase/account";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { PasswordSection } from "@/components/profile/PasswordSection";
 import { ShareSection } from "@/components/profile/ShareSection";
+import { CollectionValueButton } from "@/components/profile/CollectionValueButton";
 import { useTutorial } from "@/lib/tutorial/TutorialContext";
 import {
   isSoundEnabled,
@@ -72,8 +73,9 @@ export default function ProfilePage() {
         <p className="text-sm text-muted">{user?.email}</p>
       </div>
 
-      <div className="rounded-lg border border-border bg-surface p-4 text-sm shadow-lg shadow-black/40">
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 text-sm shadow-lg shadow-black/40">
         <p className="text-neutral-300">{movies.length} movies in your collection</p>
+        <CollectionValueButton movies={movies} />
       </div>
 
       <div data-tutorial="profile-page" className="flex flex-col gap-3">

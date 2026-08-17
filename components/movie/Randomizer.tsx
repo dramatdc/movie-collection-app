@@ -17,8 +17,8 @@ const MIN_SPIN_STEPS = 12;
 // The very first spin (per tab visit) runs slower and covers more ground to
 // actually build suspense — every spin after that uses the snappier pace
 // above, until the tab is left and comes back, which resets it.
-const FIRST_SPIN_DURATION_MS = 4200;
-const FIRST_SPIN_MIN_STEPS = 22;
+const FIRST_SPIN_DURATION_MS = 5200;
+const FIRST_SPIN_MIN_STEPS = 30;
 // Slots rendered on each side of center — kept small since the outer ones
 // fade to fully transparent well before the edge, so new keyed elements
 // entering the window are already invisible when they appear.
@@ -33,6 +33,16 @@ function mod(n: number, m: number) {
 // discrete steps.
 function easeOutQuint(t: number) {
   return 1 - Math.pow(1 - t, 5);
+}
+
+// Same idea, but overshoots slightly past the landing slot before rocking
+// back to rest on it exactly at t=1 — used only for the first spin, so it
+// briefly teases the next movie before "changing its mind" and settling,
+// instead of just being a longer version of the regular stop.
+function easeOutBack(t: number) {
+  const c1 = 1.7;
+  const c3 = c1 + 1;
+  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
 }
 
 export function Randomizer({
@@ -141,6 +151,7 @@ export function Randomizer({
     const isFirstSpin = firstSpinRef.current;
     const minSteps = isFirstSpin ? FIRST_SPIN_MIN_STEPS : MIN_SPIN_STEPS;
     const duration = isFirstSpin ? FIRST_SPIN_DURATION_MS : SPIN_DURATION_MS;
+    const ease = isFirstSpin ? easeOutBack : easeOutQuint;
 
     let distance = mod(targetSlot - currentSlot, length) || length;
     while (distance < minSteps) distance += length;
@@ -155,7 +166,7 @@ export function Randomizer({
 
     function frame(now: number) {
       const t = Math.min(1, (now - startTime) / duration);
-      const pos = startPos + distance * easeOutQuint(t);
+      const pos = startPos + distance * ease(t);
       reelPosRef.current = pos;
       setReelPos(pos);
 
