@@ -61,7 +61,32 @@ export function DiscoverRail({
     };
   }, [fetcher]);
 
-  if (items === null || items.length === 0) return null;
+  // While the TMDb fetch is in flight, a skeleton reserves the same space
+  // the real row will occupy — this is a network call, unrelated to (and
+  // often slower/less predictable than) the app's own Firestore data, so it
+  // can resolve at any time. Rendering nothing at all until it does (the
+  // previous behavior) meant the whole section would pop into existence
+  // from zero height whenever it happened to land, an uncontrolled layout
+  // shift for anything relying on the page's layout being stable — the
+  // tutorial spotlight most notably, since one of its steps targets this
+  // exact section.
+  if (items === null) {
+    return (
+      <section className="flex flex-col gap-2.5">
+        <h2 className="text-base font-semibold">{title}</h2>
+        <div className="flex w-max gap-2">
+          {Array.from({ length: 6 }, (_, i) => (
+            <div
+              key={i}
+              className="aspect-2/3 w-14 shrink-0 animate-pulse rounded-lg bg-surface-hover"
+            />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (items.length === 0) return null;
 
   const track = [...items, ...items];
   // A CSS-driven transform loop instead of a requestAnimationFrame +
