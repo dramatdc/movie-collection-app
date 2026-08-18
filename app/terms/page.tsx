@@ -99,8 +99,8 @@ export default function TermsPage() {
         <h2 className="font-medium text-white">8. Contact</h2>
         <p>
           Questions about these terms can be sent to{" "}
-          <a href="mailto:lrobhumpr+hardcopy@gmail.com" className="text-accent">
-            lrobhumpr+hardcopy@gmail.com
+          <a href="mailto:founder@hardcopy.cloud" className="text-accent">
+            founder@hardcopy.cloud
           </a>
           .
         </p>

@@ -16,8 +16,8 @@ export default function SupportPage() {
 
       <p>
         Running into a bug, or something not working the way it should? Email{" "}
-        <a href="mailto:lrobhumpr+hardcopy@gmail.com" className="text-accent">
-          lrobhumpr+hardcopy@gmail.com
+        <a href="mailto:founder@hardcopy.cloud" className="text-accent">
+          founder@hardcopy.cloud
         </a>{" "}
         and describe what happened — screenshots help. This inbox is for real
         app issues; general feedback and feature requests are welcome too, but

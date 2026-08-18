@@ -119,8 +119,8 @@ export default function PrivacyPage() {
         <h2 className="font-medium text-white">Contact</h2>
         <p>
           Questions about this policy can be sent to{" "}
-          <a href="mailto:lrobhumpr+hardcopy@gmail.com" className="text-accent">
-            lrobhumpr+hardcopy@gmail.com
+          <a href="mailto:founder@hardcopy.cloud" className="text-accent">
+            founder@hardcopy.cloud
           </a>
           .
         </p>
