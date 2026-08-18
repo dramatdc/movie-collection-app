@@ -118,8 +118,11 @@ export default function PrivacyPage() {
       <section className="flex flex-col gap-2">
         <h2 className="font-medium text-white">Contact</h2>
         <p>
-          Questions about this policy can be sent to the app developer via the
-          contact listed on the app&apos;s store listing.
+          Questions about this policy can be sent to{" "}
+          <a href="mailto:lrobhumpr+hardcopy@gmail.com" className="text-accent">
+            lrobhumpr+hardcopy@gmail.com
+          </a>
+          .
         </p>
       </section>
     </div>

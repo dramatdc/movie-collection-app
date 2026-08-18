@@ -98,8 +98,11 @@ export default function TermsPage() {
       <section className="flex flex-col gap-2">
         <h2 className="font-medium text-white">8. Contact</h2>
         <p>
-          Questions about these terms can be sent to the app developer via the
-          contact listed on the app&apos;s store listing.
+          Questions about these terms can be sent to{" "}
+          <a href="mailto:lrobhumpr+hardcopy@gmail.com" className="text-accent">
+            lrobhumpr+hardcopy@gmail.com
+          </a>
+          .
         </p>
       </section>
     </div>
