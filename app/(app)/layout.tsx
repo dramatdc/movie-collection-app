@@ -64,7 +64,7 @@ export default function AppShellLayout({
                 resizes, and layout shifts could all make them visibly detach
                 from the bottom of the screen. An element that's never inside
                 a scrolling context has nothing for that bug class to act on. */}
-            <div className="flex h-dvh flex-col overflow-hidden">
+            <div className="flex h-dvh flex-col overflow-hidden bg-bar">
               <AppHeader />
               <main className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 md:px-6 md:py-6">
                 {children}

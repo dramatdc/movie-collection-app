@@ -239,7 +239,16 @@ export function TutorialOverlay() {
       }
     : null;
 
-  const roomAbove = highlight ? highlight.top : 0;
+  const safeTop = getCardTopSafeMargin();
+  // Room above is measured from the safe top (the header's actual bottom
+  // edge), not the bare viewport top — the card can never render higher
+  // than that regardless, since it gets clamped down to safeTop below. Using
+  // viewport-top here let this check pass for a highlight that had plenty of
+  // space to y=0 but not enough above the header specifically, so the
+  // "above" branch got picked, then immediately clamped right back down into
+  // the highlight it was supposed to clear (seen on the view-toggle step,
+  // whose target sits close enough to the header for this to bite).
+  const roomAbove = highlight ? highlight.top - safeTop : 0;
   const roomBelow = highlight ? vh - (highlight.top + highlight.height) : 0;
   let cardTop: number | null = null;
   if (highlight) {
@@ -258,7 +267,7 @@ export function TutorialOverlay() {
     // the top of a tall scrolled section, a small viewport), and the card
     // shouldn't clip under the header / status bar / notch in any of those
     // cases.
-    cardTop = Math.max(getCardTopSafeMargin(), cardTop);
+    cardTop = Math.max(safeTop, cardTop);
   }
 
   return (
