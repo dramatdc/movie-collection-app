@@ -20,10 +20,19 @@ const config: CapacitorConfig = {
     // edge-to-edge and leaves safe-area handling entirely to the CSS that
     // was already written for it.
     contentInset: "never",
-    backgroundColor: "#1e1e1e",
+    // This paints the *native* WKWebView/window background — a completely
+    // separate layer from any CSS in the app, used by iOS to fill in behind
+    // the web content whenever there's a native-level gap (safe-area
+    // insetting, a brief moment before content paints, etc). It was set to
+    // --color-canvas (#1e1e1e), not --color-bar (#171717) — a real, visible
+    // mismatch in exactly the situation being reported (a strip near the
+    // bottom nav not matching its color), and one no web-side CSS change
+    // could ever fix since it isn't part of the page. Matching it to the
+    // nav's own color directly is the actual fix.
+    backgroundColor: "#171717",
   },
   android: {
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "#171717",
   },
 };
 
