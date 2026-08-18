@@ -22,12 +22,14 @@ export function MovieRail({
   title,
   titleHref,
   items,
+  loading,
   emptyLabel,
   headerAction,
 }: {
   title: string;
   titleHref?: string;
   items: RailItem[];
+  loading?: boolean;
   emptyLabel: string;
   headerAction?: React.ReactNode;
 }) {
@@ -91,6 +93,29 @@ export function MovieRail({
   ) : (
     heading
   );
+
+  // Sized to match the loaded rail's own footprint (same card dimensions,
+  // same pt-8/pb-16 padding reserved for the featured-card scale-up) so the
+  // page's height stays stable while data is still loading — without this,
+  // the whole rail popping in from a shorter "empty" state (or from nothing
+  // at all) once loading finishes causes a sudden layout shift, which on
+  // iOS's WKWebView can visibly detach fixed-positioned elements like the
+  // bottom nav until the next scroll event.
+  if (loading) {
+    return (
+      <section className="flex flex-col gap-2.5">
+        {headerRow}
+        <div className="flex gap-3 overflow-x-hidden pt-8 pb-16 -mb-12 -mx-4 px-4">
+          {Array.from({ length: 5 }, (_, i) => (
+            <div
+              key={i}
+              className="aspect-2/3 w-20 shrink-0 animate-pulse rounded-2xl bg-surface-hover"
+            />
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   if (items.length === 0) {
     return (

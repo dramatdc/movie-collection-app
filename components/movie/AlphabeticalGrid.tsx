@@ -9,8 +9,10 @@ import type { CollectionViewMode } from "@/lib/preferences";
 const ALL_LETTERS = ["#", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
 
 function jumpTo(letter: string) {
+  // behavior: "auto" (instant) — see TutorialOverlay.tsx for why an
+  // animated scrollIntoView visibly breaks the fixed bottom nav on iOS.
   document.getElementById(`shelf-${letter}`)?.scrollIntoView({
-    behavior: "smooth",
+    behavior: "auto",
     block: "start",
   });
 }

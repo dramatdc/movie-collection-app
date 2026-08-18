@@ -17,6 +17,7 @@ export function CompactMovieBox({
   title,
   titleHref,
   items,
+  loading,
   emptyLabel,
   footerHref,
   footerLabel,
@@ -25,6 +26,7 @@ export function CompactMovieBox({
   title: string;
   titleHref?: string;
   items: CompactMovieItem[];
+  loading?: boolean;
   emptyLabel: string;
   footerHref?: string;
   footerLabel?: string;
@@ -48,7 +50,16 @@ export function CompactMovieBox({
       {heading}
 
       <div className="flex flex-col gap-3 rounded-2xl border border-accent/40 bg-surface/60 p-3">
-        {preview.length === 0 ? (
+        {loading ? (
+          <div className="flex gap-2 overflow-x-hidden">
+            {Array.from({ length: previewCount }, (_, i) => (
+              <div
+                key={i}
+                className="aspect-2/3 w-14 shrink-0 animate-pulse rounded-lg bg-surface-hover"
+              />
+            ))}
+          </div>
+        ) : preview.length === 0 ? (
           <p className="py-2 text-center text-sm text-muted">{emptyLabel}</p>
         ) : (
           <div className="flex gap-2 overflow-x-auto">

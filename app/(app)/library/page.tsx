@@ -26,7 +26,7 @@ const RECENTLY_ADDED_COUNT = 15;
 
 export default function LibraryPage() {
   const { movies, loading } = useMovies();
-  const { items: wishlist } = useWishlist();
+  const { items: wishlist, loading: wishlistLoading } = useWishlist();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [viewMode, setViewMode] = useState<CollectionViewMode>("card");
   const tutorial = useTutorial();
@@ -94,8 +94,10 @@ export default function LibraryPage() {
   );
 
   function jumpToCollection() {
+    // behavior: "auto" (instant) — see TutorialOverlay.tsx for why an
+    // animated scrollIntoView visibly breaks the fixed bottom nav on iOS.
     document.getElementById("your-collection")?.scrollIntoView({
-      behavior: "smooth",
+      behavior: "auto",
       block: "start",
     });
   }
@@ -113,27 +115,31 @@ export default function LibraryPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {!loading && (
-        <>
-          <div data-tutorial="recently-added">
-            <MovieRail
-              title="Recently Added"
-              items={recentlyAdded}
-              emptyLabel="Nothing added yet — scan or search to build your shelf."
-              headerAction={jumpButton}
-            />
-          </div>
+      {/* Always mounted (skeletons while each source is still loading)
+          rather than gated behind a single `!loading` check — omitting this
+          whole block until loading finished meant it used to pop in at full
+          height all at once the instant it resolved, a sudden page-height
+          jump that could visibly detach fixed-positioned elements (like the
+          bottom nav) in iOS's WKWebView until the next scroll event. Keeping
+          the block's footprint stable throughout avoids that entirely. */}
+      <div data-tutorial="recently-added">
+        <MovieRail
+          title="Recently Added"
+          items={recentlyAdded}
+          loading={loading}
+          emptyLabel="Nothing added yet — scan or search to build your shelf."
+          headerAction={jumpButton}
+        />
+      </div>
 
-          <div className="flex flex-col gap-6 border-t border-border pt-6">
-            <div data-tutorial="wishlist-box">
-              <WishlistCompactBox items={wishlistPreview} />
-            </div>
-            <div data-tutorial="trending-box">
-              <DiscoverRail title="Trending This Week" fetcher={getTrendingClient} />
-            </div>
-          </div>
-        </>
-      )}
+      <div className="flex flex-col gap-6 border-t border-border pt-6">
+        <div data-tutorial="wishlist-box">
+          <WishlistCompactBox items={wishlistPreview} loading={wishlistLoading} />
+        </div>
+        <div data-tutorial="trending-box">
+          <DiscoverRail title="Trending This Week" fetcher={getTrendingClient} />
+        </div>
+      </div>
 
       <div
         id="your-collection"

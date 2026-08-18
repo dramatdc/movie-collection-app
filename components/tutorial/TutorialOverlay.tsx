@@ -111,7 +111,17 @@ export function TutorialOverlay() {
       // top edge in one jump. Aligning to the top is a shorter, less jarring
       // scroll and also keeps the target's actual top edge (where the info
       // card anchors) predictable.
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      //
+      // behavior: "auto" (instant), not "smooth" — iOS WebKit (Safari and
+      // WKWebView alike) has a long-standing bug where position:fixed
+      // elements visually drift and track the page during a JS-driven
+      // *animated* scroll, only snapping back once the animation settles.
+      // The bottom nav is fixed, so an animated scrollIntoView here made it
+      // visibly ride up with the page on any step whose target needed a
+      // real scroll distance (step 5, "Trending", most noticeably — it sits
+      // furthest down the page of the early steps). An instant jump has no
+      // animation frames for that bug to manifest during.
+      el.scrollIntoView({ behavior: "auto", block: "start" });
       setTimeout(() => {
         if (cancelled) return;
         measure();
