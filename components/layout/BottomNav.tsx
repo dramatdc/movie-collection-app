@@ -58,8 +58,12 @@ export function BottomNav() {
   return (
     <nav
       data-tutorial="bottom-nav"
-      className="fixed inset-x-0 bottom-0 z-10 bg-bar pb-[env(safe-area-inset-bottom)] md:hidden"
-      style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" }}
+      // A normal (non-fixed) flex child of the app shell now, not pinned to
+      // the viewport via position:fixed — see the comment in
+      // app/(app)/layout.tsx for why. shrink-0 keeps it from being
+      // compressed by the shell's flex layout; <main> is the only child
+      // that's allowed to give up space.
+      className="z-10 shrink-0 bg-bar pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <div className="relative h-16">
         {/* Bar with a notch cut into the top edge, centered, for the FAB to nest into */}

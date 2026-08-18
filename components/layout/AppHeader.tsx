@@ -13,7 +13,7 @@ const NAV = [
 export function AppHeader() {
   return (
     <header
-      className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-canvas px-4 py-3 md:px-6"
+      className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-border bg-canvas px-4 py-3 md:px-6"
       style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
     >
       <Link href="/library" className="flex items-center">

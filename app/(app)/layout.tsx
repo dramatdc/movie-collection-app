@@ -54,9 +54,19 @@ export default function AppShellLayout({
       <ConfirmDialogProvider>
         <TutorialProvider>
           <MovieAddedProvider>
-            <div className="flex flex-1 flex-col">
+            {/* h-dvh + overflow-hidden here (not on <body>, which stays a
+                normal scrolling page for the auth routes) makes this its own
+                fixed-height shell: header and nav are ordinary flex children
+                that never move, and <main> is the *only* scrolling element.
+                Previously the header/nav were position:fixed relative to a
+                scrolling <body>, which is exactly the setup iOS WebKit's
+                fixed-positioning bugs target — animated scrolls, viewport
+                resizes, and layout shifts could all make them visibly detach
+                from the bottom of the screen. An element that's never inside
+                a scrolling context has nothing for that bug class to act on. */}
+            <div className="flex h-dvh flex-col overflow-hidden">
               <AppHeader />
-              <main className="flex-1 px-4 py-4 pb-36 md:px-6 md:py-6 md:pb-6">
+              <main className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 md:px-6 md:py-6">
                 {children}
               </main>
               <BottomNav />
