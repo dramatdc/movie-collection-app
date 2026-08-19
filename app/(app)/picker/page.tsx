@@ -92,7 +92,7 @@ export default function PickerPage() {
           className="flex gap-4 rounded-lg border border-border bg-surface p-4 shadow-lg shadow-black/40"
         >
           <div className="relative aspect-2/3 w-24 shrink-0 overflow-hidden rounded bg-surface-hover shadow-md">
-            {poster && <Image src={poster} alt={pick.title} fill className="object-cover" />}
+            {poster && <Image src={poster} alt={pick.title} fill unoptimized className="object-cover" />}
           </div>
           <div className="flex flex-col gap-1">
             <p className="font-medium">{pick.title}</p>

@@ -79,7 +79,7 @@ export default function SharedCollectionPage() {
               <div key={movie.id} className="flex flex-col gap-1.5">
                 <div className="relative aspect-2/3 overflow-hidden rounded-xl bg-surface-hover shadow-lg shadow-black/40">
                   {poster ? (
-                    <Image src={poster} alt={movie.title} fill className="object-cover" />
+                    <Image src={poster} alt={movie.title} fill unoptimized className="object-cover" />
                   ) : (
                     <div className="flex h-full items-center justify-center px-2 text-center text-xs text-muted">
                       {movie.title}

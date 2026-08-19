@@ -220,6 +220,7 @@ export function Randomizer({
                     src={poster}
                     alt={movie.title}
                     fill
+                    unoptimized
                     sizes="150px"
                     priority={isCenter}
                     className="object-cover"

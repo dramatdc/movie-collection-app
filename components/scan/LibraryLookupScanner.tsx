@@ -42,7 +42,7 @@ function ResultCard({ result }: { result: LookupResult }) {
     <div className="flex items-center gap-3">
       <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded bg-surface-hover">
         {poster && (
-          <Image src={poster} alt={result.match.title} fill className="object-cover" />
+          <Image src={poster} alt={result.match.title} fill unoptimized className="object-cover" />
         )}
       </div>
       <div className="min-w-0">

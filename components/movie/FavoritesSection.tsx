@@ -59,7 +59,7 @@ export function FavoritesSection() {
               {movie ? (
                 <>
                   {poster ? (
-                    <Image src={poster} alt={movie.title} fill className="object-cover" />
+                    <Image src={poster} alt={movie.title} fill unoptimized className="object-cover" />
                   ) : (
                     <div className="flex h-full items-center justify-center px-1 text-center text-[10px] text-muted">
                       {movie.title}

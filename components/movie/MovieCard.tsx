@@ -21,6 +21,7 @@ export function MovieCard({ movie }: { movie: OwnedMovie }) {
             src={poster}
             alt={movie.title}
             fill
+            unoptimized
             sizes="(max-width: 640px) 45vw, 200px"
             className="object-cover"
           />

@@ -58,7 +58,7 @@ export default function MovieDetailPage() {
       <div className="flex flex-col gap-6 sm:flex-row">
         <div className="relative aspect-2/3 w-full max-w-[220px] shrink-0 overflow-hidden rounded-lg bg-surface-hover shadow-xl shadow-black/50">
           {poster ? (
-            <Image src={poster} alt={movie.title} fill className="object-cover" />
+            <Image src={poster} alt={movie.title} fill unoptimized className="object-cover" />
           ) : null}
         </div>
 

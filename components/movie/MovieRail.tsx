@@ -152,6 +152,7 @@ export function MovieRail({
                   src={item.posterUrl}
                   alt={item.title}
                   fill
+                  unoptimized
                   sizes="80px"
                   className="object-cover"
                 />

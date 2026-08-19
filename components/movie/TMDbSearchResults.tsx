@@ -78,7 +78,7 @@ export function TMDbSearchResults({
             >
               <div className="relative h-16 w-11 shrink-0 overflow-hidden rounded bg-surface-hover">
                 {poster && (
-                  <Image src={poster} alt={r.title} fill className="object-cover" />
+                  <Image src={poster} alt={r.title} fill unoptimized className="object-cover" />
                 )}
               </div>
               <div className="min-w-0">

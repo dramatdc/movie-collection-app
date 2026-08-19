@@ -27,7 +27,7 @@ export function ListPreviewCard({ list }: { list: CustomList }) {
             return (
               <div key={item.tmdbId} className="relative bg-surface-hover">
                 {poster && (
-                  <Image src={poster} alt={item.title} fill className="object-cover" />
+                  <Image src={poster} alt={item.title} fill unoptimized className="object-cover" />
                 )}
               </div>
             );

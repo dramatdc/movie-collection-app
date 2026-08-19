@@ -40,7 +40,7 @@ export function MovieAddedCard({
             <div className="flex items-start gap-3">
               <div className="relative aspect-2/3 w-14 shrink-0 overflow-hidden rounded-lg bg-surface-hover">
                 {poster ? (
-                  <Image src={poster} alt={movie.title} fill className="object-cover" />
+                  <Image src={poster} alt={movie.title} fill unoptimized className="object-cover" />
                 ) : (
                   <div className="flex h-full items-center justify-center px-1 text-center text-[9px] text-muted">
                     {movie.title}

@@ -17,7 +17,7 @@ export function MovieListRow({ movie }: { movie: OwnedMovie }) {
     <>
       <div className="relative aspect-2/3 w-10 shrink-0 overflow-hidden rounded bg-surface-hover">
         {poster ? (
-          <Image src={poster} alt={movie.title} fill sizes="40px" className="object-cover" />
+          <Image src={poster} alt={movie.title} fill unoptimized sizes="40px" className="object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center text-[10px] text-muted">
             {movie.title.slice(0, 1)}

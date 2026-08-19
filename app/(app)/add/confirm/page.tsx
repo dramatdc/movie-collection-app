@@ -79,7 +79,7 @@ export default function ConfirmAddPage() {
 
       <div className="flex gap-3">
         <div className="relative aspect-2/3 w-24 shrink-0 overflow-hidden rounded bg-surface-hover shadow-md">
-          {poster && <Image src={poster} alt={detail.title} fill className="object-cover" />}
+          {poster && <Image src={poster} alt={detail.title} fill unoptimized className="object-cover" />}
         </div>
         <div>
           <p className="font-medium">{detail.title}</p>

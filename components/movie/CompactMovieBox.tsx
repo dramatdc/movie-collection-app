@@ -74,6 +74,7 @@ export function CompactMovieBox({
                     src={item.posterUrl}
                     alt={item.title}
                     fill
+                    unoptimized
                     sizes="56px"
                     className="object-cover"
                   />
