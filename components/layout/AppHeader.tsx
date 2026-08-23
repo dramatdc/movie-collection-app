@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useSignInGate } from "@/lib/hooks/useSignInGate";
 
 const NAV = [
   { href: "/library", label: "Library" },
@@ -11,6 +14,8 @@ const NAV = [
 ];
 
 export function AppHeader() {
+  const guardNav = useSignInGate();
+
   return (
     <header
       className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-border bg-canvas px-4 py-1 md:px-6"
@@ -28,7 +33,12 @@ export function AppHeader() {
       </Link>
       <nav data-tutorial="bottom-nav" className="hidden gap-5 text-sm text-neutral-300 md:flex">
         {NAV.map((item) => (
-          <Link key={item.href} href={item.href} className="hover:text-white">
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={item.href === "/add" ? undefined : guardNav(item.label)}
+            className="hover:text-white"
+          >
             {item.label}
           </Link>
         ))}

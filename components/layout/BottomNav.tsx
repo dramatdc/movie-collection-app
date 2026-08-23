@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { LibraryIcon, ListIcon, ShuffleIcon, ProfileIcon, AddIcon } from "@/lib/icons";
+import { useSignInGate } from "@/lib/hooks/useSignInGate";
 
 const LEFT_ITEMS = [
   { href: "/library", label: "Library", Icon: LibraryIcon },
@@ -19,15 +20,18 @@ function NavLink({
   label,
   Icon,
   active,
+  onClick,
 }: {
   href: string;
   label: string;
   Icon: typeof LibraryIcon;
   active: boolean;
+  onClick: (e: React.MouseEvent) => void;
 }) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={clsx(
         "flex flex-col items-center gap-0.5 text-xs",
         active ? "text-accent" : "text-muted"
@@ -54,6 +58,7 @@ function computeAddHref(pathname: string): string {
 export function BottomNav() {
   const pathname = usePathname();
   const addHref = computeAddHref(pathname);
+  const guardNav = useSignInGate();
 
   return (
     <nav
@@ -87,6 +92,7 @@ export function BottomNav() {
                 label={label}
                 Icon={Icon}
                 active={pathname.startsWith(href)}
+                onClick={guardNav(label)}
               />
             ))}
           </div>
@@ -98,6 +104,7 @@ export function BottomNav() {
                 label={label}
                 Icon={Icon}
                 active={pathname.startsWith(href)}
+                onClick={guardNav(label)}
               />
             ))}
           </div>
