@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useMovies } from "@/lib/hooks/useMovies";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -12,6 +12,14 @@ import { TutorialProvider } from "@/lib/tutorial/TutorialContext";
 import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay";
 import { MovieAddedProvider } from "@/lib/context/MovieAddedContext";
 
+// /add (search by title, scan a barcode) is the one route in this shell
+// that isn't account-based — signed-out visitors can freely search and
+// scan, and only get asked to create an account at the point they try to
+// actually save something (see app/(app)/add/page.tsx's promptSignup).
+// Apple's Guideline 5.1.1(v) rejected the app for gating every single
+// route behind sign-in, including features with no inherent need for one.
+const PUBLIC_ROUTES = new Set(["/add"]);
+
 export default function AppShellLayout({
   children,
 }: {
@@ -20,6 +28,8 @@ export default function AppShellLayout({
   const { user, loading } = useAuth();
   const { loading: moviesLoading } = useMovies();
   const router = useRouter();
+  const pathname = usePathname();
+  const isPublicRoute = PUBLIC_ROUTES.has(pathname);
   // Covers the shell's very first mount until it's had a moment to settle
   // — separate from (and in addition to) the once-per-session launch
   // splash. Signing up never shows that splash a second time (it already
@@ -33,19 +43,19 @@ export default function AppShellLayout({
   const [settled, setSettled] = useState(false);
 
   useEffect(() => {
-    if (loading || !user || moviesLoading || settled) return;
+    if (loading || (!user && !isPublicRoute) || moviesLoading || settled) return;
     const id = setTimeout(() => setSettled(true), 500);
     return () => clearTimeout(id);
-  }, [loading, user, moviesLoading, settled]);
+  }, [loading, user, isPublicRoute, moviesLoading, settled]);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || isPublicRoute) return;
     if (!user) {
       router.replace("/login");
     }
-  }, [loading, user, router]);
+  }, [loading, user, isPublicRoute, router]);
 
-  if (loading || !user) {
+  if (loading || (!user && !isPublicRoute)) {
     return null;
   }
 

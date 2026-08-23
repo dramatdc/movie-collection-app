@@ -124,6 +124,22 @@ function AddPageContent() {
   }, [listId]);
   const lastHandledCodeRef = useRef<string | null>(null);
 
+  // Searching and scanning are open to signed-out visitors (see
+  // app/(app)/layout.tsx) — actually saving something is the one point
+  // that's genuinely account-based, so that's where we ask. confirmDialog
+  // and router are both stable across renders, so this reads fine even from
+  // the stable handleDetected callback below despite not being in its own
+  // dependency array.
+  async function promptSignup() {
+    const confirmed = await confirmDialog({
+      title: "Create a free account",
+      message: "Sign up to add movies to your collection — it's free and takes a few seconds.",
+      confirmLabel: "Sign up",
+      cancelLabel: "Not now",
+    });
+    if (confirmed) router.push("/signup");
+  }
+
   const handleDetected = useCallback(async (code: string) => {
     if (lastHandledCodeRef.current === code) return;
     lastHandledCodeRef.current = code;
@@ -183,7 +199,10 @@ function AddPageContent() {
           });
           return;
         }
-        if (!uid) return;
+        if (!uid) {
+          await promptSignup();
+          return;
+        }
         playAddedChime();
         hapticImpact();
         setToast({ tone: "success", message: `Added "${topMatch.title}" to ${destinationName}` });
@@ -213,7 +232,10 @@ function AddPageContent() {
         return;
       }
 
-      if (!uid) return;
+      if (!uid) {
+        await promptSignup();
+        return;
+      }
       playAddedChime();
       hapticImpact();
       celebrate({
@@ -234,7 +256,11 @@ function AddPageContent() {
     setNeedsCrowdsourcing(false);
   }
 
-  function selectForCollection(result: TMDbSearchResult) {
+  async function selectForCollection(result: TMDbSearchResult) {
+    if (!user) {
+      await promptSignup();
+      return;
+    }
     record(searchQuery);
     if (needsCrowdsourcing && scannedUpc) {
       recordUpcResolution(scannedUpc, result.title);
@@ -245,7 +271,10 @@ function AddPageContent() {
   }
 
   async function handleAddToDestination(result: TMDbSearchResult) {
-    if (!user) return;
+    if (!user) {
+      await promptSignup();
+      return;
+    }
     if (mode === "wishlist" && collectionTmdbIds.has(result.id)) {
       const confirmed = await confirmDialog({
         title: "Already in your collection",
@@ -272,7 +301,10 @@ function AddPageContent() {
   }
 
   async function handleAddToCollection(result: TMDbSearchResult) {
-    if (!user) return;
+    if (!user) {
+      await promptSignup();
+      return;
+    }
     record(searchQuery);
     if (needsCrowdsourcing && scannedUpc) {
       recordUpcResolution(scannedUpc, result.title);

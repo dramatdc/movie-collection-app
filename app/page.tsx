@@ -20,7 +20,12 @@ export default function RootPage() {
   useEffect(() => {
     if (loading) return;
     startTransition(() => {
-      router.replace(user ? "/library" : "/login");
+      // Signed-out visitors land on /add rather than /login — searching for
+      // a movie and scanning a barcode aren't account-based features (see
+      // app/(app)/layout.tsx and app/(app)/add/page.tsx), and a native app
+      // has no address bar for a reviewer (or a real user) to reach that on
+      // their own if every route bounced straight to a login wall first.
+      router.replace(user ? "/library" : "/add");
     });
   }, [loading, user, router]);
 
