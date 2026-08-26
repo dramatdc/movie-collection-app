@@ -44,11 +44,22 @@ service cloud.firestore {
       }
     }
 
-    // Shared barcode -> title cache, looked up by the /api/upc route.
-    // That route has no auth check of its own, so this must stay open —
-    // it holds no personal data, just UPC codes and product titles.
+    // Shared barcode -> title cache, looked up and written by the
+    // /api/upc route (lib/upc/server.ts) using the regular client SDK with
+    // no signed-in user — genuinely can't require auth here without
+    // breaking that route. What we CAN require: a write has to look like a
+    // real cache entry — only these three fields, a real, reasonably-sized
+    // title, and a known source — so an open rule can't be used to stuff
+    // arbitrary junk or oversized documents in, even though it can't be
+    // fully closed off. Holds no personal data either way — just UPC codes
+    // and product titles.
     match /upc_cache/{upc} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasOnly(['title', 'lookedUpAt', 'source'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() < 300
+        && request.resource.data.source in ['upcitemdb', 'crowdsourced'];
     }
 
     // Public share links — an opaque id (handed out in a URL, not
