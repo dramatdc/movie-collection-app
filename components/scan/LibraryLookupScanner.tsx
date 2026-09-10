@@ -11,6 +11,7 @@ import { posterUrl } from "@/lib/tmdb/image";
 import { addMovieToCollection } from "@/lib/firebase/quickAdd";
 import { playAddedChime } from "@/lib/sound";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useFormatPicker } from "@/components/ui/FormatPickerDialog";
 import { CameraIcon, CloseIcon } from "@/lib/icons";
 import type { OwnedMovie } from "@/lib/firebase/types";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
@@ -67,6 +68,7 @@ function ResultCard({ result }: { result: LookupResult }) {
 
 export function LibraryLookupScanner({ movies }: { movies: OwnedMovie[] }) {
   const { user } = useAuth();
+  const pickFormat = useFormatPicker();
   const [open, setOpen] = useState(false);
   const [checking, setChecking] = useState(false);
   const [result, setResult] = useState<LookupResult | null>(null);
@@ -113,12 +115,15 @@ export function LibraryLookupScanner({ movies }: { movies: OwnedMovie[] }) {
 
   async function handleAdd() {
     if (!user || result?.status !== "not-owned") return;
+    const format = await pickFormat(result.match.title);
+    if (!format) return;
     playAddedChime();
     setAdding(true);
     try {
       await addMovieToCollection(user.uid, result.match, {
         barcodeUpc: null,
         addedVia: "scan",
+        format,
       });
       close();
     } finally {

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { ChevronRightIcon } from "@/lib/icons";
-import type { MovieFormat } from "@/lib/firebase/types";
+import { MOVIE_FORMATS } from "@/lib/firebase/types";
 import type { MovieFilters } from "@/lib/filters";
 
 const WATCHED_TABS: { value: MovieFilters["watched"]; label: string }[] = [
@@ -11,8 +11,6 @@ const WATCHED_TABS: { value: MovieFilters["watched"]; label: string }[] = [
   { value: "unwatched", label: "Want to watch" },
   { value: "watched", label: "Watched" },
 ];
-
-const FORMATS: MovieFormat[] = ["DVD", "Blu-ray", "4K UHD", "Digital"];
 
 type Chip =
   | { kind: "divider"; key: string }
@@ -103,7 +101,7 @@ export function FilterBar({
       active: filters.format === null,
       onClick: () => onChange({ ...filters, format: null }),
     },
-    ...FORMATS.map((f) => ({
+    ...MOVIE_FORMATS.map((f) => ({
       kind: "option" as const,
       key: `format-${f}`,
       label: f,

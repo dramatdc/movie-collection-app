@@ -7,8 +7,10 @@ import type { MovieFormat, OwnedMovie } from "@/lib/firebase/types";
 export const ESTIMATED_FORMAT_VALUE: Record<MovieFormat, number> = {
   DVD: 3,
   "Blu-ray": 8,
-  "4K UHD": 15,
+  "4K UHD": 17,
   Digital: 12,
+  Steelbook: 15,
+  Criterion: 25,
 };
 
 export interface CollectionValueBreakdown {

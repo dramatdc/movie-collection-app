@@ -14,6 +14,7 @@ import { addOwnedMovie } from "@/lib/firebase/firestore";
 import { playAddedChime, playRemovedChime } from "@/lib/sound";
 import { posterUrl } from "@/lib/tmdb/image";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { useFormatPicker } from "@/components/ui/FormatPickerDialog";
 import { BackButton } from "@/components/ui/BackButton";
 import type { TMDbMovieDetail } from "@/lib/tmdb/types";
 
@@ -26,6 +27,7 @@ export default function WishlistDetailPage() {
   const { movies } = useMovies();
   const router = useRouter();
   const confirmDialog = useConfirm();
+  const pickFormat = useFormatPicker();
 
   const [detail, setDetail] = useState<TMDbMovieDetail | null>(null);
   const [saving, setSaving] = useState(false);
@@ -89,6 +91,8 @@ export default function WishlistDetailPage() {
 
   async function handleAddToCollection() {
     if (!user || !detail) return;
+    const format = await pickFormat(detail.title);
+    if (!format) return;
     playAddedChime();
     setSaving(true);
     try {
@@ -100,7 +104,7 @@ export default function WishlistDetailPage() {
         genres: detail.genres.map((g) => g.name),
         runtimeMinutes: detail.runtime,
         overview: detail.overview,
-        format: "Blu-ray",
+        format,
         location: null,
         watched: false,
         personalRating: null,

@@ -14,9 +14,7 @@ import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { BackButton } from "@/components/ui/BackButton";
 import { ShareIcon } from "@/lib/icons";
 import { ShareCardModal } from "@/components/movie/ShareCardModal";
-import type { MovieFormat } from "@/lib/firebase/types";
-
-const FORMATS: MovieFormat[] = ["DVD", "Blu-ray", "4K UHD", "Digital"];
+import { MOVIE_FORMATS, type MovieFormat } from "@/lib/firebase/types";
 
 export default function MovieDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -138,7 +136,7 @@ export default function MovieDetailPage() {
                 }
                 className="rounded border border-border bg-surface px-2 py-1 text-sm"
               >
-                {FORMATS.map((f) => (
+                {MOVIE_FORMATS.map((f) => (
                   <option key={f} value={f}>
                     {f}
                   </option>

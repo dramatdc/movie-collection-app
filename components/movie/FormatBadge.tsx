@@ -5,6 +5,8 @@ const STYLES: Record<MovieFormat, string> = {
   "Blu-ray": "bg-accent text-accent-foreground",
   "4K UHD": "bg-[#005f8a] text-accent-foreground",
   Digital: "bg-transparent text-accent border border-accent",
+  Steelbook: "bg-[#5b6472] text-white",
+  Criterion: "bg-[#8a6a1f] text-white",
 };
 
 export function FormatBadge({ format }: { format: MovieFormat }) {

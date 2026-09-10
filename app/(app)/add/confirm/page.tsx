@@ -11,9 +11,7 @@ import { addOwnedMovie } from "@/lib/firebase/firestore";
 import { playAddedChime } from "@/lib/sound";
 import { useMovieAdded } from "@/lib/context/MovieAddedContext";
 import type { TMDbMovieDetail } from "@/lib/tmdb/types";
-import type { MovieFormat } from "@/lib/firebase/types";
-
-const FORMATS: MovieFormat[] = ["DVD", "Blu-ray", "4K UHD", "Digital"];
+import { MOVIE_FORMATS, type MovieFormat } from "@/lib/firebase/types";
 
 export default function ConfirmAddPage() {
   const { candidate, barcodeUpc } = useAddFlow();
@@ -96,7 +94,7 @@ export default function ConfirmAddPage() {
           onChange={(e) => setFormat(e.target.value as MovieFormat)}
           className="rounded border border-border bg-canvas px-2 py-1.5"
         >
-          {FORMATS.map((f) => (
+          {MOVIE_FORMATS.map((f) => (
             <option key={f} value={f}>
               {f}
             </option>

@@ -1,4 +1,22 @@
-export type MovieFormat = "DVD" | "Blu-ray" | "4K UHD" | "Digital";
+export type MovieFormat =
+  | "DVD"
+  | "Blu-ray"
+  | "4K UHD"
+  | "Digital"
+  | "Steelbook"
+  | "Criterion";
+
+// Single source of truth for every format picker/filter in the app — was
+// previously copy-pasted separately in three different files, which is how
+// a format could end up added to one dropdown and missed in another.
+export const MOVIE_FORMATS: MovieFormat[] = [
+  "DVD",
+  "Blu-ray",
+  "4K UHD",
+  "Digital",
+  "Steelbook",
+  "Criterion",
+];
 
 export interface OwnedMovie {
   id: string;

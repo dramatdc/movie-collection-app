@@ -25,6 +25,7 @@ import { searchMoviesClient } from "@/lib/tmdb/client";
 import { hapticImpact } from "@/lib/haptics";
 import { playAddedChime } from "@/lib/sound";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { useFormatPicker } from "@/components/ui/FormatPickerDialog";
 import { useMovieAdded } from "@/lib/context/MovieAddedContext";
 import type { TMDbSearchResult } from "@/lib/tmdb/types";
 
@@ -68,6 +69,7 @@ function AddPageContent() {
   const { recent, record } = useRecentSearches("recent-searches-add");
   const router = useRouter();
   const confirmDialog = useConfirm();
+  const pickFormat = useFormatPicker();
   const { celebrate } = useMovieAdded();
 
   const list = mode === "list" ? lists.find((l) => l.id === listId) : undefined;
@@ -126,10 +128,10 @@ function AddPageContent() {
 
   // Searching and scanning are open to signed-out visitors (see
   // app/(app)/layout.tsx) — actually saving something is the one point
-  // that's genuinely account-based, so that's where we ask. confirmDialog
-  // and router are both stable across renders, so this reads fine even from
-  // the stable handleDetected callback below despite not being in its own
-  // dependency array.
+  // that's genuinely account-based, so that's where we ask. confirmDialog,
+  // pickFormat, and router are all stable across renders, so they read fine
+  // even from the stable handleDetected callback below despite not being in
+  // its own dependency array.
   async function promptSignup() {
     const confirmed = await confirmDialog({
       title: "Create a free account",
@@ -236,15 +238,17 @@ function AddPageContent() {
         await promptSignup();
         return;
       }
+      const format = await pickFormat(topMatch.title);
+      if (!format) return;
       playAddedChime();
       hapticImpact();
       celebrate({
         title: topMatch.title,
         year: topMatch.release_date ? Number(topMatch.release_date.slice(0, 4)) : null,
-        format: "Blu-ray",
+        format,
         posterPath: topMatch.poster_path,
       });
-      await addMovieToCollection(uid, topMatch, { barcodeUpc: code, addedVia: "scan" });
+      await addMovieToCollection(uid, topMatch, { barcodeUpc: code, addedVia: "scan", format });
     } finally {
       setLookingUp(false);
     }
@@ -305,6 +309,8 @@ function AddPageContent() {
       await promptSignup();
       return;
     }
+    const format = await pickFormat(result.title);
+    if (!format) return;
     record(searchQuery);
     if (needsCrowdsourcing && scannedUpc) {
       recordUpcResolution(scannedUpc, result.title);
@@ -313,7 +319,7 @@ function AddPageContent() {
     celebrate({
       title: result.title,
       year: result.release_date ? Number(result.release_date.slice(0, 4)) : null,
-      format: "Blu-ray",
+      format,
       posterPath: result.poster_path,
     });
     setAddingIds((prev) => new Set(prev).add(result.id));
@@ -321,6 +327,7 @@ function AddPageContent() {
       await addMovieToCollection(user.uid, result, {
         barcodeUpc: scannedUpc,
         addedVia: scannedUpc ? "scan" : "manual",
+        format,
       });
     } finally {
       setAddingIds((prev) => {
